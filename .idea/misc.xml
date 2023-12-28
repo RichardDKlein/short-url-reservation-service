@@ -1,0 +1,15 @@
+<project version="4">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectResources">
+    <resource url="http://maven.apache.org/ASSEMBLY/2.0.0" location="$PROJECT_DIR$" />
+    <resource url="http://maven.apache.org/xsd/assembly-2.0.0.xsd" location="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" default="true" project-jdk-name="Java 21" project-jdk-type="JavaSDK" />
+</project>

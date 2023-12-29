@@ -19,6 +19,11 @@ dependencies {
   testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
+// Add the "-parameters" compilation switch, so that @PathVariable works.
+tasks.withType(JavaCompile) {
+  options.compilerArgs << "-parameters"
+}
+
 task buildZip(type: Zip) {
   from compileJava
   from processResources

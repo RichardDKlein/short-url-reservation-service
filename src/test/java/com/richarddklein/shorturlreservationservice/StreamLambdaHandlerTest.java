@@ -33,7 +33,7 @@ public class StreamLambdaHandlerTest {
 
     @Test
     public void ping_streamRequest_respondsWithHello() {
-        InputStream requestStream = new AwsProxyRequestBuilder("/shorturl/reservation/", HttpMethod.GET)
+        InputStream requestStream = new AwsProxyRequestBuilder("/shorturl/reservation", HttpMethod.GET)
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
                 .buildStream();
         ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
@@ -55,7 +55,7 @@ public class StreamLambdaHandlerTest {
 
     @Test
     public void invalidResource_streamRequest_responds404() {
-        InputStream requestStream = new AwsProxyRequestBuilder("/not-mapped", HttpMethod.GET)
+        InputStream requestStream = new AwsProxyRequestBuilder("/shorturl/not-mapped", HttpMethod.GET)
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
                 .buildStream();
         ByteArrayOutputStream responseStream = new ByteArrayOutputStream();

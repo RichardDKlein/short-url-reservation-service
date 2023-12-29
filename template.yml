@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Short URL Reservaation Service - api.richarddklein.com/shorturl/reservation
+Description: Short URL Reservation Service - api.richarddklein.com/shorturl/reservation
 Globals:
   Api:
     EndpointConfiguration: REGIONAL
@@ -18,16 +18,16 @@ Resources:
       SnapStart:
         ApplyOn: "PublishedVersions"
       Events:
-        RootResource:
+        ReserveShortUrl:
           Type: Api
           Properties:
             Path: /shorturl/reservation
-            Method: any
-        ProxyResource:
+            Method: GET
+        CancelReservation:
           Type: Api
           Properties:
             Path: /shorturl/reservation/{proxy+}
-            Method: any
+            Method: DELETE
 
 Outputs:
   MyServiceApi:

@@ -6,5 +6,5 @@ s3_prefix = "short-url-reservation-service"
 region = "us-east-2"
 capabilities = "CAPABILITY_IAM"
 image_repositories = []
-disable_rollback = true
-confirm_changeset = true
+disable_rollback = false
+confirm_changeset = false

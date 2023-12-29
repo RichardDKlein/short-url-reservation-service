@@ -33,7 +33,7 @@ public class StreamLambdaHandlerTest {
 
     @Test
     public void ping_streamRequest_respondsWithHello() {
-        InputStream requestStream = new AwsProxyRequestBuilder("/shorturl/reservation", HttpMethod.GET)
+        InputStream requestStream = new AwsProxyRequestBuilder("/shorturl/reservations", HttpMethod.GET)
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
                 .buildStream();
         ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
@@ -46,8 +46,9 @@ public class StreamLambdaHandlerTest {
 
         assertFalse(response.isBase64Encoded());
 
-        assertTrue(response.getBody().contains("greeting"));
-        assertTrue(response.getBody().contains("Hello, World!"));
+        assertTrue(response.getBody().contains("shortUrl"));
+        assertTrue(response.getBody().contains("message"));
+        assertTrue(response.getBody().contains("Short URL successfully reserved"));
 
         assertTrue(response.getMultiValueHeaders().containsKey(HttpHeaders.CONTENT_TYPE));
         assertTrue(response.getMultiValueHeaders().getFirst(HttpHeaders.CONTENT_TYPE).startsWith(MediaType.APPLICATION_JSON));

@@ -18,25 +18,33 @@ Resources:
       SnapStart:
         ApplyOn: "PublishedVersions"
       Events:
-        ReserveAnyShortUrl:
+        ReserveAnyShortUrlViaApiGateway:
           Type: Api
           Properties:
             Path: /shorturl/reservations
             Method: GET
-        ReserveSpecifiedShortUrl:
+        ReserveAnyShortUrlViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /
+            Method: GET
+        ReserveSpecifiedShortUrlViaApiGateway:
           Type: Api
           Properties:
             Path: /shorturl/reservations/{proxy+}
             Method: GET
-        CancelShortUrlReservation:
+        ReserveSpecifiedShortUrlViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: GET
+        CancelShortUrlReservationViaApiGateway:
           Type: Api
           Properties:
             Path: /shorturl/reservations/{proxy+}
             Method: DELETE
-
-Outputs:
-  MyServiceApi:
-    Description: URL for application
-    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/shorturl/reservations'
-    Export:
-      Name: ShortUrlReservationServiceApi
+        CancelShortUrlReservationViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: DELETE

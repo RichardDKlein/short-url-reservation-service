@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/shorturl/reservations")
+@RequestMapping({"/shorturl/reservations", "/"})
 public class ShortUrlReservationController {
     private final ShortUrlReservationService shortUrlReservationService;
 

@@ -28,7 +28,7 @@ Resources:
           Properties:
             Path: /shorturl/reservations/{proxy+}
             Method: GET
-        CancelReservation:
+        CancelShortUrlReservation:
           Type: Api
           Properties:
             Path: /shorturl/reservations/{proxy+}

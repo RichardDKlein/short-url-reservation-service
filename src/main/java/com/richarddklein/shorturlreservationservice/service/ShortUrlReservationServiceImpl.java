@@ -24,7 +24,7 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     }
 
     @Override
-    public Map<String, String> cancelReservation(String shortUrl) {
+    public Map<String, String> cancelShortUrlReservation(String shortUrl) {
         Map<String, String> response = new HashMap<>();
         response.put("shortUrl", shortUrl);
         response.put("message", "Reservation successfully canceled");

@@ -27,7 +27,7 @@ public class ShortUrlReservationController {
     }
 
     @DeleteMapping("/{shortUrl}")
-    public Map<String, String> deleteReservation(@PathVariable String shortUrl) {
-        return shortUrlReservationService.cancelReservation(shortUrl);
+    public Map<String, String> cancelShortUrlReservation(@PathVariable String shortUrl) {
+        return shortUrlReservationService.cancelShortUrlReservation(shortUrl);
     }
 }

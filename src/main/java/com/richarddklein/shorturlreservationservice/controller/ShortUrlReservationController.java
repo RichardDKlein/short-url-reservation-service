@@ -16,18 +16,39 @@ public class ShortUrlReservationController {
         this.shortUrlReservationService = shortUrlReservationService;
     }
 
+    @PostMapping
+    public Map<String, String> initializeShortUrlReservationsTable() {
+        shortUrlReservationService.initializeShortUrlReservationsTable();
+        return Map.of(
+                "message",
+                "Short URL Reservations table successfully initialized"
+        );
+    }
+
     @GetMapping
     public Map<String, String> reserveAnyShortUrl() {
-        return shortUrlReservationService.reserveShortUrl();
+        String shortUrl = shortUrlReservationService.reserveAnyShortUrl();
+        return Map.of(
+                "shortUrl", shortUrl,
+                "message", "Short URL successfully reserved"
+        );
     }
 
     @GetMapping("/{shortUrl}")
     public Map<String, String> reserveSpecifiedShortUrl(@PathVariable String shortUrl) {
-        return shortUrlReservationService.reserveShortUrl(shortUrl);
+        shortUrlReservationService.reserveSpecifiedShortUrl(shortUrl);
+        return Map.of(
+                "shortUrl", shortUrl,
+                "message", "Short URL successfully reserved"
+        );
     }
 
     @DeleteMapping("/{shortUrl}")
     public Map<String, String> cancelShortUrlReservation(@PathVariable String shortUrl) {
-        return shortUrlReservationService.cancelShortUrlReservation(shortUrl);
+        shortUrlReservationService.cancelShortUrlReservation(shortUrl);
+        return Map.of(
+                "shortUrl", shortUrl,
+                "message", "Reservation successfully canceled"
+        );
     }
 }

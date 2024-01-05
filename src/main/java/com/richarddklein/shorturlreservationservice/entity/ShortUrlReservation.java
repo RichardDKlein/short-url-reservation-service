@@ -40,8 +40,8 @@ public class ShortUrlReservation {
 
     public Map<String, AttributeValue> toAttributeValueMap() {
         Map<String, AttributeValue> attributeValues = new HashMap<>();
-        attributeValues.put("shortUrl", AttributeValue.builder().s(shortUrl).build());
-        attributeValues.put("isReserved", AttributeValue.builder().bool(isReserved).build());
+        attributeValues.put("short_url", AttributeValue.builder().s(shortUrl).build());
+        attributeValues.put("is_reserved", AttributeValue.builder().bool(isReserved).build());
 
         return attributeValues;
     }

@@ -20,6 +20,10 @@ public class ShortUrlReservationDao {
     private final DynamoDbClient dynamoDbClient;
     private final DynamoDbTable<ShortUrlReservation> shortUrlReservationsTable;
 
+    // ------------------------------------------------------------------------
+    // PUBLIC METHODS
+    // ------------------------------------------------------------------------
+
     @Autowired
     public ShortUrlReservationDao(
             DynamoDbClient dynamoDbClient,
@@ -30,25 +34,35 @@ public class ShortUrlReservationDao {
     }
 
     public void initializeShortUrlReservationsTable(long min, long max) {
-        List<ShortUrlReservation> reservations = new ArrayList<>();
+        List<ShortUrlReservation> shortUrlReservations = new ArrayList<>();
 
         for (long i = min; i <= max; i++) {
             String shortUrl = longToShortUrl(i);
-            ShortUrlReservation reservation = new ShortUrlReservation(shortUrl, false);
-            reservations.add(reservation);
+            ShortUrlReservation shortUrlReservation = new ShortUrlReservation(
+                    shortUrl, false);
+            shortUrlReservations.add(shortUrlReservation);
         }
-
-        // Batch insert reservations into DynamoDB
-        batchInsertReservations(reservations);
+        batchInsertReservations(shortUrlReservations);
     }
 
-    public void saveItem(ShortUrlReservation item) {
-        shortUrlReservationsTable.putItem(item);
-    }
+    // ------------------------------------------------------------------------
+    // PRIVATE METHODS
+    // ------------------------------------------------------------------------
 
     private String longToShortUrl(long n) {
-        return "hi_there";
-    }
+        final String digits = "0123456789" +
+                "abcdefghijklmnopqrstuvwxyz" +
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+                "_-";
+        StringBuilder sb = new StringBuilder();
+
+        do {
+            sb.append(digits.charAt((int)(n % 64)));
+            n /= 36;
+        } while (n > 0);
+
+        return sb.reverse().toString();
+   }
 
     private void batchInsertReservations(List<ShortUrlReservation> shortUrlReservations) {
         List<List<ShortUrlReservation>> batches = new ArrayList<>();
@@ -63,18 +77,16 @@ public class ShortUrlReservationDao {
             Map<String, List<WriteRequest>> writeRequests = new HashMap<>();
             List<WriteRequest> writeRequestList = new ArrayList<>();
 
-            for (ShortUrlReservation reservation : batch) {
+            for (ShortUrlReservation shortUrlReservation : batch) {
                 writeRequestList.add(WriteRequest.builder().putRequest(PutRequest.builder()
-                        .item(reservation.toAttributeValueMap())
+                        .item(shortUrlReservation.toAttributeValueMap())
                         .build()).build());
             }
-
             writeRequests.put(shortUrlReservationsTable.tableName(), writeRequestList);
 
             BatchWriteItemRequest batchWriteItemRequest = BatchWriteItemRequest.builder()
                     .requestItems(writeRequests)
                     .build();
-
             dynamoDbClient.batchWriteItem(batchWriteItemRequest);
         }
     }

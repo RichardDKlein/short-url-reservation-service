@@ -18,6 +18,16 @@ Resources:
       SnapStart:
         ApplyOn: "PublishedVersions"
       Events:
+        InitializeShortUrlReservationsTableViaApiGateway:
+          Type: Api
+          Properties:
+            Path: /shorturl/reservations
+            Method: POST
+        InitializeShortUrlReservationsTableViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /
+            Method: POST
         ReserveAnyShortUrlViaApiGateway:
           Type: Api
           Properties:

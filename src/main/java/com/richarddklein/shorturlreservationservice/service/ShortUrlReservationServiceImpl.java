@@ -3,31 +3,34 @@ package com.richarddklein.shorturlreservationservice.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ShortUrlReservationServiceImpl implements ShortUrlReservationService{
-    @Override
-    public Map<String, String> reserveShortUrl() {
-        Map<String, String> response = new HashMap<>();
-        response.put("shortUrl", "Qx3_Ym");
-        response.put("message", "Short URL successfully reserved");
-        return response;
+    private ShortUrlReservationDao shortUrlReservationDao;
+
+    @Autowired
+    public ShortUrlReservationServiceImpl(ShortUrlReservationDao shortUrlReservationDao) {
+        this.shortUrlReservationDao = shortUrlReservationDao;
     }
 
     @Override
-    public Map<String, String> reserveShortUrl(String shortUrl) {
-        Map<String, String> response = new HashMap<>();
-        response.put("shortUrl", shortUrl);
-        response.put("message", "Short URL successfully reserved");
-        return response;
+    public void initializeShortUrlReservationsTable() {
+        shortUrlReservationDao.initializeShortUrlReservationsTable(0, 127);
     }
 
     @Override
-    public Map<String, String> cancelShortUrlReservation(String shortUrl) {
-        Map<String, String> response = new HashMap<>();
-        response.put("shortUrl", shortUrl);
-        response.put("message", "Reservation successfully canceled");
-        return response;
+    public String reserveAnyShortUrl() {
+        return "Qx3_Ym";
+    }
+
+    @Override
+    public void reserveSpecifiedShortUrl(String shortUrl) {
+    }
+
+    @Override
+    public void cancelShortUrlReservation(String shortUrl) {
     }
 }

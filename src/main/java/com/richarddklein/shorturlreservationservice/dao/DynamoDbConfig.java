@@ -18,8 +18,6 @@ public class DynamoDbConfig {
     public DynamoDbClient
     dynamoDbClient() {
         return DynamoDbClient.builder()
-                // Use region from default AWS config
-                .region(Region.AWS_GLOBAL)
                 .credentialsProvider(DefaultCredentialsProvider.create())
                 .build();
     }

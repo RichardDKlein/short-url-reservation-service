@@ -11,7 +11,7 @@ dependencies {
   implementation (
           'org.springframework.boot:spring-boot-starter-web:3.2.1',
           'com.amazonaws.serverless:aws-serverless-java-container-springboot3:[2.0-SNAPSHOT,)',
-          'software.amazon.awssdk:dynamodb:2.22.11'
+          'software.amazon.awssdk:dynamodb-enhanced:2.22.11'
   )
 
   testImplementation("com.amazonaws.serverless:aws-serverless-java-container-core:[2.0-SNAPSHOT,):tests")

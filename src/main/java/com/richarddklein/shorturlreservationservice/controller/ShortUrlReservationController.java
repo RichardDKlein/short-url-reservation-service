@@ -1,7 +1,9 @@
 package com.richarddklein.shorturlreservationservice.controller;
 
+import java.util.List;
 import java.util.Map;
 
+import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.service.ShortUrlReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,11 @@ public class ShortUrlReservationController {
                 "message",
                 "Short URL Reservations table successfully initialized"
         );
+    }
+
+    @GetMapping("/all")
+    public List<ShortUrlReservation> getAllShortUrls() {
+        return shortUrlReservationService.getShortUrlReservationsTable();
     }
 
     @GetMapping

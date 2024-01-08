@@ -21,6 +21,11 @@ public class ShortUrlReservation {
         this.isReserved = isReserved;
     }
 
+    public ShortUrlReservation(Map<String, AttributeValue> item) {
+        shortUrl = item.get("short_url").s();
+        isReserved = item.get("is_reserved").bool();
+    }
+
     @DynamoDbPartitionKey
     public String getShortUrl() {
         return shortUrl;

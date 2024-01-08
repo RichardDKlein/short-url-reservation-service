@@ -1,5 +1,6 @@
-package com.richarddklein.shorturlreservationservice.controller;
+package com.richarddklein.shorturlreservationservice.exception;
 
+import com.richarddklein.shorturlreservationservice.response.GlobalErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,7 @@ public class GlobalExceptionHandler {
             NoResourceFoundException e) {
         logger.warn("====> ", e);
         GlobalErrorResponse globalErrorResponse = new GlobalErrorResponse(
-                HttpStatus.NOT_FOUND,
+                HttpStatus.NOT_FOUND.value(),
                 "Resource Not Found",
                 e.getMessage());
 
@@ -30,7 +31,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<GlobalErrorResponse> handleAllOtherExceptions(Exception e) {
         logger.warn("====> ", e);
         GlobalErrorResponse globalErrorResponse = new GlobalErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR,
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Internal Server Error",
                 e.getMessage());
 

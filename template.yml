@@ -28,6 +28,16 @@ Resources:
           Properties:
             Path: /
             Method: POST
+        GetAllShortUrlsViaApiGateway:
+          Type: Api
+          Properties:
+            Path: /shorturl/reservations/all
+            Method: GET
+        GetAllShortUrlsViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /all
+            Method: GET
         ReserveAnyShortUrlViaApiGateway:
           Type: Api
           Properties:

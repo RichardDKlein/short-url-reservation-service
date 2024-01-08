@@ -1,4 +1,16 @@
-package com.richarddklein.shorturlreservationservice.dao;
+/**
+ * Description: The DynamoDB @Configuration class.
+ *
+ * <p>Tells Spring how to construct classes that are needed in order to work
+ * with AWS DynamoDB, for example `DynamoDbClient`, `DynamoDbEnhancedClient`,
+ * and `DynamoDbTable`.
+ *
+ * @author Richard D. Klein
+ * @version 1.0
+ * @since 2024-01-08
+ */
+
+package com.richarddklein.shorturlreservationservice.config;
 
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 import org.springframework.context.annotation.Bean;
@@ -7,12 +19,11 @@ import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 @Configuration
 public class DynamoDbConfig {
-    private static final String SHORT_URL_RESERVATIONS = "short_url_reservations";
+    public static final String SHORT_URL_RESERVATIONS = "short_url_reservations";
 
     @Bean
     public DynamoDbClient

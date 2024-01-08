@@ -1,27 +1,23 @@
-package com.richarddklein.shorturlreservationservice.controller;
-
-import org.springframework.http.HttpStatus;
+package com.richarddklein.shorturlreservationservice.response;
 
 public class GlobalErrorResponse {
 
-    private HttpStatus httpStatus;
+    private int httpStatusCode;
     private String message;
     private String details;
 
-    public GlobalErrorResponse(
-            HttpStatus httpStatus, String message, String details) {
-
-        this.httpStatus = httpStatus;
+    public GlobalErrorResponse(int httpStatusCode, String message, String details) {
+        this.httpStatusCode = httpStatusCode;
         this.message = message;
         this.details = details;
     }
 
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
+    public int getHttpStatusCode() {
+        return httpStatusCode;
     }
 
-    public void setHttpStatus(HttpStatus httpStatus) {
-        this.httpStatus = httpStatus;
+    public void setHttpStatusCode(int httpStatusCode) {
+        this.httpStatusCode = httpStatusCode;
     }
 
     public String getMessage() {
@@ -43,7 +39,7 @@ public class GlobalErrorResponse {
     @Override
     public String toString() {
         return "GlobalErrorResponse{" +
-                "httpStatusCode=" + httpStatus +
+                "httpStatusCode=" + httpStatusCode +
                 ", message='" + message + '\'' +
                 ", details='" + details + '\'' +
                 '}';

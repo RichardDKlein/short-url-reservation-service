@@ -128,10 +128,27 @@ public class ShortUrlReservationController {
     @GetMapping("/{shortUrl}")
     public Map<String, String> reserveSpecifiedShortUrl(@PathVariable String shortUrl) {
         shortUrlReservationService.reserveSpecifiedShortUrl(shortUrl);
+        String shortUrlLong = Long.toString(shortUrlToLong(shortUrl));
         return Map.of(
                 "shortUrl", shortUrl,
+                "shortUrlLong", shortUrlLong,
                 "message", "Short URL successfully reserved"
         );
+    }
+
+    private long shortUrlToLong(String shortUrl) {
+        final String DIGITS = "0123456789" +
+                "abcdefghijklmnopqrstuvwxyz" +
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+                "_-";
+        final int BASE = DIGITS.length();
+
+        long result = 0;
+        for (char c : shortUrl.toCharArray()) {
+            int digit = DIGITS.indexOf(c);
+            result = result * BASE + digit;
+        }
+        return result;
     }
 
     @DeleteMapping("/{shortUrl}")

@@ -12,6 +12,13 @@ import software.amazon.awssdk.services.dynamodb.model.*;
 
 @Repository
 public class ShortUrlReservationDao {
+    private static final String DIGITS =
+            "0123456789" +
+            "abcdefghijklmnopqrstuvwxyz" +
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+            "_-";
+    private static final int BASE = DIGITS.length();
+
     private static final int MAX_BATCH_SIZE = 25;
     private final DynamoDbClient dynamoDbClient;
     private final DynamoDbTable<ShortUrlReservation> shortUrlReservationsTable;
@@ -29,10 +36,12 @@ public class ShortUrlReservationDao {
         this.shortUrlReservationsTable = shortUrlReservationsTable;
     }
 
-    public void initializeShortUrlReservationsTable(long min, long max) {
+    public void initializeShortUrlReservationsTable(
+            long minShortUrlBase10, long maxShortUrlBase10) {
+
         List<ShortUrlReservation> shortUrlReservations = new ArrayList<>();
 
-        for (long i = min; i <= max; i++) {
+        for (long i = minShortUrlBase10; i <= maxShortUrlBase10; i++) {
             String shortUrl = longToShortUrl(i);
             ShortUrlReservation shortUrlReservation = new ShortUrlReservation(
                     shortUrl, false);
@@ -130,21 +139,22 @@ public class DynamoDBScanExample {
     // ------------------------------------------------------------------------
 
     private String longToShortUrl(long n) {
-        final String DIGITS = "0123456789" +
-                "abcdefghijklmnopqrstuvwxyz" +
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-                "_-";
-        final int BASE = DIGITS.length();
-
         StringBuilder sb = new StringBuilder();
-
         do {
-            sb.append(DIGITS.charAt((int)(n % BASE)));
+            sb.append(DIGITS.charAt((int) (n % BASE)));
             n /= BASE;
         } while (n > 0);
-
         return sb.reverse().toString();
-   }
+    }
+
+    private long shortUrlToLong(String shortUrl) {
+        long result = 0;
+        for (char c : shortUrl.toCharArray()) {
+            int digit = DIGITS.indexOf(c);
+            result = result * BASE + digit;
+        }
+        return result;
+    }
 
     private void batchInsertShortUrlReservations(
             List<ShortUrlReservation> shortUrlReservations) {

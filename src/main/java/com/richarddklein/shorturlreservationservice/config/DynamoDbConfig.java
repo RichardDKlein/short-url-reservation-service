@@ -15,6 +15,7 @@ package com.richarddklein.shorturlreservationservice.config;
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;

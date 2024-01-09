@@ -1,26 +1,33 @@
 package com.richarddklein.shorturlreservationservice.service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
-import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
+import com.richarddklein.shorturlreservationservice.util.ParameterStoreReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
+import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
+
 @Service
 public class ShortUrlReservationServiceImpl implements ShortUrlReservationService{
+    private ParameterStoreReader parameterStoreReader;
     private ShortUrlReservationDao shortUrlReservationDao;
 
     @Autowired
-    public ShortUrlReservationServiceImpl(ShortUrlReservationDao shortUrlReservationDao) {
+    public ShortUrlReservationServiceImpl(
+            ParameterStoreReader parameterStoreReader,
+            ShortUrlReservationDao shortUrlReservationDao) {
+
+        this.parameterStoreReader = parameterStoreReader;
         this.shortUrlReservationDao = shortUrlReservationDao;
     }
 
     @Override
     public void initializeShortUrlReservationsTable() {
-        shortUrlReservationDao.initializeShortUrlReservationsTable(0, 127);
+        shortUrlReservationDao.initializeShortUrlReservationsTable(
+                parameterStoreReader.getMinShortUrlBase10(),
+                parameterStoreReader.getMaxShortUrlBase10());
     }
 
     @Override

@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.dynamodb.model.*;
 
 @Repository
 public class ShortUrlReservationDao {
+    private static final int MAX_BATCH_SIZE = 25;
     private final DynamoDbClient dynamoDbClient;
     private final DynamoDbTable<ShortUrlReservation> shortUrlReservationsTable;
 
@@ -150,16 +151,17 @@ public class DynamoDBScanExample {
 
         List<List<ShortUrlReservation>> batches = new ArrayList<>();
 
-        int batchSize = 25;
-        for (int i = 0; i < shortUrlReservations.size(); i += batchSize) {
-            int end = Math.min(i + batchSize, shortUrlReservations.size());
+        // Organize the given ShortUrlReservations into batches.
+        for (int i = 0; i < shortUrlReservations.size(); i += MAX_BATCH_SIZE) {
+            int end = Math.min(i + MAX_BATCH_SIZE, shortUrlReservations.size());
             batches.add(shortUrlReservations.subList(i, end));
         }
 
+        // For each batch ...
         for (List<ShortUrlReservation> batch : batches) {
-            Map<String, List<WriteRequest>> writeRequests = new HashMap<>();
-            List<WriteRequest> writeRequestList = new ArrayList<>();
 
+            // Add the ShortUrlReservations in that batch to a write request list.
+            List<WriteRequest> writeRequestList = new ArrayList<>();
             for (ShortUrlReservation shortUrlReservation : batch) {
                 writeRequestList.add(WriteRequest.builder()
                         .putRequest(PutRequest.builder()
@@ -168,12 +170,14 @@ public class DynamoDBScanExample {
                         .build());
             }
 
+            // Create a BatchWriteItemRequest containing the write request list.
+            Map<String, List<WriteRequest>> writeRequests = new HashMap<>();
             writeRequests.put(shortUrlReservationsTable.tableName(), writeRequestList);
-
             BatchWriteItemRequest batchWriteItemRequest = BatchWriteItemRequest.builder()
                     .requestItems(writeRequests)
                     .build();
 
+            // Tell DynamoDB to perform the BatchWriteItemRequest.
             dynamoDbClient.batchWriteItem(batchWriteItemRequest);
         }
     }

@@ -3,6 +3,7 @@ package com.richarddklein.shorturlreservationservice.entity;
 import java.util.HashMap;
 import java.util.Map;
 
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
@@ -10,10 +11,11 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 @DynamoDbBean
 public class ShortUrlReservation {
     private String shortUrl;
+
     private boolean isReserved;
 
     public ShortUrlReservation() {
-        // Spring needs to see a default constructor.
+        // Spring requires a default constructor.
     }
 
     public ShortUrlReservation(String shortUrl, boolean isReserved) {
@@ -35,12 +37,13 @@ public class ShortUrlReservation {
         this.shortUrl = shortUrl;
     }
 
-    public boolean isReserved() {
+    @DynamoDbAttribute("isReserved")
+    public boolean getIsReserved() {
         return isReserved;
     }
 
-    public void setReserved(boolean reserved) {
-        isReserved = reserved;
+    public void setIsReserved(boolean isReserved) {
+        this.isReserved = isReserved;
     }
 
     public Map<String, AttributeValue> toAttributeValueMap() {

@@ -2,13 +2,19 @@ package com.richarddklein.shorturlreservationservice.dao;
 
 import java.util.*;
 
-import com.richarddklein.shorturlreservationservice.config.DynamoDbConfig;
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.*;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
+import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
+
+import static com.richarddklein.shorturlreservationservice.config.DynamoDbConfig.SHORT_URL_RESERVATIONS;
 
 @Repository
 public class ShortUrlReservationDao {
@@ -20,7 +26,7 @@ public class ShortUrlReservationDao {
     private static final int BASE = DIGITS.length();
 
     private static final int MAX_BATCH_SIZE = 25;
-    private final DynamoDbClient dynamoDbClient;
+    private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
     private final DynamoDbTable<ShortUrlReservation> shortUrlReservationsTable;
 
     // ------------------------------------------------------------------------
@@ -29,15 +35,21 @@ public class ShortUrlReservationDao {
 
     @Autowired
     public ShortUrlReservationDao(
-            DynamoDbClient dynamoDbClient,
+            DynamoDbEnhancedClient dynamoDbEnhancedClient,
             DynamoDbTable<ShortUrlReservation> shortUrlReservationsTable) {
 
-        this.dynamoDbClient = dynamoDbClient;
+        this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
         this.shortUrlReservationsTable = shortUrlReservationsTable;
     }
 
     public void initializeShortUrlReservationsTable(
             long minShortUrlBase10, long maxShortUrlBase10) {
+
+        if (doesTableExist()) {
+            deleteShortUrlReservationsTable();
+        }
+
+        createShortUrlReservationsTable();
 
         List<ShortUrlReservation> shortUrlReservations = new ArrayList<>();
 
@@ -53,19 +65,8 @@ public class ShortUrlReservationDao {
 
     public List<ShortUrlReservation> getShortUrlReservationsTable() {
         List<ShortUrlReservation> result = new ArrayList<>();
-
-        ScanRequest scanRequest = ScanRequest.builder()
-                .tableName(DynamoDbConfig.SHORT_URL_RESERVATIONS)
-                .build();
-
-        ScanResponse scanResponse = dynamoDbClient.scan(scanRequest);
-
-        for (Map<String, AttributeValue> item : scanResponse.items()) {
-            result.add(new ShortUrlReservation(item));
-        }
-
+        shortUrlReservationsTable.scan().items().forEach(result::add);
         result.sort((x, y) -> x.getShortUrl().compareTo(y.getShortUrl()));
-
         return result;
     }
 /*
@@ -138,6 +139,24 @@ public class DynamoDBScanExample {
     // PRIVATE METHODS
     // ------------------------------------------------------------------------
 
+    private boolean doesTableExist() {
+        try {
+            dynamoDbEnhancedClient.table(SHORT_URL_RESERVATIONS,
+                    TableSchema.fromBean(ShortUrlReservation.class))
+                    .describeTable();
+        } catch (ResourceNotFoundException e) {
+            return false;
+        }
+        return true;
+    }
+
+    private void createShortUrlReservationsTable() {
+        shortUrlReservationsTable.createTable();
+    }
+    private void deleteShortUrlReservationsTable() {
+        shortUrlReservationsTable.deleteTable();
+    }
+
     private String longToShortUrl(long n) {
         StringBuilder sb = new StringBuilder();
         do {
@@ -159,36 +178,25 @@ public class DynamoDBScanExample {
     private void batchInsertShortUrlReservations(
             List<ShortUrlReservation> shortUrlReservations) {
 
-        List<List<ShortUrlReservation>> batches = new ArrayList<>();
+        BatchWriteItemEnhancedRequest.Builder batchWriteItemEnhancedRequestBuilder =
+                BatchWriteItemEnhancedRequest.builder();
 
-        // Organize the given ShortUrlReservations into batches.
-        for (int i = 0; i < shortUrlReservations.size(); i += MAX_BATCH_SIZE) {
-            int end = Math.min(i + MAX_BATCH_SIZE, shortUrlReservations.size());
-            batches.add(shortUrlReservations.subList(i, end));
-        }
+        long numItems = shortUrlReservations.size();
 
-        // For each batch ...
-        for (List<ShortUrlReservation> batch : batches) {
+        for (int i = 0; i < numItems; i += MAX_BATCH_SIZE) {
+            WriteBatch.Builder<ShortUrlReservation> writeBatchBuilder =
+                    WriteBatch.builder(ShortUrlReservation.class)
+                            .mappedTableResource(shortUrlReservationsTable);
 
-            // Add the ShortUrlReservations in that batch to a write request list.
-            List<WriteRequest> writeRequestList = new ArrayList<>();
-            for (ShortUrlReservation shortUrlReservation : batch) {
-                writeRequestList.add(WriteRequest.builder()
-                        .putRequest(PutRequest.builder()
-                                .item(shortUrlReservation.toAttributeValueMap())
-                                .build())
-                        .build());
+            for (int j = i; j < Math.min(i + MAX_BATCH_SIZE, numItems); j++) {
+                writeBatchBuilder.addPutItem(shortUrlReservations.get(j));
             }
+            WriteBatch writeBatch = writeBatchBuilder.build();
 
-            // Create a BatchWriteItemRequest containing the write request list.
-            Map<String, List<WriteRequest>> writeRequests = new HashMap<>();
-            writeRequests.put(shortUrlReservationsTable.tableName(), writeRequestList);
-            BatchWriteItemRequest batchWriteItemRequest = BatchWriteItemRequest.builder()
-                    .requestItems(writeRequests)
-                    .build();
-
-            // Tell DynamoDB to perform the BatchWriteItemRequest.
-            dynamoDbClient.batchWriteItem(batchWriteItemRequest);
+            batchWriteItemEnhancedRequestBuilder.writeBatches(writeBatch);
         }
+
+        dynamoDbEnhancedClient.batchWriteItem(
+                batchWriteItemEnhancedRequestBuilder.build());
     }
 }

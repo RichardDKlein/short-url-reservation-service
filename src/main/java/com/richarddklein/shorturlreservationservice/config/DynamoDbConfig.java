@@ -1,9 +1,9 @@
 /**
  * Description: The DynamoDB @Configuration class.
  *
- * <p>Tells Spring how to construct classes that are needed in order to work
- * with AWS DynamoDB, for example `DynamoDbClient`, `DynamoDbEnhancedClient`,
- * and `DynamoDbTable`.
+ * <p>Tells Spring how to construct classes that are needed in order to
+ * work with AWS DynamoDB, for example `DynamoDbEnhancedClient` and
+ * `DynamoDbTable`.
  *
  * @author Richard D. Klein
  * @version 1.0

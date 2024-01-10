@@ -24,13 +24,13 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     }
 
     @Override
-    public void initializeShortUrlReservationsTable() {
-        shortUrlReservationDao.initializeShortUrlReservationsTable();
+    public void initializeShortUrlReservationTable() {
+        shortUrlReservationDao.initializeShortUrlReservationTable();
     }
 
     @Override
-    public List<ShortUrlReservation> getShortUrlReservationsTable() {
-        return shortUrlReservationDao.getShortUrlReservationsTable();
+    public List<ShortUrlReservation> getShortUrlReservationTable() {
+        return shortUrlReservationDao.getShortUrlReservationTable();
     }
 
     @Override
@@ -39,7 +39,7 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     }
 
     @Override
-    public void reserveSpecifiedShortUrl(String shortUrl) {
+    public void reserveSpecificShortUrl(String shortUrl) {
     }
 
     @Override

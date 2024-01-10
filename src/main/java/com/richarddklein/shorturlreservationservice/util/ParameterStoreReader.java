@@ -10,11 +10,11 @@ import software.amazon.awssdk.services.ssm.model.GetParameterResponse;
 @Component
 public class ParameterStoreReader {
     private static final String SHORT_URL_RANGE = "/shortUrl/range";
-    private static final String SHORT_URL_RESERVATIONS_TABLE_NAME = "/shortUrl/tableName";
+    private static final String SHORT_URL_RESERVATION_TABLE_NAME = "/shortUrl/tableName";
 
     private final SsmClient ssmClient;
 
-    private String shortUrlReservationsTableName;
+    private String shortUrlReservationTableName;
     private long minShortUrlBase10;
     private long maxShortUrlBase10;
 
@@ -30,8 +30,8 @@ public class ParameterStoreReader {
         minShortUrlBase10 = Long.parseLong(tokens[0]);
         maxShortUrlBase10 = Long.parseLong(tokens[1]);
 
-        shortUrlReservationsTableName =
-                getParameter(SHORT_URL_RESERVATIONS_TABLE_NAME);
+        shortUrlReservationTableName =
+                getParameter(SHORT_URL_RESERVATION_TABLE_NAME);
     }
 
     private String getParameter(String parameterName) {
@@ -46,8 +46,8 @@ public class ParameterStoreReader {
         return parameterResponse.parameter().value();
     }
 
-    public String getShortUrlReservationsTableName() {
-        return shortUrlReservationsTableName;
+    public String getShortUrlReservationTableName() {
+        return shortUrlReservationTableName;
     }
 
     public long getMinShortUrlBase10() {

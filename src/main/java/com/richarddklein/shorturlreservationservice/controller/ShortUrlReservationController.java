@@ -96,21 +96,21 @@ public class ShortUrlReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<StatusResponse> initializeShortUrlReservationsTable() {
-        shortUrlReservationService.initializeShortUrlReservationsTable();
+    public ResponseEntity<StatusResponse> initializeShortUrlReservationTable() {
+        shortUrlReservationService.initializeShortUrlReservationTable();
         StatusResponse response = new StatusResponse(
                 true,
-                "Short URL Reservations table successfully initialized");
+                "Short URL Reservation table successfully initialized");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/all")
     public ResponseEntity<StatusAndShortUrlReservationArrayResponse> getAllShortUrls() {
         List<ShortUrlReservation> shortUrlReservations =
-                shortUrlReservationService.getShortUrlReservationsTable();
+                shortUrlReservationService.getShortUrlReservationTable();
         StatusResponse status = new StatusResponse(
                 true,
-                "Short URL Reservations table successfully retrieved");
+                "Short URL Reservation table successfully retrieved");
         StatusAndShortUrlReservationArrayResponse response =
                 new StatusAndShortUrlReservationArrayResponse(status, shortUrlReservations);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -127,7 +127,7 @@ public class ShortUrlReservationController {
 
     @GetMapping("/{shortUrl}")
     public Map<String, String> reserveSpecifiedShortUrl(@PathVariable String shortUrl) {
-        shortUrlReservationService.reserveSpecifiedShortUrl(shortUrl);
+        shortUrlReservationService.reserveSpecificShortUrl(shortUrl);
         String shortUrlLong = Long.toString(shortUrlToLong(shortUrl));
         return Map.of(
                 "shortUrl", shortUrl,

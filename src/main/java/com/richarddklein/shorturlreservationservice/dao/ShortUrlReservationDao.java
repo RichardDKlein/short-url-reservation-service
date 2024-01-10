@@ -29,7 +29,7 @@ public class ShortUrlReservationDao {
     private final ParameterStoreReader parameterStoreReader;
     private final DynamoDbClient dynamoDbClient;
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
-    private final DynamoDbTable<ShortUrlReservation> shortUrlReservationsTable;
+    private final DynamoDbTable<ShortUrlReservation> shortUrlReservationTable;
 
     // ------------------------------------------------------------------------
     // PUBLIC METHODS
@@ -40,25 +40,25 @@ public class ShortUrlReservationDao {
             ParameterStoreReader parameterStoreReader,
             DynamoDbClient dynamoDbClient,
             DynamoDbEnhancedClient dynamoDbEnhancedClient,
-            DynamoDbTable<ShortUrlReservation> shortUrlReservationsTable) {
+            DynamoDbTable<ShortUrlReservation> shortUrlReservationTable) {
 
         this.parameterStoreReader = parameterStoreReader;
         this.dynamoDbClient = dynamoDbClient;
         this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
-        this.shortUrlReservationsTable = shortUrlReservationsTable;
+        this.shortUrlReservationTable = shortUrlReservationTable;
     }
 
-    public void initializeShortUrlReservationsTable() {
+    public void initializeShortUrlReservationTable() {
         if (doesTableExist()) {
-            deleteShortUrlReservationsTable();
+            deleteShortUrlReservationTable();
         }
-        createShortUrlReservationsTable();
-        populateShortUrlReservationsTable();
+        createShortUrlReservationTable();
+        populateShortUrlReservationTable();
     }
 
-    public List<ShortUrlReservation> getShortUrlReservationsTable() {
+    public List<ShortUrlReservation> getShortUrlReservationTable() {
         List<ShortUrlReservation> result = new ArrayList<>();
-        shortUrlReservationsTable.scan().items().forEach(result::add);
+        shortUrlReservationTable.scan().items().forEach(result::add);
         result.sort((x, y) -> x.getShortUrl().compareTo(y.getShortUrl()));
         return result;
     }
@@ -69,43 +69,43 @@ public class ShortUrlReservationDao {
 
     private boolean doesTableExist() {
         try {
-            shortUrlReservationsTable.describeTable();
+            shortUrlReservationTable.describeTable();
         } catch (ResourceNotFoundException e) {
             return false;
         }
         return true;
     }
 
-    private void deleteShortUrlReservationsTable() {
-        System.out.print("Deleting the Short URL Reservations table ...");
-        shortUrlReservationsTable.deleteTable();
+    private void deleteShortUrlReservationTable() {
+        System.out.print("Deleting the Short URL Reservation table ...");
+        shortUrlReservationTable.deleteTable();
         DynamoDbWaiter waiter = DynamoDbWaiter.builder()
                 .client(dynamoDbClient)
                 .build();
         waiter.waitUntilTableNotExists(builder -> builder
                 .tableName(parameterStoreReader
-                        .getShortUrlReservationsTableName())
+                        .getShortUrlReservationTableName())
                 .build());
         waiter.close();
         System.out.println(" done!");
     }
 
-    private void createShortUrlReservationsTable() {
-        System.out.print("Creating the Short URL Reservations table ...");
-        shortUrlReservationsTable.createTable();
+    private void createShortUrlReservationTable() {
+        System.out.print("Creating the Short URL Reservation table ...");
+        shortUrlReservationTable.createTable();
         DynamoDbWaiter waiter = DynamoDbWaiter.builder()
                 .client(dynamoDbClient)
                 .build();
         waiter.waitUntilTableExists(builder -> builder
                 .tableName(parameterStoreReader
-                        .getShortUrlReservationsTableName())
+                        .getShortUrlReservationTableName())
                 .build());
         waiter.close();
         System.out.println(" done!");
     }
 
-    private void populateShortUrlReservationsTable() {
-        System.out.print("Populating the Short URL Reservations table ...");
+    private void populateShortUrlReservationTable() {
+        System.out.print("Populating the Short URL Reservation table ...");
         List<ShortUrlReservation> shortUrlReservations = new ArrayList<>();
 
         long minShortUrlBase10 = parameterStoreReader.getMinShortUrlBase10();
@@ -147,7 +147,7 @@ public class ShortUrlReservationDao {
         for (int i = 0; i < numItems; i += MAX_BATCH_SIZE) {
             WriteBatch.Builder<ShortUrlReservation> writeBatchBuilder =
                     WriteBatch.builder(ShortUrlReservation.class)
-                            .mappedTableResource(shortUrlReservationsTable);
+                            .mappedTableResource(shortUrlReservationTable);
             for (int j = i; j < Math.min(i + MAX_BATCH_SIZE, numItems); j++) {
                 writeBatchBuilder.addPutItem(shortUrlReservations.get(j));
             }

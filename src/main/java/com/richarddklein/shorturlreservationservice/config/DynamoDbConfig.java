@@ -54,7 +54,7 @@ public class DynamoDbConfig {
     public DynamoDbTable<ShortUrlReservation>
     shortUrlReservationTable(DynamoDbEnhancedClient enhancedClient) {
         return enhancedClient.table(
-                parameterStoreReader.getShortUrlReservationsTableName(),
+                parameterStoreReader.getShortUrlReservationTableName(),
                 TableSchema.fromBean(ShortUrlReservation.class));
     }
 }

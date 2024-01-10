@@ -14,7 +14,7 @@ Resources:
       CodeUri: .
       MemorySize: 512
       Policies: AWSLambdaBasicExecutionRole
-      Timeout: 30
+      Timeout: 90
       SnapStart:
         ApplyOn: "PublishedVersions"
       Events:

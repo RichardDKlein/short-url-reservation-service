@@ -25,9 +25,7 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
 
     @Override
     public void initializeShortUrlReservationsTable() {
-        shortUrlReservationDao.initializeShortUrlReservationsTable(
-                parameterStoreReader.getMinShortUrlBase10(),
-                parameterStoreReader.getMaxShortUrlBase10());
+        shortUrlReservationDao.initializeShortUrlReservationsTable();
     }
 
     @Override

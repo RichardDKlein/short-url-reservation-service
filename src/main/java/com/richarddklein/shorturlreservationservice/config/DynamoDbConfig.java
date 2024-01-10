@@ -13,6 +13,8 @@
 package com.richarddklein.shorturlreservationservice.config;
 
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
+import com.richarddklein.shorturlreservationservice.util.ParameterStoreReader;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,26 +26,35 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 @Configuration
 public class DynamoDbConfig {
-    public static final String SHORT_URL_RESERVATIONS = "short_url_reservations";
+    private final ParameterStoreReader parameterStoreReader;
+
+    @Autowired
+    public DynamoDbConfig(ParameterStoreReader parameterStoreReader) {
+        this.parameterStoreReader = parameterStoreReader;
+    }
 
     @Bean
     public DynamoDbClient
     dynamoDbClient() {
         return DynamoDbClient.builder()
-                .credentialsProvider(DefaultCredentialsProvider.create())
+                .credentialsProvider(DefaultCredentialsProvider
+                        .create())
                 .build();
     }
 
     @Bean
     public DynamoDbEnhancedClient
     dynamoDbEnhancedClient(DynamoDbClient dynamoDbClient) {
-        return DynamoDbEnhancedClient.builder().dynamoDbClient(dynamoDbClient).build();
+        return DynamoDbEnhancedClient.builder()
+                .dynamoDbClient(dynamoDbClient)
+                .build();
     }
 
     @Bean
     public DynamoDbTable<ShortUrlReservation>
     shortUrlReservationTable(DynamoDbEnhancedClient enhancedClient) {
-        return enhancedClient.table(SHORT_URL_RESERVATIONS,
+        return enhancedClient.table(
+                parameterStoreReader.getShortUrlReservationsTableName(),
                 TableSchema.fromBean(ShortUrlReservation.class));
     }
 }

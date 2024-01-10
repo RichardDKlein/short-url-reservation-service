@@ -2,20 +2,18 @@ package com.richarddklein.shorturlreservationservice.dao;
 
 import java.util.*;
 
+import com.richarddklein.shorturlreservationservice.util.ParameterStoreReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
-
-import static com.richarddklein.shorturlreservationservice.config.DynamoDbConfig.SHORT_URL_RESERVATIONS;
 
 @Repository
 public class ShortUrlReservationDao {
@@ -28,6 +26,7 @@ public class ShortUrlReservationDao {
 
     private static final int MAX_BATCH_SIZE = 25;
 
+    private final ParameterStoreReader parameterStoreReader;
     private final DynamoDbClient dynamoDbClient;
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
     private final DynamoDbTable<ShortUrlReservation> shortUrlReservationsTable;
@@ -38,34 +37,23 @@ public class ShortUrlReservationDao {
 
     @Autowired
     public ShortUrlReservationDao(
+            ParameterStoreReader parameterStoreReader,
             DynamoDbClient dynamoDbClient,
             DynamoDbEnhancedClient dynamoDbEnhancedClient,
             DynamoDbTable<ShortUrlReservation> shortUrlReservationsTable) {
 
+        this.parameterStoreReader = parameterStoreReader;
         this.dynamoDbClient = dynamoDbClient;
         this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
         this.shortUrlReservationsTable = shortUrlReservationsTable;
     }
 
-    public void initializeShortUrlReservationsTable(
-            long minShortUrlBase10, long maxShortUrlBase10) {
-
+    public void initializeShortUrlReservationsTable() {
         if (doesTableExist()) {
             deleteShortUrlReservationsTable();
         }
-
         createShortUrlReservationsTable();
-
-        List<ShortUrlReservation> shortUrlReservations = new ArrayList<>();
-
-        for (long i = minShortUrlBase10; i <= maxShortUrlBase10; i++) {
-            String shortUrl = longToShortUrl(i);
-            ShortUrlReservation shortUrlReservation = new ShortUrlReservation(
-                    shortUrl, false);
-            shortUrlReservations.add(shortUrlReservation);
-        }
-
-        batchInsertShortUrlReservations(shortUrlReservations);
+        populateShortUrlReservationsTable();
     }
 
     public List<ShortUrlReservation> getShortUrlReservationsTable() {
@@ -81,9 +69,7 @@ public class ShortUrlReservationDao {
 
     private boolean doesTableExist() {
         try {
-            dynamoDbEnhancedClient.table(SHORT_URL_RESERVATIONS,
-                    TableSchema.fromBean(ShortUrlReservation.class))
-                    .describeTable();
+            shortUrlReservationsTable.describeTable();
         } catch (ResourceNotFoundException e) {
             return false;
         }
@@ -93,8 +79,13 @@ public class ShortUrlReservationDao {
     private void deleteShortUrlReservationsTable() {
         System.out.print("Deleting the Short URL Reservations table ...");
         shortUrlReservationsTable.deleteTable();
-        DynamoDbWaiter waiter = DynamoDbWaiter.builder().client(dynamoDbClient).build();
-        waiter.waitUntilTableNotExists(builder -> builder.tableName(SHORT_URL_RESERVATIONS).build());
+        DynamoDbWaiter waiter = DynamoDbWaiter.builder()
+                .client(dynamoDbClient)
+                .build();
+        waiter.waitUntilTableNotExists(builder -> builder
+                .tableName(parameterStoreReader
+                        .getShortUrlReservationsTableName())
+                .build());
         waiter.close();
         System.out.println(" done!");
     }
@@ -102,9 +93,31 @@ public class ShortUrlReservationDao {
     private void createShortUrlReservationsTable() {
         System.out.print("Creating the Short URL Reservations table ...");
         shortUrlReservationsTable.createTable();
-        DynamoDbWaiter waiter = DynamoDbWaiter.builder().client(dynamoDbClient).build();
-        waiter.waitUntilTableExists(builder -> builder.tableName(SHORT_URL_RESERVATIONS).build());
+        DynamoDbWaiter waiter = DynamoDbWaiter.builder()
+                .client(dynamoDbClient)
+                .build();
+        waiter.waitUntilTableExists(builder -> builder
+                .tableName(parameterStoreReader
+                        .getShortUrlReservationsTableName())
+                .build());
         waiter.close();
+        System.out.println(" done!");
+    }
+
+    private void populateShortUrlReservationsTable() {
+        System.out.print("Populating the Short URL Reservations table ...");
+        List<ShortUrlReservation> shortUrlReservations = new ArrayList<>();
+
+        long minShortUrlBase10 = parameterStoreReader.getMinShortUrlBase10();
+        long maxShortUrlBase10 = parameterStoreReader.getMaxShortUrlBase10();
+
+        for (long i = minShortUrlBase10; i <= maxShortUrlBase10; i++) {
+            String shortUrl = longToShortUrl(i);
+            ShortUrlReservation shortUrlReservation = new ShortUrlReservation(
+                    shortUrl, false);
+            shortUrlReservations.add(shortUrlReservation);
+        }
+        batchInsertShortUrlReservations(shortUrlReservations);
         System.out.println(" done!");
     }
 
@@ -129,8 +142,8 @@ public class ShortUrlReservationDao {
     private void batchInsertShortUrlReservations(
             List<ShortUrlReservation> shortUrlReservations) {
 
-        System.out.print("Initializing the Short URL Reservations table ...");
         long numItems = shortUrlReservations.size();
+
         for (int i = 0; i < numItems; i += MAX_BATCH_SIZE) {
             WriteBatch.Builder<ShortUrlReservation> writeBatchBuilder =
                     WriteBatch.builder(ShortUrlReservation.class)
@@ -142,6 +155,5 @@ public class ShortUrlReservationDao {
             dynamoDbEnhancedClient.batchWriteItem(
                     builder -> builder.writeBatches(writeBatch).build());
         }
-        System.out.println(" done!");
     }
 }

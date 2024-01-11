@@ -6,26 +6,27 @@ import java.util.Map;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 @DynamoDbBean
 public class ShortUrlReservation {
     private String shortUrl;
 
-    private boolean isReserved;
+    private String isAvailable;
 
     public ShortUrlReservation() {
         // Spring requires a default constructor.
     }
 
-    public ShortUrlReservation(String shortUrl, boolean isReserved) {
+    public ShortUrlReservation(String shortUrl, String isAvailable) {
         this.shortUrl = shortUrl;
-        this.isReserved = isReserved;
+        this.isAvailable = isAvailable;
     }
 
     public ShortUrlReservation(Map<String, AttributeValue> item) {
-        shortUrl = item.get("short_url").s();
-        isReserved = item.get("is_reserved").bool();
+        shortUrl = item.get("shortUrl").s();
+        isAvailable = item.get("isAvailable").s();
     }
 
     @DynamoDbPartitionKey
@@ -37,19 +38,20 @@ public class ShortUrlReservation {
         this.shortUrl = shortUrl;
     }
 
-    @DynamoDbAttribute("isReserved")
-    public boolean getIsReserved() {
-        return isReserved;
+    @DynamoDbAttribute("isAvailable")
+    @DynamoDbSecondaryPartitionKey(indexNames = "isAvailable-index")
+    public String getIsAvailable() {
+        return isAvailable;
     }
 
-    public void setIsReserved(boolean isReserved) {
-        this.isReserved = isReserved;
+    public void setIsAvailable(String isAvailable) {
+        this.isAvailable = isAvailable;
     }
 
     public Map<String, AttributeValue> toAttributeValueMap() {
         Map<String, AttributeValue> attributeValues = new HashMap<>();
-        attributeValues.put("short_url", AttributeValue.builder().s(shortUrl).build());
-        attributeValues.put("is_reserved", AttributeValue.builder().bool(isReserved).build());
+        attributeValues.put("shortUrl", AttributeValue.builder().s(shortUrl).build());
+        attributeValues.put("isAvailable", AttributeValue.builder().s(isAvailable).build());
 
         return attributeValues;
     }

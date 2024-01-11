@@ -8,8 +8,10 @@ import org.springframework.stereotype.Repository;
 
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
@@ -129,7 +131,17 @@ public class ShortUrlReservationDao {
 
     private void createShortUrlReservationTable() {
         System.out.print("Creating the Short URL Reservation table ...");
-        shortUrlReservationTable.createTable();
+
+        CreateTableEnhancedRequest createTableRequest = CreateTableEnhancedRequest.builder()
+                .globalSecondaryIndices(gsiBuilder -> gsiBuilder
+                        .indexName("isAvailable-index")
+                        .projection(projectionBuilder -> projectionBuilder
+                                .projectionType(ProjectionType.KEYS_ONLY))
+                )
+                .build();
+
+        shortUrlReservationTable.createTable(createTableRequest);
+
         DynamoDbWaiter waiter = DynamoDbWaiter.builder()
                 .client(dynamoDbClient)
                 .build();
@@ -137,7 +149,9 @@ public class ShortUrlReservationDao {
                 .tableName(parameterStoreReader
                         .getShortUrlReservationTableName())
                 .build());
+
         waiter.close();
+
         System.out.println(" done!");
     }
 
@@ -151,7 +165,7 @@ public class ShortUrlReservationDao {
         for (long i = minShortUrlBase10; i <= maxShortUrlBase10; i++) {
             String shortUrl = longToShortUrl(i);
             ShortUrlReservation shortUrlReservation = new ShortUrlReservation(
-                    shortUrl, false);
+                    shortUrl, shortUrl);
             shortUrlReservations.add(shortUrlReservation);
         }
         batchInsertShortUrlReservations(shortUrlReservations);

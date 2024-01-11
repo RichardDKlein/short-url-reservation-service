@@ -21,12 +21,12 @@ Resources:
         InitializeShortUrlReservationTableViaApiGateway:
           Type: Api
           Properties:
-            Path: /shorturl/reservations
+            Path: /shorturl/reservations/all
             Method: POST
         InitializeShortUrlReservationTableViaCustomDomain:
           Type: Api
           Properties:
-            Path: /
+            Path: /all
             Method: POST
         GetAllShortUrlsViaApiGateway:
           Type: Api

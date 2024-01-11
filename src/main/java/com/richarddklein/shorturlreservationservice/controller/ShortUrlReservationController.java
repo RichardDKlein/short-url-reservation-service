@@ -106,7 +106,7 @@ public class ShortUrlReservationController {
         this.shortUrlReservationService = shortUrlReservationService;
     }
 
-    @PostMapping
+    @PostMapping("/all")
     public ResponseEntity<StatusResponse> initializeShortUrlReservationTable() {
         shortUrlReservationService.initializeShortUrlReservationTable();
         StatusResponse response = new StatusResponse(

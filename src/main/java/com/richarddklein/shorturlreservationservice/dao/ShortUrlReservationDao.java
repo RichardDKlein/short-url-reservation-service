@@ -15,6 +15,44 @@ import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 
+/*
+Your approach sounds reasonable, and it addresses the requirement
+of finding an available shortUrl without introducing hot spots.
+By leveraging a Global Secondary Index (GSI) on the `isAvailable`
+attribute with a specific condition (such as the presence or
+absence of the attribute), you can efficiently query for available
+shortUrls.
+
+Here's a summary of the key points in your approach:
+
+1. Main Table (`ShortUrlReservations`):
+
+- Items have attributes {`shortUrl` (S), `isAvailable` (S)}.
+- If the shortUrl is available, the `isAvailable` attribute is
+present, and its value is the same as the shortUrl.
+- If the shortUrl is not available, the `isAvailable` attribute
+is completely absent.
+
+2. Global Secondary Index (isAvailable GSI):
+- Created on the `isAvailable` attribute.
+- Contains only the shortUrls that are currently available.
+- Due to the nature of the data, where the `isAvailable` value
+is the same as the `shortUrl`, the GSI will be evenly distributed
+over partitions.
+
+3. Finding an Available shortUrl:
+- Query the isAvailable GSI to get the first available shortUrl.
+- Query the main table (`ShortUrlReservations`) using the obtained
+shortUrl to confirm availability and retrieve additional details.
+- Remove the `isAvailable` attribute from the shortUrl in the main
+table to mark it as no longer available, which, as a side effect,
+updates the `isAvailable` GSI.
+
+This approach is designed to distribute the load evenly across
+partitions and avoid hot spots. It allows you to efficiently find
+available shortUrls and mark them as unavailable, while maintaining
+a fast and scalable system.
+ */
 @Repository
 public class ShortUrlReservationDao {
     private static final String DIGITS =
@@ -59,7 +97,6 @@ public class ShortUrlReservationDao {
     public List<ShortUrlReservation> getShortUrlReservationTable() {
         List<ShortUrlReservation> result = new ArrayList<>();
         shortUrlReservationTable.scan().items().forEach(result::add);
-        result.sort((x, y) -> x.getShortUrl().compareTo(y.getShortUrl()));
         return result;
     }
 

@@ -30,18 +30,17 @@ GET /shorturl/reservations/all
         "shortUrlReservations": [
             {
                 "shortUrl": "<abc>",
-                "isReserved": true/false
+                "isAvailable": true/false
             },
             ...
             {
                 "shortUrl": "<xyz>",
-                "isReserved": true/false
+                "isAvailable": true/false
             },
         ]
     }
 
-
-GET /shorturl/reservations/reserve/any
+GET /shorturl/reservations/specific/{shortUrl}
     {
         "status": {
             "success" : true/false,
@@ -49,11 +48,11 @@ GET /shorturl/reservations/reserve/any
         },
         "shortUrlReservation": {
                 "shortUrl": "<abc>",
-                "isReserved": true/false
+                "isAvailable": true/false
         }
     }
 
-GET /shorturl/reservations/reserve/specific/{shortUrl+}
+PUT /shorturl/reservations/reserve/any
     {
         "status": {
             "success" : true/false,
@@ -61,7 +60,19 @@ GET /shorturl/reservations/reserve/specific/{shortUrl+}
         },
         "shortUrlReservation": {
                 "shortUrl": "<abc>",
-                "isReserved": true/false
+                "isAvailable": false
+        }
+    }
+
+PUT /shorturl/reservations/reserve/specific/{shortUrl}
+    {
+        "status": {
+            "success" : true/false,
+            "message" : "blah, blah..."
+        },
+        "shortUrlReservation": {
+                "shortUrl": "<abc>",
+                "isAvailable": false
         }
     }
 
@@ -73,7 +84,7 @@ PUT /shorturl/reservations/cancel/all
         }
     }
 
-PUT /shorturl/reservations/cancel/specific/{shortUrl+}
+PUT /shorturl/reservations/cancel/specific/{shortUrl}
     {
         "status": {
             "success" : true/false,
@@ -81,7 +92,7 @@ PUT /shorturl/reservations/cancel/specific/{shortUrl+}
         },
         "shortUrlReservation": {
                 "shortUrl": "<abc>",
-                "isReserved": true/false
+                "isAvailable": true
         }
     }
  */

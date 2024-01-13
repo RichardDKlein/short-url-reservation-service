@@ -5,41 +5,16 @@ import java.util.Map;
 
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.response.StatusAndShortUrlReservationArrayResponse;
+import com.richarddklein.shorturlreservationservice.response.StatusAndShortUrlReservationResponse;
 import com.richarddklein.shorturlreservationservice.response.StatusResponse;
 import com.richarddklein.shorturlreservationservice.service.ShortUrlReservationService;
+import com.richarddklein.shorturlreservationservice.util.ShortUrlReservationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /*
-POST /shorturl/reservations/all
-    {
-        "status": {
-            "success" : true/false,
-            "message" : "blah, blah..."
-        }
-    }
-
-GET /shorturl/reservations/all
-    {
-        "status": {
-            "success" : true/false,
-            "message" : "blah, blah..."
-        },
-        "shortUrlReservations": [
-            {
-                "shortUrl": "<abc>",
-                "isAvailable": true/false
-            },
-            ...
-            {
-                "shortUrl": "<xyz>",
-                "isAvailable": true/false
-            },
-        ]
-    }
-
 GET /shorturl/reservations/specific/{shortUrl}
     {
         "status": {
@@ -107,24 +82,58 @@ public class ShortUrlReservationController {
     }
 
     @PostMapping("/all")
-    public ResponseEntity<StatusResponse> initializeShortUrlReservationTable() {
-        shortUrlReservationService.initializeShortUrlReservationTable();
+    public ResponseEntity<StatusResponse>
+    initializeShortUrlReservationTable() {
+        shortUrlReservationService.initializeShortUrlReservationRepository();
         StatusResponse response = new StatusResponse(
-                true,
+                ShortUrlReservationStatus.SUCCESS,
                 "Short URL Reservation table successfully initialized");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<StatusAndShortUrlReservationArrayResponse> getAllShortUrls() {
+    public ResponseEntity<StatusAndShortUrlReservationArrayResponse>
+    getAllShortUrlReservations() {
         List<ShortUrlReservation> shortUrlReservations =
-                shortUrlReservationService.getShortUrlReservationTable();
+                shortUrlReservationService.getAllShortUrlReservations();
+
         StatusResponse status = new StatusResponse(
-                true,
+                ShortUrlReservationStatus.SUCCESS,
                 "Short URL Reservation table successfully retrieved");
+
         StatusAndShortUrlReservationArrayResponse response =
                 new StatusAndShortUrlReservationArrayResponse(status, shortUrlReservations);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/specific/{shortUrl}")
+    public ResponseEntity<StatusAndShortUrlReservationResponse>
+    getSpecificShortUrlReservation(@PathVariable String shortUrl) {
+        ShortUrlReservation shortUrlReservation =
+                shortUrlReservationService.getSpecificShortUrlReservation(shortUrl);
+
+        HttpStatus httpStatus;
+        StatusResponse status;
+
+        if (shortUrlReservation == null) {
+            httpStatus = HttpStatus.NOT_FOUND;
+            status = new StatusResponse(
+                    ShortUrlReservationStatus.SHORT_URL_NOT_FOUND,
+                    String.format("Short URL '%s' not found", shortUrl)
+            );
+            shortUrlReservation = new ShortUrlReservation(
+                    shortUrl,
+                    "<not found>");
+        } else {
+            httpStatus = HttpStatus.OK;
+            status = new StatusResponse(
+                    ShortUrlReservationStatus.SUCCESS,
+                    String.format("Short URL '%s' successfully retrieved", shortUrl)
+            );
+        }
+        StatusAndShortUrlReservationResponse response =
+                new StatusAndShortUrlReservationResponse(status, shortUrlReservation);
+        return new ResponseEntity<>(response, httpStatus);
     }
 
     @GetMapping
@@ -134,32 +143,6 @@ public class ShortUrlReservationController {
                 "shortUrl", shortUrl,
                 "message", "Short URL successfully reserved"
         );
-    }
-
-    @GetMapping("/{shortUrl}")
-    public Map<String, String> reserveSpecifiedShortUrl(@PathVariable String shortUrl) {
-        shortUrlReservationService.reserveSpecificShortUrl(shortUrl);
-        String shortUrlLong = Long.toString(shortUrlToLong(shortUrl));
-        return Map.of(
-                "shortUrl", shortUrl,
-                "shortUrlLong", shortUrlLong,
-                "message", "Short URL successfully reserved"
-        );
-    }
-
-    private long shortUrlToLong(String shortUrl) {
-        final String DIGITS = "0123456789" +
-                "abcdefghijklmnopqrstuvwxyz" +
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-                "_-";
-        final int BASE = DIGITS.length();
-
-        long result = 0;
-        for (char c : shortUrl.toCharArray()) {
-            int digit = DIGITS.indexOf(c);
-            result = result * BASE + digit;
-        }
-        return result;
     }
 
     @DeleteMapping("/{shortUrl}")

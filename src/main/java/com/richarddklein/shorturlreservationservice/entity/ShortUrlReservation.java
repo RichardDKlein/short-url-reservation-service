@@ -3,6 +3,7 @@ package com.richarddklein.shorturlreservationservice.entity;
 import java.util.HashMap;
 import java.util.Map;
 
+import software.amazon.awssdk.enhanced.dynamodb.extensions.annotations.DynamoDbVersionAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
@@ -12,8 +13,8 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 @DynamoDbBean
 public class ShortUrlReservation {
     private String shortUrl;
-
     private String isAvailable;
+    private Long version; // for optimistic locking
 
     public ShortUrlReservation() {
         // Spring requires a default constructor.
@@ -46,6 +47,15 @@ public class ShortUrlReservation {
 
     public void setIsAvailable(String isAvailable) {
         this.isAvailable = isAvailable;
+    }
+
+    @DynamoDbVersionAttribute
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     public Map<String, AttributeValue> toAttributeValueMap() {

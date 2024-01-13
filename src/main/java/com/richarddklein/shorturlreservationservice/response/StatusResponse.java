@@ -1,21 +1,23 @@
 package com.richarddklein.shorturlreservationservice.response;
 
+import com.richarddklein.shorturlreservationservice.util.ShortUrlReservationStatus;
+
 public class StatusResponse {
 
-    private boolean success;
+    private ShortUrlReservationStatus status;
     private String message;
 
-    public StatusResponse(boolean success, String message) {
-        this.success = success;
+    public StatusResponse(ShortUrlReservationStatus status, String message) {
+        this.status = status;
         this.message = message;
     }
 
-    public boolean isSuccess() {
-        return success;
+    public ShortUrlReservationStatus getStatus() {
+        return status;
     }
 
-    public void setSuccess(boolean success) {
-        this.success = success;
+    public void setStatus(ShortUrlReservationStatus status) {
+        this.status = status;
     }
 
     public String getMessage() {
@@ -29,7 +31,7 @@ public class StatusResponse {
     @Override
     public String toString() {
         return "StatusResponse{" +
-                "success=" + success +
+                "status=" + status +
                 ", message='" + message + '\'' +
                 '}';
     }

@@ -38,6 +38,16 @@ Resources:
           Properties:
             Path: /all
             Method: GET
+        GetSpecificShortUrlViaApiGateway:
+          Type: Api
+          Properties:
+            Path: /shorturl/reservations/specific/{proxy+}
+            Method: GET
+        GetSpecificShortUrlViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /specific/{proxy+}
+            Method: GET
         ReserveAnyShortUrlViaApiGateway:
           Type: Api
           Properties:

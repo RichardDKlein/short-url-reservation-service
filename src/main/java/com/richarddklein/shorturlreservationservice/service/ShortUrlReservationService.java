@@ -5,8 +5,9 @@ import java.util.List;
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 
 public interface ShortUrlReservationService {
-    void initializeShortUrlReservationTable();
-    List<ShortUrlReservation> getShortUrlReservationTable();
+    void initializeShortUrlReservationRepository();
+    List<ShortUrlReservation> getAllShortUrlReservations();
+    ShortUrlReservation getSpecificShortUrlReservation(String shortUrl);
     String reserveAnyShortUrl();
     void reserveSpecificShortUrl(String shortUrl);
     void cancelShortUrlReservation(String shortUrl);

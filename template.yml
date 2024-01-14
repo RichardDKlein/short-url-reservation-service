@@ -51,30 +51,10 @@ Resources:
         ReserveAnyShortUrlViaApiGateway:
           Type: Api
           Properties:
-            Path: /shorturl/reservations
-            Method: GET
+            Path: /shorturl/reservations/reserve/any
+            Method: PUT
         ReserveAnyShortUrlViaCustomDomain:
           Type: Api
           Properties:
-            Path: /
-            Method: GET
-        ReserveSpecifiedShortUrlViaApiGateway:
-          Type: Api
-          Properties:
-            Path: /shorturl/reservations/{proxy+}
-            Method: GET
-        ReserveSpecifiedShortUrlViaCustomDomain:
-          Type: Api
-          Properties:
-            Path: /{proxy+}
-            Method: GET
-        CancelShortUrlReservationViaApiGateway:
-          Type: Api
-          Properties:
-            Path: /shorturl/reservations/{proxy+}
-            Method: DELETE
-        CancelShortUrlReservationViaCustomDomain:
-          Type: Api
-          Properties:
-            Path: /{proxy+}
-            Method: DELETE
+            Path: /reserve/any
+            Method: PUT

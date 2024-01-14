@@ -2,12 +2,14 @@ package com.richarddklein.shorturlreservationservice.service;
 
 import java.util.List;
 
+import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
 import com.richarddklein.shorturlreservationservice.util.ParameterStoreReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
+import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 
 @Service
 public class ShortUrlReservationServiceImpl implements ShortUrlReservationService{
@@ -42,27 +44,22 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     }
 
     @Override
-    public String reserveAnyShortUrl() {
-        while (true) {
-            String availableShortUrl = findAvailableShortUrl();
-            ShortUrlReservation item =
-                    shortUrlReservationDao
-                            .readShortUrlReservation(availableShortUrl);
+    public ShortUrlReservation reserveAnyShortUrl()
+            throws NoShortUrlsAvailableException {
 
-            if (isShortUrlReallyAvailable(item)) {
-                item.setIsAvailable(null);
+        ShortUrlReservation updatedShortUrlReservation;
+        do {
+            ShortUrlReservation availableShortUrlReservation =
+                    shortUrlReservationDao.findAvailableShortUrlReservation();
 
-                item.setVersion(item.getVersion() + 1);
+            availableShortUrlReservation.setIsAvailable(null);
 
-                ShortUrlReservation updatedItem =
-                        shortUrlReservationDao
-                                .updateShortUrlReservation(item);
+            updatedShortUrlReservation =
+                    shortUrlReservationDao.updateShortUrlReservation(availableShortUrlReservation);
 
-                if (wasUpdateSuccessful(item, updatedItem)) {
-                    return availableShortUrl; // Reservation successful
-                }
-            }
-        }
+        } while (updatedShortUrlReservation == null);
+
+        return updatedShortUrlReservation;
     }
 
     @Override
@@ -76,34 +73,4 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
     // ------------------------------------------------------------------------
-
-    private String findAvailableShortUrl() {
-        // Implement logic to query the isAvailable-index GSI and return an available shortUrl
-        // ...
-        return "hello";
-    }
-
-    private boolean isShortUrlReallyAvailable(ShortUrlReservation shortUrlReservation) {
-        if (shortUrlReservation == null) {
-            return false;
-        }
-        String isAvailable = shortUrlReservation.getIsAvailable();
-        if (isAvailable == null) {
-            return false;
-        }
-        String shortUrl = shortUrlReservation.getShortUrl();
-        return isAvailable.equals(shortUrl);
-    }
-
-    private boolean wasUpdateSuccessful(
-            ShortUrlReservation item, ShortUrlReservation updatedItem) {
-
-        if (updatedItem == null) {
-            return false;
-        }
-        if (updatedItem.getIsAvailable() != null) {
-            return false;
-        }
-        return updatedItem.getShortUrl().equals(item.getShortUrl());
-    }
 }

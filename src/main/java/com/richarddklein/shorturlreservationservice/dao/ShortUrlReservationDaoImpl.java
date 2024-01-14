@@ -2,13 +2,18 @@ package com.richarddklein.shorturlreservationservice.dao;
 
 import java.util.*;
 
+import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
 import com.richarddklein.shorturlreservationservice.util.ParameterStoreReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.Page;
+import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
 import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
@@ -106,7 +111,10 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     @Override
     public List<ShortUrlReservation> readAllShortUrlReservations() {
         List<ShortUrlReservation> result = new ArrayList<>();
-        shortUrlReservationTable.scan().items().forEach(result::add);
+
+        shortUrlReservationTable.scan(req -> req.consistentRead(true))
+                .items().forEach(result::add);
+
         return result;
     }
 
@@ -121,7 +129,9 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     @Override
     public ShortUrlReservation readShortUrlReservation(String shortUrl) {
         return shortUrlReservationTable.getItem(
-                req -> req.key(key -> key.partitionValue(shortUrl)));
+                req -> req
+                        .key(key -> key.partitionValue(shortUrl))
+                        .consistentRead(true));
     }
 
     @Override
@@ -133,14 +143,55 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             // reserved, i.e. not available, he should set the `isAvailable`
             // field to `null`. The `.ignoreNulls(true)` mutation in the
             // builder below will then cause DynamoDB to *remove* the
-            // `isAvailable` attribute from the item in the database.
-            return shortUrlReservationTable.updateItem(
-                    req -> req.item(shortUrlReservation).ignoreNulls(true));
+            // `isAvailable` attribute from the item in the database, and
+            // to remove it from the `isAvailable-index` GSI as well.
+            return shortUrlReservationTable.updateItem(req -> req
+                    .item(shortUrlReservation)
+                    .ignoreNulls(true));
+
         } catch (ConditionalCheckFailedException e) {
             // Version check failed. Someone updated the ShortUrlReservation
             // item in the database after we read the item, so the item we
             // just tried to update contains stale data.
             return null;
+        }
+    }
+
+    @Override
+    public ShortUrlReservation findAvailableShortUrlReservation()
+            throws NoShortUrlsAvailableException {
+
+        ShortUrlReservation availableShortUrlReservation;
+
+        while (true) {
+            // Get the first item from the `isAvailable-index` GSI, and
+            // use it to perform a strongly consistent read of the
+            // corresponding ShortUrlReservation.
+            SdkIterable<Page<ShortUrlReservation>> pagedResult =
+                    shortUrlReservationTable.index("isAvailable-index")
+                            .scan(req -> req
+                                    .limit(1)
+                                    // The `consistentRead()` mutation
+                                    // applies only to the base table,
+                                    // not to the `isAvailable-index` GSI.
+                                    .consistentRead(true));
+
+            try {
+                availableShortUrlReservation =
+                        pagedResult.iterator().next().items().get(0);
+
+                // Since reads from any GSI, such as `isAvailable-index`, are not
+                // strongly consistent, we must perform a manual consistency check,
+                // to verify that the ShortUrlReservation we obtained from the
+                // `isAvailable-index` really is available.
+                if (!isShortUrlReallyAvailable(availableShortUrlReservation)) {
+                    continue;
+                }
+                return availableShortUrlReservation;
+
+            } catch (NullPointerException e) {
+                throw new NoShortUrlsAvailableException();
+            }
         }
     }
 
@@ -223,15 +274,6 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         return sb.reverse().toString();
     }
 
-    private long shortUrlToLong(String shortUrl) {
-        long result = 0;
-        for (char c : shortUrl.toCharArray()) {
-            int digit = DIGITS.indexOf(c);
-            result = result * BASE + digit;
-        }
-        return result;
-    }
-
     private void batchInsertShortUrlReservations(
             List<ShortUrlReservation> shortUrlReservations) {
 
@@ -248,5 +290,17 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             dynamoDbEnhancedClient.batchWriteItem(
                     builder -> builder.writeBatches(writeBatch).build());
         }
+    }
+
+    private boolean isShortUrlReallyAvailable(ShortUrlReservation shortUrlReservation) {
+        if (shortUrlReservation == null) {
+            return false;
+        }
+        String isAvailable = shortUrlReservation.getIsAvailable();
+        if (isAvailable == null) {
+            return false;
+        }
+        String shortUrl = shortUrlReservation.getShortUrl();
+        return isAvailable.equals(shortUrl);
     }
 }

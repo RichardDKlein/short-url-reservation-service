@@ -2,14 +2,16 @@ package com.richarddklein.shorturlreservationservice.service;
 
 import java.util.List;
 
+import ch.qos.logback.core.html.NOPThrowableRenderer;
 import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
-import com.richarddklein.shorturlreservationservice.util.ParameterStoreReader;
+import com.richarddklein.shorturlreservationservice.util.ShortUrlReservationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
-import software.amazon.awssdk.enhanced.dynamodb.model.Page;
+
+import static com.richarddklein.shorturlreservationservice.util.ShortUrlReservationUtils.isShortUrlReallyAvailable;
 
 @Service
 public class ShortUrlReservationServiceImpl implements ShortUrlReservationService{
@@ -50,12 +52,14 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
         ShortUrlReservation updatedShortUrlReservation;
         do {
             ShortUrlReservation availableShortUrlReservation =
-                    shortUrlReservationDao.findAvailableShortUrlReservation();
+                    shortUrlReservationDao
+                            .findAvailableShortUrlReservation();
 
             availableShortUrlReservation.setIsAvailable(null);
 
-            updatedShortUrlReservation =
-                    shortUrlReservationDao.updateShortUrlReservation(availableShortUrlReservation);
+            updatedShortUrlReservation = shortUrlReservationDao
+                    .updateShortUrlReservation(
+                            availableShortUrlReservation);
 
         } while (updatedShortUrlReservation == null);
 
@@ -63,7 +67,33 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     }
 
     @Override
-    public void reserveSpecificShortUrl(String shortUrl) {
+    public ShortUrlReservationStatus reserveSpecificShortUrl(
+            String shortUrl) {
+
+        ShortUrlReservation updatedShortUrlReservation;
+        do {
+            ShortUrlReservation shortUrlReservation =
+                    shortUrlReservationDao
+                            .readShortUrlReservation(shortUrl);
+
+            if (shortUrlReservation == null) {
+                return ShortUrlReservationStatus
+                        .SHORT_URL_NOT_FOUND;
+            }
+
+            if (!isShortUrlReallyAvailable(shortUrlReservation)) {
+                return ShortUrlReservationStatus
+                        .SHORT_URL_FOUND_BUT_NOT_AVAILABLE;
+            }
+
+            shortUrlReservation.setIsAvailable(null);
+
+            updatedShortUrlReservation = shortUrlReservationDao
+                    .updateShortUrlReservation(shortUrlReservation);
+
+        } while (updatedShortUrlReservation == null);
+
+        return ShortUrlReservationStatus.SUCCESS;
     }
 
     @Override

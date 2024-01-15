@@ -58,3 +58,13 @@ Resources:
           Properties:
             Path: /reserve/any
             Method: PUT
+        ReserveSpecificShortUrlViaApiGateway:
+          Type: Api
+          Properties:
+            Path: /shorturl/reservations/reserve/{proxy+}
+            Method: PUT
+        ReserveSpecificShortUrlViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /reserve/{proxy+}
+            Method: PUT

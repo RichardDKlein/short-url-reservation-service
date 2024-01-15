@@ -18,6 +18,8 @@ import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 
+import static com.richarddklein.shorturlreservationservice.util.ShortUrlReservationUtils.isShortUrlReallyAvailable;
+
 /*
 Your approach sounds reasonable, and it addresses the requirement
 of finding an available shortUrl without introducing hot spots.
@@ -290,17 +292,5 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
                             writeRequests
                     )));
         }
-    }
-
-    private boolean isShortUrlReallyAvailable(ShortUrlReservation shortUrlReservation) {
-        if (shortUrlReservation == null) {
-            return false;
-        }
-        String isAvailable = shortUrlReservation.getIsAvailable();
-        if (isAvailable == null) {
-            return false;
-        }
-        String shortUrl = shortUrlReservation.getShortUrl();
-        return isAvailable.equals(shortUrl);
     }
 }

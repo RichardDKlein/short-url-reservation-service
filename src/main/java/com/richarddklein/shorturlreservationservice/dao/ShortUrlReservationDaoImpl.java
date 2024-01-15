@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
@@ -68,6 +69,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     private static final int BASE = DIGITS.length();
 
     private static final int MAX_BATCH_SIZE = 25;
+    private static final int SCAN_LIMIT = 128;
 
     private final ParameterStoreReader parameterStoreReader;
     private final DynamoDbClient dynamoDbClient;
@@ -182,6 +184,51 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
 
             } catch (NullPointerException e) {
                 throw new NoShortUrlsAvailableException();
+            }
+        }
+    }
+
+    @Override
+    public void reserveAllShortUrls() {
+        SdkIterable<Page<ShortUrlReservation>> pagedResult =
+                shortUrlReservationTable.scan(req -> req
+                        .limit(SCAN_LIMIT)
+                        .filterExpression(Expression.builder()
+                                .expression("attribute_exists(isAvailable)")
+                                .build())
+                );
+
+        for (Page<ShortUrlReservation> page : pagedResult) {
+            for (ShortUrlReservation shortUrlReservation : page.items()) {
+                shortUrlReservation.setIsAvailable(null);
+
+                // Don't have to check for update failure. If the
+                // update fails, all that means is that someone
+                // else has already reserved the short URL.
+                updateShortUrlReservation(shortUrlReservation);
+            }
+        }
+    }
+
+    @Override
+    public void cancelAllShortUrlReservations() {
+        SdkIterable<Page<ShortUrlReservation>> pagedResult =
+                shortUrlReservationTable.scan(req -> req
+                        .limit(SCAN_LIMIT)
+                        .filterExpression(Expression.builder()
+                                .expression("attribute_not_exists(isAvailable)")
+                                .build())
+                );
+
+        for (Page<ShortUrlReservation> page : pagedResult) {
+            for (ShortUrlReservation shortUrlReservation : page.items()) {
+                shortUrlReservation.setIsAvailable(
+                        shortUrlReservation.getShortUrl());
+
+                // Don't have to check for update failure. If the
+                // update fails, all that means is that someone
+                // else has already canceled the reservation.
+                updateShortUrlReservation(shortUrlReservation);
             }
         }
     }

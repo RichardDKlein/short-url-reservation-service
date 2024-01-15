@@ -98,6 +98,11 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     }
 
     @Override
+    public void reserveAllShortUrls() {
+        shortUrlReservationDao.reserveAllShortUrls();
+    }
+
+    @Override
     public ShortUrlReservationStatus
     cancelSpecificShortUrlReservation(String shortUrl) {
         ShortUrlReservation updatedShortUrlReservation;
@@ -124,6 +129,11 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
         } while (updatedShortUrlReservation == null);
 
         return ShortUrlReservationStatus.SUCCESS;
+    }
+
+    @Override
+    public void cancelAllShortUrlReservations() {
+        shortUrlReservationDao.cancelAllShortUrlReservations();
     }
 
     // ------------------------------------------------------------------------

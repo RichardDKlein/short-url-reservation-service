@@ -11,4 +11,6 @@ public interface ShortUrlReservationDao {
     ShortUrlReservation readShortUrlReservation(String shortUrl);
     ShortUrlReservation updateShortUrlReservation(ShortUrlReservation shortUrlReservation);
     ShortUrlReservation findAvailableShortUrlReservation() throws NoShortUrlsAvailableException;
+    void reserveAllShortUrls();
+    void cancelAllShortUrlReservations();
 }

@@ -61,20 +61,40 @@ Resources:
         ReserveSpecificShortUrlViaApiGateway:
           Type: Api
           Properties:
-            Path: /shorturl/reservations/reserve/{proxy+}
+            Path: /shorturl/reservations/reserve/specific/{proxy+}
             Method: PUT
         ReserveSpecificShortUrlViaCustomDomain:
           Type: Api
           Properties:
-            Path: /reserve/{proxy+}
+            Path: /reserve/specific/{proxy+}
+            Method: PUT
+        ReserveAllShortUrlsViaApiGateway:
+          Type: Api
+          Properties:
+            Path: /shorturl/reservations/reserve/all
+            Method: PUT
+        ReserveAllShortUrlViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /reserve/all
             Method: PUT
         CancelSpecificShortUrlReservationViaApiGateway:
           Type: Api
           Properties:
-            Path: /shorturl/reservations/cancel/{proxy+}
+            Path: /shorturl/reservations/cancel/specific/{proxy+}
             Method: PUT
         CancelSpecificShortUrlReservationViaCustomDomain:
           Type: Api
           Properties:
-            Path: /cancel/{proxy+}
+            Path: /cancel/specific/{proxy+}
+            Method: PUT
+        CancelAllShortUrlReservationsViaApiGateway:
+          Type: Api
+          Properties:
+            Path: /shorturl/reservations/cancel/all
+            Method: PUT
+        CancelAllShortUrlReservationsViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /cancel/all
             Method: PUT

@@ -12,5 +12,7 @@ public interface ShortUrlReservationService {
     ShortUrlReservation getSpecificShortUrlReservation(String shortUrl);
     ShortUrlReservation reserveAnyShortUrl() throws NoShortUrlsAvailableException;
     ShortUrlReservationStatus reserveSpecificShortUrl(String shortUrl);
+    void reserveAllShortUrls();
     ShortUrlReservationStatus cancelSpecificShortUrlReservation(String shortUrl);
+    void cancelAllShortUrlReservations();
 }

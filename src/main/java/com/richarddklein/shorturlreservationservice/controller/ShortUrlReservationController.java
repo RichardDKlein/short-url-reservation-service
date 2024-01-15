@@ -14,15 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/*
-PUT /shorturl/reservations/cancel/all
-    {
-        "status": {
-            "success" : true/false,
-            "message" : "blah, blah..."
-        }
-    }
- */
 @RestController
 @RequestMapping({"/shorturl/reservations", "/"})
 public class ShortUrlReservationController {
@@ -192,6 +183,19 @@ public class ShortUrlReservationController {
         return new ResponseEntity<>(response, httpStatus);
     }
 
+    @PutMapping("/reserve/all")
+    public ResponseEntity<StatusResponse>
+    reserveAllShortUrls() {
+        shortUrlReservationService.reserveAllShortUrls();
+
+        StatusResponse response = new StatusResponse(
+                ShortUrlReservationStatus.SUCCESS,
+                "All short URL reservations "
+                        + "successfully reserved");
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @PutMapping("/cancel/specific/{shortUrl}")
     public ResponseEntity<StatusResponse>
     cancelSpecificShortUrlReservation(@PathVariable String shortUrl) {
@@ -237,5 +241,19 @@ public class ShortUrlReservationController {
         }
 
         return new ResponseEntity<>(response, httpStatus);
+    }
+
+    @PutMapping("/cancel/all")
+    public ResponseEntity<StatusResponse>
+    cancelAllShortUrlReservations() {
+        shortUrlReservationService
+                .cancelAllShortUrlReservations();
+
+        StatusResponse response = new StatusResponse(
+                ShortUrlReservationStatus.SUCCESS,
+                "All short URL reservations "
+                        + "successfully canceled");
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

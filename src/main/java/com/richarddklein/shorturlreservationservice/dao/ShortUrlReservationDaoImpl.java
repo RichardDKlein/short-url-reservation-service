@@ -9,16 +9,11 @@ import org.springframework.stereotype.Repository;
 
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
-import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
-import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
-import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
-import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
@@ -244,6 +239,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
 
     private void populateShortUrlReservationTable() {
         System.out.print("Populating the Short URL Reservation table ...");
+        List<ShortUrlReservation> shortUrlReservations = new ArrayList<>();
 
         long minShortUrlBase10 = parameterStoreReader.getMinShortUrlBase10();
         long maxShortUrlBase10 = parameterStoreReader.getMaxShortUrlBase10();
@@ -252,8 +248,10 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             String shortUrl = longToShortUrl(i);
             ShortUrlReservation shortUrlReservation = new ShortUrlReservation(
                     shortUrl, shortUrl);
-            shortUrlReservationTable.putItem(shortUrlReservation);
+            shortUrlReservation.setVersion(1L);
+            shortUrlReservations.add(shortUrlReservation);
         }
+        batchInsertShortUrlReservations(shortUrlReservations);
         System.out.println(" done!");
     }
 
@@ -264,6 +262,34 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             n /= BASE;
         } while (n > 0);
         return sb.reverse().toString();
+    }
+
+    private void batchInsertShortUrlReservations(
+            List<ShortUrlReservation> shortUrlReservations) {
+
+        long numItems = shortUrlReservations.size();
+
+        for (int i = 0; i < numItems; i += MAX_BATCH_SIZE) {
+            List<WriteRequest> writeRequests = new ArrayList<>();
+
+            for (int j = i; j < Math.min(i + MAX_BATCH_SIZE, numItems); j++) {
+                ShortUrlReservation shortUrlReservation =
+                        shortUrlReservations.get(j);
+
+                WriteRequest writeRequest = WriteRequest.builder()
+                        .putRequest(put -> put.item(shortUrlReservation
+                                .toAttributeValueMap()))
+                        .build();
+
+                writeRequests.add(writeRequest);
+            }
+
+            dynamoDbClient.batchWriteItem(req -> req
+                    .requestItems(Collections.singletonMap(
+                            parameterStoreReader.getShortUrlReservationTableName(),
+                            writeRequests
+                    )));
+        }
     }
 
     private boolean isShortUrlReallyAvailable(ShortUrlReservation shortUrlReservation) {

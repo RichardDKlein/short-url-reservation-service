@@ -22,18 +22,6 @@ PUT /shorturl/reservations/cancel/all
             "message" : "blah, blah..."
         }
     }
-
-PUT /shorturl/reservations/cancel/specific/{shortUrl}
-    {
-        "status": {
-            "success" : true/false,
-            "message" : "blah, blah..."
-        },
-        "shortUrlReservation": {
-                "shortUrl": "<abc>",
-                "isAvailable": true
-        }
-    }
  */
 @RestController
 @RequestMapping({"/shorturl/reservations", "/"})
@@ -156,19 +144,7 @@ public class ShortUrlReservationController {
 
         return new ResponseEntity<>(response, httpStatus);
     }
-/*
-PUT /shorturl/reservations/reserve/specific/{shortUrl}
-    {
-        "status": {
-            "success" : true/false,
-            "message" : "blah, blah..."
-        },
-        "shortUrlReservation": {
-                "shortUrl": "<abc>",
-                "isAvailable": false
-        }
-    }
- */
+
     @PutMapping("/reserve/specific/{shortUrl}")
     public ResponseEntity<StatusResponse>
     reserveSpecificShortUrl(@PathVariable String shortUrl) {
@@ -209,6 +185,53 @@ PUT /shorturl/reservations/reserve/specific/{shortUrl}
                     String.format(
                             "Short URL '%s' "
                             + "successfully reserved",
+                            shortUrl)
+            );
+        }
+
+        return new ResponseEntity<>(response, httpStatus);
+    }
+
+    @PutMapping("/cancel/specific/{shortUrl}")
+    public ResponseEntity<StatusResponse>
+    cancelSpecificShortUrlReservation(@PathVariable String shortUrl) {
+        ShortUrlReservationStatus shortUrlReservationStatus =
+                shortUrlReservationService
+                        .cancelSpecificShortUrlReservation(shortUrl);
+
+        HttpStatus httpStatus;
+        StatusResponse response;
+
+        if (shortUrlReservationStatus ==
+                ShortUrlReservationStatus.SHORT_URL_NOT_FOUND) {
+
+            httpStatus = HttpStatus.NOT_FOUND;
+            response = new StatusResponse(
+                    ShortUrlReservationStatus.SHORT_URL_NOT_FOUND,
+                    String.format(
+                            "Short URL '%s' not found",
+                            shortUrl)
+            );
+        } else if (shortUrlReservationStatus ==
+                ShortUrlReservationStatus
+                        .SHORT_URL_FOUND_BUT_NOT_RESERVED) {
+
+            httpStatus = HttpStatus.CONFLICT;
+            response = new StatusResponse(
+                    ShortUrlReservationStatus
+                            .SHORT_URL_FOUND_BUT_NOT_RESERVED,
+                    String.format(
+                            "Short URL '%s' was found, "
+                            + "but is not reserved",
+                            shortUrl)
+            );
+        } else {
+            httpStatus = HttpStatus.OK;
+            response = new StatusResponse(
+                    ShortUrlReservationStatus.SUCCESS,
+                    String.format(
+                            "Short URL '%s' "
+                            + "successfully canceled",
                             shortUrl)
             );
         }

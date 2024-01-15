@@ -68,3 +68,13 @@ Resources:
           Properties:
             Path: /reserve/{proxy+}
             Method: PUT
+        CancelSpecificShortUrlReservationViaApiGateway:
+          Type: Api
+          Properties:
+            Path: /shorturl/reservations/cancel/{proxy+}
+            Method: PUT
+        CancelSpecificShortUrlReservationViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /cancel/{proxy+}
+            Method: PUT

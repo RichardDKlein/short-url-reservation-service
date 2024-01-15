@@ -42,7 +42,8 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     public ShortUrlReservation getSpecificShortUrlReservation(
             String shortUrl) {
 
-        return shortUrlReservationDao.readShortUrlReservation(shortUrl);
+        return shortUrlReservationDao
+                .readShortUrlReservation(shortUrl);
     }
 
     @Override
@@ -97,7 +98,32 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     }
 
     @Override
-    public void cancelShortUrlReservation(String shortUrl) {
+    public ShortUrlReservationStatus
+    cancelSpecificShortUrlReservation(String shortUrl) {
+        ShortUrlReservation updatedShortUrlReservation;
+        do {
+            ShortUrlReservation shortUrlReservation =
+                    shortUrlReservationDao
+                            .readShortUrlReservation(shortUrl);
+
+            if (shortUrlReservation == null) {
+                return ShortUrlReservationStatus
+                        .SHORT_URL_NOT_FOUND;
+            }
+
+            if (isShortUrlReallyAvailable(shortUrlReservation)) {
+                return ShortUrlReservationStatus
+                        .SHORT_URL_FOUND_BUT_NOT_RESERVED;
+            }
+
+            shortUrlReservation.setIsAvailable(shortUrl);
+
+            updatedShortUrlReservation = shortUrlReservationDao
+                    .updateShortUrlReservation(shortUrlReservation);
+
+        } while (updatedShortUrlReservation == null);
+
+        return ShortUrlReservationStatus.SUCCESS;
     }
 
     // ------------------------------------------------------------------------

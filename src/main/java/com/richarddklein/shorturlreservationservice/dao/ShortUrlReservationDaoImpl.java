@@ -146,13 +146,13 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             // `isAvailable` attribute from the item in the database, and
             // to remove it from the `isAvailable-index` GSI as well.
             return shortUrlReservationTable.updateItem(req -> req
-                    .item(shortUrlReservation)
-                    .ignoreNulls(true));
+                    .item(shortUrlReservation));
 
         } catch (ConditionalCheckFailedException e) {
             // Version check failed. Someone updated the ShortUrlReservation
             // item in the database after we read the item, so the item we
             // just tried to update contains stale data.
+            System.out.println(e.getMessage());
             return null;
         }
     }
@@ -161,27 +161,21 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     public ShortUrlReservation findAvailableShortUrlReservation()
             throws NoShortUrlsAvailableException {
 
-        ShortUrlReservation availableShortUrlReservation;
-
         while (true) {
-            // Get the first item from the `isAvailable-index` GSI, and
-            // use it to perform a strongly consistent read of the
-            // corresponding ShortUrlReservation.
+            // Get the first item from the `isAvailable-index` GSI,
             SdkIterable<Page<ShortUrlReservation>> pagedResult =
                     shortUrlReservationTable.index("isAvailable-index")
-                            .scan(req -> req
-                                    .limit(1)
-                                    // The `consistentRead()` mutation
-                                    // applies only to the base table,
-                                    // not to the `isAvailable-index` GSI.
-                                    .consistentRead(true));
+                            .scan(req -> req.limit(1));
 
             try {
-                availableShortUrlReservation =
+                ShortUrlReservation gsiItem =
                         pagedResult.iterator().next().items().get(0);
 
+                ShortUrlReservation availableShortUrlReservation =
+                        readShortUrlReservation(gsiItem.getShortUrl());
+
                 // Since reads from any GSI, such as `isAvailable-index`, are not
-                // strongly consistent, we must perform a manual consistency check,
+                // strongly consistent, we should perform a manual consistency check,
                 // to verify that the ShortUrlReservation we obtained from the
                 // `isAvailable-index` really is available.
                 if (!isShortUrlReallyAvailable(availableShortUrlReservation)) {
@@ -250,7 +244,6 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
 
     private void populateShortUrlReservationTable() {
         System.out.print("Populating the Short URL Reservation table ...");
-        List<ShortUrlReservation> shortUrlReservations = new ArrayList<>();
 
         long minShortUrlBase10 = parameterStoreReader.getMinShortUrlBase10();
         long maxShortUrlBase10 = parameterStoreReader.getMaxShortUrlBase10();
@@ -259,9 +252,8 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             String shortUrl = longToShortUrl(i);
             ShortUrlReservation shortUrlReservation = new ShortUrlReservation(
                     shortUrl, shortUrl);
-            shortUrlReservations.add(shortUrlReservation);
+            shortUrlReservationTable.putItem(shortUrlReservation);
         }
-        batchInsertShortUrlReservations(shortUrlReservations);
         System.out.println(" done!");
     }
 
@@ -272,24 +264,6 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             n /= BASE;
         } while (n > 0);
         return sb.reverse().toString();
-    }
-
-    private void batchInsertShortUrlReservations(
-            List<ShortUrlReservation> shortUrlReservations) {
-
-        long numItems = shortUrlReservations.size();
-
-        for (int i = 0; i < numItems; i += MAX_BATCH_SIZE) {
-            WriteBatch.Builder<ShortUrlReservation> writeBatchBuilder =
-                    WriteBatch.builder(ShortUrlReservation.class)
-                            .mappedTableResource(shortUrlReservationTable);
-            for (int j = i; j < Math.min(i + MAX_BATCH_SIZE, numItems); j++) {
-                writeBatchBuilder.addPutItem(shortUrlReservations.get(j));
-            }
-            WriteBatch writeBatch = writeBatchBuilder.build();
-            dynamoDbEnhancedClient.batchWriteItem(
-                    builder -> builder.writeBatches(writeBatch).build());
-        }
     }
 
     private boolean isShortUrlReallyAvailable(ShortUrlReservation shortUrlReservation) {

@@ -58,11 +58,12 @@ public class ShortUrlReservation {
         this.version = version;
     }
 
-    public Map<String, AttributeValue> toAttributeValueMap() {
-        Map<String, AttributeValue> attributeValues = new HashMap<>();
-        attributeValues.put("shortUrl", AttributeValue.builder().s(shortUrl).build());
-        attributeValues.put("isAvailable", AttributeValue.builder().s(isAvailable).build());
-
-        return attributeValues;
+    @Override
+    public String toString() {
+        return "ShortUrlReservation{" +
+                "shortUrl='" + shortUrl + '\'' +
+                ", isAvailable='" + isAvailable + '\'' +
+                ", version=" + version +
+                '}';
     }
 }

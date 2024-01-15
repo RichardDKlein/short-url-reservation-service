@@ -48,7 +48,7 @@ public class StreamLambdaHandlerTest {
 //        assertFalse(response.isBase64Encoded());
 //
 //        assertTrue(response.getBody().contains("status"));
-//        assertTrue(response.getBody().contains("shortUrl"));
+//        assertTrue(response.getBody().contains("shortUrlReservation"));
 //
 //        assertTrue(response.getMultiValueHeaders().containsKey(HttpHeaders.CONTENT_TYPE));
 //        assertTrue(response.getMultiValueHeaders().getFirst(HttpHeaders.CONTENT_TYPE).startsWith(MediaType.APPLICATION_JSON));

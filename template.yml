@@ -13,8 +13,16 @@ Resources:
       Runtime: java21
       CodeUri: .
       MemorySize: 512
-      Policies: AWSLambdaBasicExecutionRole
       Timeout: 90
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AmazonDynamoDBFullAccess
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName:
+              /shortUrl/range
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName:
+              /shortUrl/tableName
       SnapStart:
         ApplyOn: "PublishedVersions"
       Events:

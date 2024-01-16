@@ -1,3 +1,14 @@
+/**
+ * Description: The Short URL Reservation Controller class.
+ *
+ * <p>Implements the REST API endpoints for the Short URL
+ * Reservation service.
+ *
+ * @author Richard D. Klein
+ * @version 1.0
+ * @since 2024-01-15
+ */
+
 package com.richarddklein.shorturlreservationservice.controller;
 
 import java.util.List;
@@ -234,7 +245,7 @@ public class ShortUrlReservationController {
             response = new StatusResponse(
                     ShortUrlReservationStatus.SUCCESS,
                     String.format(
-                            "Short URL '%s' "
+                            "Short URL '%s' reservation "
                             + "successfully canceled",
                             shortUrl)
             );

@@ -19,6 +19,7 @@ import com.richarddklein.shorturlreservationservice.response.StatusAndShortUrlRe
 import com.richarddklein.shorturlreservationservice.response.StatusAndShortUrlReservationResponse;
 import com.richarddklein.shorturlreservationservice.response.StatusResponse;
 import com.richarddklein.shorturlreservationservice.service.ShortUrlReservationService;
+import com.richarddklein.shorturlreservationservice.service.ShortUrlReservationServiceImpl;
 import com.richarddklein.shorturlreservationservice.util.ShortUrlReservationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,7 @@ public class ShortUrlReservationController {
     @PostMapping("/all")
     public ResponseEntity<StatusResponse>
     initializeShortUrlReservationTable() {
+        System.out.println("@PostMapping('/all')");
         shortUrlReservationService
                 .initializeShortUrlReservationRepository();
 

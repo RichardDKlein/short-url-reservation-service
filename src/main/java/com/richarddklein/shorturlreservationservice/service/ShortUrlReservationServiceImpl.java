@@ -14,7 +14,7 @@ import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 import static com.richarddklein.shorturlreservationservice.util.ShortUrlReservationUtils.isShortUrlReallyAvailable;
 
 @Service
-public class ShortUrlReservationServiceImpl implements ShortUrlReservationService{
+public class ShortUrlReservationServiceImpl implements ShortUrlReservationService {
     private final ShortUrlReservationDao shortUrlReservationDao;
 
     // ------------------------------------------------------------------------

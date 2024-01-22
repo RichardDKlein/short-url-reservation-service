@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest;
@@ -73,7 +72,6 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
 
     private final ParameterStoreReader parameterStoreReader;
     private final DynamoDbClient dynamoDbClient;
-    private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
     private final DynamoDbTable<ShortUrlReservation> shortUrlReservationTable;
 
     // ------------------------------------------------------------------------
@@ -84,17 +82,16 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     public ShortUrlReservationDaoImpl(
             ParameterStoreReader parameterStoreReader,
             DynamoDbClient dynamoDbClient,
-            DynamoDbEnhancedClient dynamoDbEnhancedClient,
             DynamoDbTable<ShortUrlReservation> shortUrlReservationTable) {
 
         this.parameterStoreReader = parameterStoreReader;
         this.dynamoDbClient = dynamoDbClient;
-        this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
         this.shortUrlReservationTable = shortUrlReservationTable;
     }
 
     @Override
-    public void createAllShortUrlReservations() {
+    public void initializeShortUrlReservationTable() {
+        System.out.println("Entering initializeShortUrlReservationTable() ...");
         if (doesTableExist()) {
             deleteShortUrlReservationTable();
         }
@@ -238,6 +235,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     // ------------------------------------------------------------------------
 
     private boolean doesTableExist() {
+        System.out.println("Entering doesTableExist() ...");
         try {
             shortUrlReservationTable.describeTable();
         } catch (ResourceNotFoundException e) {

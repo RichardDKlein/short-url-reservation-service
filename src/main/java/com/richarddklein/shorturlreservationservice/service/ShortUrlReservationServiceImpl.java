@@ -2,10 +2,10 @@ package com.richarddklein.shorturlreservationservice.service;
 
 import java.util.List;
 
-import ch.qos.logback.core.html.NOPThrowableRenderer;
 import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
 import com.richarddklein.shorturlreservationservice.util.ShortUrlReservationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
@@ -29,8 +29,9 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     }
 
     @Override
+    @Async
     public void initializeShortUrlReservationRepository() {
-        shortUrlReservationDao.createAllShortUrlReservations();
+        shortUrlReservationDao.initializeShortUrlReservationTable();
     }
 
     @Override

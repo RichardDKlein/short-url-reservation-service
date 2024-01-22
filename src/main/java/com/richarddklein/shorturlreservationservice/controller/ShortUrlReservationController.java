@@ -46,8 +46,8 @@ public class ShortUrlReservationController {
 
         StatusResponse response = new StatusResponse(
                 ShortUrlReservationStatus.SUCCESS,
-                "Short URL Reservation table "
-                + "successfully initialized");
+                "Initialization of Short URL "
+                + "Reservation table successfully started");
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

@@ -6,7 +6,7 @@ import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
 
 public interface ShortUrlReservationDao {
-    void createAllShortUrlReservations();
+    void initializeShortUrlReservationTable();
     List<ShortUrlReservation> readAllShortUrlReservations();
     ShortUrlReservation readShortUrlReservation(String shortUrl);
     ShortUrlReservation updateShortUrlReservation(ShortUrlReservation shortUrlReservation);

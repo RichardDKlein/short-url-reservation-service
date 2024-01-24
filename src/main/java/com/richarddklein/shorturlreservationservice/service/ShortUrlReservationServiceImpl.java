@@ -29,7 +29,6 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     }
 
     @Override
-    @Async
     public void initializeShortUrlReservationRepository() {
         shortUrlReservationDao.initializeShortUrlReservationTable();
     }

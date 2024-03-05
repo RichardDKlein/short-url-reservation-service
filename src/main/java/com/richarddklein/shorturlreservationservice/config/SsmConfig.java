@@ -11,6 +11,8 @@
 
 package com.richarddklein.shorturlreservationservice.config;
 
+import com.richarddklein.shorturlreservationservice.util.ParameterStoreReader;
+import com.richarddklein.shorturlreservationservice.util.ParameterStoreReaderImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,5 +24,11 @@ public class SsmConfig {
     public SsmClient
     ssmClient() {
         return SsmClient.builder().build();
+    }
+
+    @Bean
+    public ParameterStoreReader
+    parameterStoreReader() {
+        return new ParameterStoreReaderImpl(ssmClient());
     }
 }

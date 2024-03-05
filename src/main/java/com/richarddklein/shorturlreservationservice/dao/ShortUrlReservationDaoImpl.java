@@ -78,7 +78,6 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     // PUBLIC METHODS
     // ------------------------------------------------------------------------
 
-    @Autowired
     public ShortUrlReservationDaoImpl(
             ParameterStoreReader parameterStoreReader,
             DynamoDbClient dynamoDbClient,
@@ -275,8 +274,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
                 .client(dynamoDbClient)
                 .build();
         waiter.waitUntilTableExists(builder -> builder
-                .tableName(parameterStoreReader
-                        .getShortUrlReservationTableName())
+                .tableName(parameterStoreReader.getShortUrlReservationTableName())
                 .build());
 
         waiter.close();

@@ -25,13 +25,9 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 @Configuration
-public class DynamoDbConfig {
-    private final ParameterStoreReader parameterStoreReader;
-
+public class DbConfig {
     @Autowired
-    public DynamoDbConfig(ParameterStoreReader parameterStoreReader) {
-        this.parameterStoreReader = parameterStoreReader;
-    }
+    private SsmConfig ssmConfig;
 
     @Bean
     public DynamoDbClient
@@ -44,17 +40,17 @@ public class DynamoDbConfig {
 
     @Bean
     public DynamoDbEnhancedClient
-    dynamoDbEnhancedClient(DynamoDbClient dynamoDbClient) {
+    dynamoDbEnhancedClient() {
         return DynamoDbEnhancedClient.builder()
-                .dynamoDbClient(dynamoDbClient)
+                .dynamoDbClient(dynamoDbClient())
                 .build();
     }
 
     @Bean
     public DynamoDbTable<ShortUrlReservation>
-    shortUrlReservationTable(DynamoDbEnhancedClient enhancedClient) {
-        return enhancedClient.table(
-                parameterStoreReader.getShortUrlReservationTableName(),
+    shortUrlReservationTable() {
+        return dynamoDbEnhancedClient().table(
+                ssmConfig.parameterStoreReader().getShortUrlReservationTableName(),
                 TableSchema.fromBean(ShortUrlReservation.class));
     }
 }

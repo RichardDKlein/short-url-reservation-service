@@ -5,7 +5,6 @@ import java.util.List;
 import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
 import com.richarddklein.shorturlreservationservice.util.ShortUrlReservationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
@@ -21,7 +20,6 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     // PUBLIC METHODS
     // ------------------------------------------------------------------------
 
-    @Autowired
     public ShortUrlReservationServiceImpl(
             ShortUrlReservationDao shortUrlReservationDao) {
 

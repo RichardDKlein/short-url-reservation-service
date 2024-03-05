@@ -3,13 +3,14 @@ package com.richarddklein.shorturlreservationservice.controller;
 import com.richarddklein.shorturlreservationservice.response.StatusAndShortUrlReservationArrayResponse;
 import com.richarddklein.shorturlreservationservice.response.StatusAndShortUrlReservationResponse;
 import com.richarddklein.shorturlreservationservice.response.StatusResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 public interface ShortUrlReservationController {
     @PostMapping("/all")
     ResponseEntity<StatusResponse>
-    initializeShortUrlReservationTable();
+    initializeShortUrlReservationTable(HttpServletRequest request);
 
     @GetMapping("/all")
     ResponseEntity<StatusAndShortUrlReservationArrayResponse>

@@ -20,6 +20,8 @@ import com.richarddklein.shorturlreservationservice.response.StatusAndShortUrlRe
 import com.richarddklein.shorturlreservationservice.response.StatusResponse;
 import com.richarddklein.shorturlreservationservice.service.ShortUrlReservationService;
 import com.richarddklein.shorturlreservationservice.util.ShortUrlReservationStatus;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,8 +29,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping({"/shorturl/reservations", "/"})
 public class ShortUrlReservationControllerImpl implements ShortUrlReservationController {
-    private final ShortUrlReservationService
-            shortUrlReservationService;
+    private final ShortUrlReservationService shortUrlReservationService;
+
+    // ------------------------------------------------------------------------
+    // PUBLIC METHODS
+    // ------------------------------------------------------------------------
 
     public ShortUrlReservationControllerImpl(
             ShortUrlReservationService shortUrlReservationService) {
@@ -38,16 +43,22 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
 
     @Override
     public ResponseEntity<StatusResponse>
-    initializeShortUrlReservationTable() {
-        System.out.println("@PostMapping('/all')");
-        shortUrlReservationService.initializeShortUrlReservationRepository();
-
-        StatusResponse response = new StatusResponse(
-                ShortUrlReservationStatus.SUCCESS,
-                "Initialization of Short URL "
-                + "Reservation table successfully started");
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    initializeShortUrlReservationTable(HttpServletRequest request) {
+        if (isRunningLocally(request.getRemoteAddr())) {
+            shortUrlReservationService.initializeShortUrlReservationRepository();
+            StatusResponse response = new StatusResponse(
+                    ShortUrlReservationStatus.SUCCESS,
+                    "Initialization of Short URL Reservation table "
+                            + "completed successfully");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            StatusResponse response = new StatusResponse(
+                    ShortUrlReservationStatus.NOT_ON_LOCAL_MACHINE,
+                    "Initialization of the Short URL Reservation "
+                            + "table can be done only when the service is "
+                            + "running on your local machine");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
     }
 
     @Override
@@ -223,5 +234,13 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
                 "All short URL reservations successfully canceled");
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    // ------------------------------------------------------------------------
+    // PRIVATE METHODS
+    // ------------------------------------------------------------------------
+
+    private boolean isRunningLocally(String remoteAddr) {
+        return remoteAddr.equals("127.0.0.1");
     }
 }

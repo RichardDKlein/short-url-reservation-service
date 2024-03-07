@@ -13,6 +13,12 @@ package com.richarddklein.shorturlreservationservice.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
 import com.richarddklein.shorturlreservationservice.response.StatusAndShortUrlReservationArrayResponse;
@@ -20,11 +26,6 @@ import com.richarddklein.shorturlreservationservice.response.StatusAndShortUrlRe
 import com.richarddklein.shorturlreservationservice.response.StatusResponse;
 import com.richarddklein.shorturlreservationservice.service.ShortUrlReservationService;
 import com.richarddklein.shorturlreservationservice.util.ShortUrlReservationStatus;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping({"/shorturl/reservations", "/"})

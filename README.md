@@ -25,5 +25,5 @@ From the project root folder (where `template.yml` is located),
 use SAM CLI to deploy the project on AWS Lambda and API Gateway:
 
 ```
-$ sam deploy --guided
+$ sam deploy
 ```

@@ -1,3 +1,13 @@
+/**
+ * Description: The interface between AWS Lambda and Spring Boot
+ *
+ * <p>Handles an incoming request from AWS Lambda, by proxying it
+ * to Spring Boot.
+ *
+ * @author Richard D. Klein
+ * @version 1.0
+ * @since 2024-03-06
+ */
 package com.richarddklein.shorturlreservationservice;
 
 import java.io.IOException;
@@ -11,6 +21,9 @@ import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 
+/**
+ * Handles an incoming request from AWS Lambda, by proxying it to Spring Boot.
+ */
 public class StreamLambdaHandler implements RequestStreamHandler {
     private static final SpringBootLambdaContainerHandler<AwsProxyRequest, AwsProxyResponse> handler;
     static {
@@ -22,6 +35,14 @@ public class StreamLambdaHandler implements RequestStreamHandler {
         }
     }
 
+    /**
+     * Handles an incoming request from AWS Lambda, by proxying it to Spring Boot.
+     *
+     * @param inputStream The Lambda Function input stream
+     * @param outputStream The Lambda function output stream
+     * @param context The Lambda execution environment context object.
+     * @throws IOException
+     */
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context)
             throws IOException {

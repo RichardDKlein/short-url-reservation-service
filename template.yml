@@ -15,8 +15,11 @@ Resources:
       MemorySize: 512
       Timeout: 90
       Policies:
+        # Write permission for CloudWatch logs
         - AWSLambdaBasicExecutionRole
+        # Read/write permission for DynamoDB
         - AmazonDynamoDBFullAccess
+        # Read permission for SSM Parameter Store.
         - SSMParameterWithSlashPrefixReadPolicy:
             ParameterName:
               /shortUrl/range
@@ -25,8 +28,35 @@ Resources:
               /shortUrl/tableName
       SnapStart:
         ApplyOn: "PublishedVersions"
+
+      # Defined below are the REST endpoints. The URL for each endpoint is of
+      # the following form:
+      #
+      # https://<hostname>/shorturl/reservations/<endpoint-path>.
+      #
+      # For each endpoint, a pair of paths are defined. One path is for the
+      # case where <hostname> is either the API Gateway or localhost. The
+      # other path is for the case where <hostname> is the custom domain that
+      # redirects to the API Gateway. Thus, <hostname> can have one of three
+      # possible values:
+      #
+      # API Gateway:   2y5f39ydt2.execute-api.us-east-2.amazonaws.com/Prod
+      #                (subject to change)
+      # localhost:     localhost:3000
+      # Custom Domain: api.richarddklein.com
+      #
+      # When the service is running on your local machine, via the command
+      # `sam local start-api`, use the above `localhost` hostname.
+      #
+      # When the service is running on AWS, use either the above `API Gateway`
+      # hostname or the above `Custom Domain` hostname. (It is recommended that
+      # you use the `Custom Domain` hostname, as it is simpler to remember and
+      # to type.)
+      #
+      # For a description of the functionality provided by the REST endpoints,
+      # see the comments in the `ShortUrlReservationController` interface.
       Events:
-        InitializeShortUrlReservationTableViaApiGateway:
+        InitializeShortUrlReservationTableViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
             Path: /shorturl/reservations/all
@@ -36,17 +66,7 @@ Resources:
           Properties:
             Path: /all
             Method: POST
-        GetAllShortUrlsViaApiGateway:
-          Type: Api
-          Properties:
-            Path: /shorturl/reservations/all
-            Method: GET
-        GetAllShortUrlsViaCustomDomain:
-          Type: Api
-          Properties:
-            Path: /all
-            Method: GET
-        GetSpecificShortUrlViaApiGateway:
+        GetSpecificShortUrlViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
             Path: /shorturl/reservations/specific/{proxy+}
@@ -56,7 +76,17 @@ Resources:
           Properties:
             Path: /specific/{proxy+}
             Method: GET
-        ReserveAnyShortUrlViaApiGateway:
+        GetAllShortUrlsViaApiGatewayOrLocalHost:
+          Type: Api
+          Properties:
+            Path: /shorturl/reservations/all
+            Method: GET
+        GetAllShortUrlsViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /all
+            Method: GET
+        ReserveAnyShortUrlViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
             Path: /shorturl/reservations/reserve/any
@@ -66,7 +96,7 @@ Resources:
           Properties:
             Path: /reserve/any
             Method: PUT
-        ReserveSpecificShortUrlViaApiGateway:
+        ReserveSpecificShortUrlViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
             Path: /shorturl/reservations/reserve/specific/{proxy+}
@@ -76,7 +106,7 @@ Resources:
           Properties:
             Path: /reserve/specific/{proxy+}
             Method: PUT
-        ReserveAllShortUrlsViaApiGateway:
+        ReserveAllShortUrlsViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
             Path: /shorturl/reservations/reserve/all
@@ -86,7 +116,7 @@ Resources:
           Properties:
             Path: /reserve/all
             Method: PUT
-        CancelSpecificShortUrlReservationViaApiGateway:
+        CancelSpecificShortUrlReservationViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
             Path: /shorturl/reservations/cancel/specific/{proxy+}
@@ -96,7 +126,7 @@ Resources:
           Properties:
             Path: /cancel/specific/{proxy+}
             Method: PUT
-        CancelAllShortUrlReservationsViaApiGateway:
+        CancelAllShortUrlReservationsViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
             Path: /shorturl/reservations/cancel/all

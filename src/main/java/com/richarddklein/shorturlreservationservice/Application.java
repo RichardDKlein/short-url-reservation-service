@@ -1,3 +1,13 @@
+/**
+ * Description: The entry point of the Short URL Reservation Service.
+ *
+ * <p>Implements the `main()` function of the service, which runs the
+ * service as a Spring application.
+ *
+ * @author Richard D. Klein
+ * @version 1.0
+ * @since 2024-03-06
+ */
 package com.richarddklein.shorturlreservationservice;
 
 import org.springframework.boot.SpringApplication;

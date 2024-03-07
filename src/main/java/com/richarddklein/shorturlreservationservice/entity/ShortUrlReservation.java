@@ -49,6 +49,10 @@ public class ShortUrlReservation {
         this.isAvailable = isAvailable;
     }
 
+    public boolean isReallyAvailable() {
+        return (isAvailable != null) && (isAvailable.equals(shortUrl));
+    }
+
     @DynamoDbVersionAttribute
     public Long getVersion() {
         return version;

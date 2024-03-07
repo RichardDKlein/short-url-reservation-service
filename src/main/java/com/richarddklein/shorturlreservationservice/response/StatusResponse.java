@@ -1,7 +1,5 @@
 package com.richarddklein.shorturlreservationservice.response;
 
-import com.richarddklein.shorturlreservationservice.util.ShortUrlReservationStatus;
-
 public class StatusResponse {
 
     private ShortUrlReservationStatus status;

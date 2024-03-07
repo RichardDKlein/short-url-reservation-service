@@ -25,7 +25,7 @@ import com.richarddklein.shorturlreservationservice.response.StatusAndShortUrlRe
 import com.richarddklein.shorturlreservationservice.response.StatusAndShortUrlReservationResponse;
 import com.richarddklein.shorturlreservationservice.response.StatusResponse;
 import com.richarddklein.shorturlreservationservice.service.ShortUrlReservationService;
-import com.richarddklein.shorturlreservationservice.util.ShortUrlReservationStatus;
+import com.richarddklein.shorturlreservationservice.response.ShortUrlReservationStatus;
 
 @RestController
 @RequestMapping({"/shorturl/reservations", "/"})

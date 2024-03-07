@@ -3,14 +3,11 @@ package com.richarddklein.shorturlreservationservice.service;
 import java.util.List;
 
 import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
-import com.richarddklein.shorturlreservationservice.util.ShortUrlReservationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.richarddklein.shorturlreservationservice.response.ShortUrlReservationStatus;
 import org.springframework.stereotype.Service;
 
 import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
-
-import static com.richarddklein.shorturlreservationservice.util.ShortUrlReservationUtils.isShortUrlReallyAvailable;
 
 @Service
 public class ShortUrlReservationServiceImpl implements ShortUrlReservationService {
@@ -37,28 +34,21 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     }
 
     @Override
-    public ShortUrlReservation getSpecificShortUrlReservation(
-            String shortUrl) {
-
-        return shortUrlReservationDao
-                .readShortUrlReservation(shortUrl);
+    public ShortUrlReservation getSpecificShortUrlReservation(String shortUrl) {
+        return shortUrlReservationDao.readShortUrlReservation(shortUrl);
     }
 
     @Override
-    public ShortUrlReservation reserveAnyShortUrl()
-            throws NoShortUrlsAvailableException {
-
+    public ShortUrlReservation reserveAnyShortUrl() throws NoShortUrlsAvailableException {
         ShortUrlReservation updatedShortUrlReservation;
         do {
             ShortUrlReservation availableShortUrlReservation =
-                    shortUrlReservationDao
-                            .findAvailableShortUrlReservation();
+                    shortUrlReservationDao.findAvailableShortUrlReservation();
 
             availableShortUrlReservation.setIsAvailable(null);
 
             updatedShortUrlReservation = shortUrlReservationDao
-                    .updateShortUrlReservation(
-                            availableShortUrlReservation);
+                    .updateShortUrlReservation(availableShortUrlReservation);
 
         } while (updatedShortUrlReservation == null);
 
@@ -66,23 +56,18 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     }
 
     @Override
-    public ShortUrlReservationStatus reserveSpecificShortUrl(
-            String shortUrl) {
-
+    public ShortUrlReservationStatus reserveSpecificShortUrl(String shortUrl) {
         ShortUrlReservation updatedShortUrlReservation;
         do {
             ShortUrlReservation shortUrlReservation =
-                    shortUrlReservationDao
-                            .readShortUrlReservation(shortUrl);
+                    shortUrlReservationDao.readShortUrlReservation(shortUrl);
 
             if (shortUrlReservation == null) {
-                return ShortUrlReservationStatus
-                        .SHORT_URL_NOT_FOUND;
+                return ShortUrlReservationStatus.SHORT_URL_NOT_FOUND;
             }
 
-            if (!isShortUrlReallyAvailable(shortUrlReservation)) {
-                return ShortUrlReservationStatus
-                        .SHORT_URL_FOUND_BUT_NOT_AVAILABLE;
+            if (!shortUrlReservation.isReallyAvailable()) {
+                return ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_AVAILABLE;
             }
 
             shortUrlReservation.setIsAvailable(null);
@@ -106,17 +91,14 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
         ShortUrlReservation updatedShortUrlReservation;
         do {
             ShortUrlReservation shortUrlReservation =
-                    shortUrlReservationDao
-                            .readShortUrlReservation(shortUrl);
+                    shortUrlReservationDao.readShortUrlReservation(shortUrl);
 
             if (shortUrlReservation == null) {
-                return ShortUrlReservationStatus
-                        .SHORT_URL_NOT_FOUND;
+                return ShortUrlReservationStatus.SHORT_URL_NOT_FOUND;
             }
 
-            if (isShortUrlReallyAvailable(shortUrlReservation)) {
-                return ShortUrlReservationStatus
-                        .SHORT_URL_FOUND_BUT_NOT_RESERVED;
+            if (shortUrlReservation.isReallyAvailable()) {
+                return ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_RESERVED;
             }
 
             shortUrlReservation.setIsAvailable(shortUrl);

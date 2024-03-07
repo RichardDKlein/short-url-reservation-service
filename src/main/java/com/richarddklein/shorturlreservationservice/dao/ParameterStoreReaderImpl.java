@@ -1,6 +1,5 @@
-package com.richarddklein.shorturlreservationservice.util;
+package com.richarddklein.shorturlreservationservice.dao;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import software.amazon.awssdk.services.ssm.SsmClient;

@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
-import com.richarddklein.shorturlreservationservice.util.ShortUrlReservationStatus;
+import com.richarddklein.shorturlreservationservice.response.ShortUrlReservationStatus;
 
 public interface ShortUrlReservationService {
     void initializeShortUrlReservationRepository();

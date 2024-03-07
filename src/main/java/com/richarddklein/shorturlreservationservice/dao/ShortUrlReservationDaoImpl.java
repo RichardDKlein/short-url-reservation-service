@@ -3,8 +3,6 @@ package com.richarddklein.shorturlreservationservice.dao;
 import java.util.*;
 
 import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
-import com.richarddklein.shorturlreservationservice.util.ParameterStoreReader;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
@@ -17,8 +15,6 @@ import software.amazon.awssdk.services.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
-
-import static com.richarddklein.shorturlreservationservice.util.ShortUrlReservationUtils.isShortUrlReallyAvailable;
 
 /*
 Your approach sounds reasonable, and it addresses the requirement
@@ -90,7 +86,6 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
 
     @Override
     public void initializeShortUrlReservationTable() {
-        System.out.println("Entering initializeShortUrlReservationTable() ...");
         if (doesTableExist()) {
             deleteShortUrlReservationTable();
         }
@@ -123,10 +118,9 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
      */
     @Override
     public ShortUrlReservation readShortUrlReservation(String shortUrl) {
-        return shortUrlReservationTable.getItem(
-                req -> req
-                        .key(key -> key.partitionValue(shortUrl))
-                        .consistentRead(true));
+        return shortUrlReservationTable.getItem(req -> req
+                .key(key -> key.partitionValue(shortUrl))
+                .consistentRead(true));
     }
 
     @Override
@@ -161,11 +155,8 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             SdkIterable<Page<ShortUrlReservation>> pagedResult =
                     shortUrlReservationTable.index("isAvailable-index")
                             .scan(req -> req.limit(1));
-
             try {
-                ShortUrlReservation gsiItem =
-                        pagedResult.iterator().next().items().get(0);
-
+                ShortUrlReservation gsiItem = pagedResult.iterator().next().items().get(0);
                 ShortUrlReservation availableShortUrlReservation =
                         readShortUrlReservation(gsiItem.getShortUrl());
 
@@ -173,11 +164,10 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
                 // strongly consistent, we should perform a manual consistency check,
                 // to verify that the ShortUrlReservation we obtained from the
                 // `isAvailable-index` really is available.
-                if (!isShortUrlReallyAvailable(availableShortUrlReservation)) {
+                if (!availableShortUrlReservation.isReallyAvailable()) {
                     continue;
                 }
                 return availableShortUrlReservation;
-
             } catch (NullPointerException e) {
                 throw new NoShortUrlsAvailableException();
             }
@@ -234,7 +224,6 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     // ------------------------------------------------------------------------
 
     private boolean doesTableExist() {
-        System.out.println("Entering doesTableExist() ...");
         try {
             shortUrlReservationTable.describeTable();
         } catch (ResourceNotFoundException e) {

@@ -1,4 +1,4 @@
-package com.richarddklein.shorturlreservationservice.util;
+package com.richarddklein.shorturlreservationservice.response;
 
 public enum ShortUrlReservationStatus {
     SUCCESS,

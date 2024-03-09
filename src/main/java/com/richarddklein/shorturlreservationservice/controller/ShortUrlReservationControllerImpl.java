@@ -1,12 +1,6 @@
 /**
- * Description: The Short URL Reservation Controller class.
- *
- * <p>Implements the REST API endpoints for the Short URL
- * Reservation service.
- *
- * @author Richard D. Klein
- * @version 1.0
- * @since 2024-01-15
+ * The Short URL Reservation Service
+ * (Copyright 2024 by Richard Klein)
  */
 
 package com.richarddklein.shorturlreservationservice.controller;
@@ -27,6 +21,10 @@ import com.richarddklein.shorturlreservationservice.response.StatusResponse;
 import com.richarddklein.shorturlreservationservice.service.ShortUrlReservationService;
 import com.richarddklein.shorturlreservationservice.response.ShortUrlReservationStatus;
 
+/**
+ * The production implementation of the Short URL Reservation Controller
+ * interface.
+ */
 @RestController
 @RequestMapping({"/shorturl/reservations", "/"})
 public class ShortUrlReservationControllerImpl implements ShortUrlReservationController {

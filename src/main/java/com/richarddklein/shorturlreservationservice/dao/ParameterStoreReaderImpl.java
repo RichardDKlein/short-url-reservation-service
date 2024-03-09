@@ -1,3 +1,8 @@
+/**
+ * The Short URL Reservation Service
+ * (Copyright 2024 by Richard Klein)
+ */
+
 package com.richarddklein.shorturlreservationservice.dao;
 
 import org.springframework.stereotype.Component;
@@ -6,6 +11,9 @@ import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
 import software.amazon.awssdk.services.ssm.model.GetParameterResponse;
 
+/**
+ * The production implementation of the Parameter Store Reader interface.
+ */
 @Component
 public class ParameterStoreReaderImpl implements ParameterStoreReader {
     private static final String SHORT_URL_RANGE = "/shortUrl/range";

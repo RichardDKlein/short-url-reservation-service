@@ -187,10 +187,8 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         for (Page<ShortUrlReservation> page : pagedResult) {
             for (ShortUrlReservation shortUrlReservation : page.items()) {
                 shortUrlReservation.setIsAvailable(null);
-
-                // Don't have to check for update failure. If the
-                // update fails, all that means is that someone
-                // else has already reserved the short URL.
+                // Don't have to check for update failure, since we're in
+                // system maintenance mode.
                 updateShortUrlReservation(shortUrlReservation);
             }
         }
@@ -211,9 +209,8 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
                 shortUrlReservation.setIsAvailable(
                         shortUrlReservation.getShortUrl());
 
-                // Don't have to check for update failure. If the
-                // update fails, all that means is that someone
-                // else has already canceled the reservation.
+                // Don't have to check for update failure, since we're in
+                // system maintenance mode.
                 updateShortUrlReservation(shortUrlReservation);
             }
         }

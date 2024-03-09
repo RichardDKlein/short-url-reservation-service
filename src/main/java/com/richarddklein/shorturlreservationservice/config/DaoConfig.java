@@ -1,23 +1,12 @@
 /**
- * Description: The DAO (Data Access Object) @Configuration class.
- *
- * <p>Tells Spring how to construct the class that accesses the
- * database.
- *
- * @author Richard D. Klein
- * @version 1.0
- * @since 2024-03-04
+ * The Short URL Reservation Service
+ * (Copyright 2024 by Richard Klein)
  */
 
 package com.richarddklein.shorturlreservationservice.config;
 
-import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
-import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDaoImpl;
-import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
-import com.richarddklein.shorturlreservationservice.dao.ParameterStoreReader;
-import com.richarddklein.shorturlreservationservice.dao.ParameterStoreReaderImpl;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -25,6 +14,19 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
+import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
+import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDaoImpl;
+import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
+import com.richarddklein.shorturlreservationservice.dao.ParameterStoreReader;
+import com.richarddklein.shorturlreservationservice.dao.ParameterStoreReaderImpl;
+import org.springframework.context.annotation.Bean;
+
+/**
+ * The DAO (Data Access Object) @Configuration class.
+ *
+ * <p>Tells Spring how to construct instances of classes that are needed
+ * to implement the DAO package.</p>
+ */
 @Configuration
 public class DaoConfig {
     @Bean

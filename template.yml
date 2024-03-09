@@ -1,3 +1,7 @@
+#
+# The Short URL Reservation Service
+# (Copyright 2024 by Richard Klein)
+#
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Short URL Reservation Service - api.richarddklein.com/shorturl/reservations

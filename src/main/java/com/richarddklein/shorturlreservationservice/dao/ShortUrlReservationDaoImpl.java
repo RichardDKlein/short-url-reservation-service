@@ -1,8 +1,12 @@
+/**
+ * The Short URL Reservation Service
+ * (Copyright 2024 by Richard Klein)
+ */
+
 package com.richarddklein.shorturlreservationservice.dao;
 
 import java.util.*;
 
-import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
 import org.springframework.stereotype.Repository;
 
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
@@ -15,6 +19,7 @@ import software.amazon.awssdk.services.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
+import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
 
 /*
 Your approach sounds reasonable, and it addresses the requirement
@@ -53,6 +58,10 @@ This approach is designed to distribute the load evenly across
 partitions and avoid hot spots. It allows you to efficiently find
 available shortUrls and mark them as unavailable, while maintaining
 a fast and scalable system.
+ */
+
+/**
+ * The production implementation of the Short URL Reservation DAO interface.
  */
 @Repository
 public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {

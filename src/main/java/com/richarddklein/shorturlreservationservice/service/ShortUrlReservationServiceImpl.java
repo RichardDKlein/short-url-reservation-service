@@ -1,14 +1,22 @@
+/**
+ * The Short URL Reservation Service
+ * (Copyright 2024 by Richard Klein)
+ */
+
 package com.richarddklein.shorturlreservationservice.service;
 
 import java.util.List;
 
-import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
-import com.richarddklein.shorturlreservationservice.response.ShortUrlReservationStatus;
 import org.springframework.stereotype.Service;
 
 import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
+import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
+import com.richarddklein.shorturlreservationservice.response.ShortUrlReservationStatus;
 
+/**
+ *
+ */
 @Service
 public class ShortUrlReservationServiceImpl implements ShortUrlReservationService {
     private final ShortUrlReservationDao shortUrlReservationDao;

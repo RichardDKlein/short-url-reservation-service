@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
+import com.richarddklein.shorturlreservationservice.response.ShortUrlReservationStatus;
 
 /**
  * The Short URL Reservation DAO (Data Access Object) interface.
@@ -21,39 +22,51 @@ public interface ShortUrlReservationDao {
     /**
      *
      */
-    void initializeShortUrlReservationTable();
+    void initializeShortUrlReservationRepository();
 
     /**
+     * Gets all the Short URL Reservations from the repository.
      *
-     * @return
+     * @return A List of all the ShortUrlReservations that exist
+     * in the repository.
      */
-    List<ShortUrlReservation> readAllShortUrlReservations();
+    List<ShortUrlReservation> getAllShortUrlReservations();
 
     /**
+     * Gets a specific Short URL Reservation from the repository.
      *
-     * @param shortUrl
-     * @return
+     * @param shortUrl The short URL of interest.
+     * @return The ShortUrlReservation corresponding to the specified
+     * shortUrl, or `null` if that shortUrl could not be found in the
+     * database.
      */
-    ShortUrlReservation readShortUrlReservation(String shortUrl);
-
-    /**
-     *
-     * @param shortUrlReservation
-     * @return
-     */
-    ShortUrlReservation updateShortUrlReservation(ShortUrlReservation shortUrlReservation);
+    ShortUrlReservation getSpecificShortUrlReservation(String shortUrl);
 
     /**
      *
      * @return
      * @throws NoShortUrlsAvailableException
      */
-    ShortUrlReservation findAvailableShortUrlReservation() throws NoShortUrlsAvailableException;
+    ShortUrlReservation reserveAnyShortUrl() throws NoShortUrlsAvailableException;
+
+    /**
+     *
+     * @param shortUrl
+     * @return
+     */
+    ShortUrlReservationStatus reserveSpecificShortUrl(String shortUrl);
 
     /**
      *
      */
     void reserveAllShortUrls();
+
+    /**
+     *
+     * @param shortUrl
+     * @return
+     */
+    ShortUrlReservationStatus cancelSpecificShortUrlReservation(String shortUrl);
 
     /**
      *

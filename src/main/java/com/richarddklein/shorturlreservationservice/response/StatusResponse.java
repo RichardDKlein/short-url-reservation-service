@@ -16,4 +16,28 @@ public class StatusResponse {
         this.status = status;
         this.message = message;
     }
+
+    public ShortUrlReservationStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ShortUrlReservationStatus status) {
+        this.status = status;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    @Override
+    public String toString() {
+        return "StatusResponse{" +
+                "status=" + status +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }

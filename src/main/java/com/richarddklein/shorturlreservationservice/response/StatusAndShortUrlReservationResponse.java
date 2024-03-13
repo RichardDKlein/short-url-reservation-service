@@ -26,4 +26,28 @@ public class StatusAndShortUrlReservationResponse {
         this.status = status;
         this.shortUrlReservation = shortUrlReservation;
     }
+
+    public StatusResponse getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusResponse status) {
+        this.status = status;
+    }
+
+    public ShortUrlReservation getShortUrlReservation() {
+        return shortUrlReservation;
+    }
+
+    public void setShortUrlReservation(ShortUrlReservation shortUrlReservation) {
+        this.shortUrlReservation = shortUrlReservation;
+    }
+
+    @Override
+    public String toString() {
+        return "StatusAndShortUrlReservationResponse{" +
+                "status=" + status +
+                ", shortUrlReservation=" + shortUrlReservation +
+                '}';
+    }
 }

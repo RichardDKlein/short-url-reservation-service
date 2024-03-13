@@ -5,6 +5,7 @@
 
 package com.richarddklein.shorturlreservationservice.entity;
 
+import java.beans.Transient;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -125,6 +126,7 @@ public class ShortUrlReservation {
      *
      * @return
      */
+    @Transient
     public boolean isReallyAvailable() {
         return (isAvailable != null) && (isAvailable.equals(shortUrl));
     }

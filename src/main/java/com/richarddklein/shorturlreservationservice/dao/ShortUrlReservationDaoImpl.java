@@ -7,6 +7,7 @@ package com.richarddklein.shorturlreservationservice.dao;
 
 import java.util.*;
 
+import com.richarddklein.shorturlreservationservice.response.ShortUrlReservationStatus;
 import org.springframework.stereotype.Repository;
 
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
@@ -87,14 +88,13 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             ParameterStoreReader parameterStoreReader,
             DynamoDbClient dynamoDbClient,
             DynamoDbTable<ShortUrlReservation> shortUrlReservationTable) {
-
         this.parameterStoreReader = parameterStoreReader;
         this.dynamoDbClient = dynamoDbClient;
         this.shortUrlReservationTable = shortUrlReservationTable;
     }
 
     @Override
-    public void initializeShortUrlReservationTable() {
+    public void initializeShortUrlReservationRepository() {
         if (doesTableExist()) {
             deleteShortUrlReservationTable();
         }
@@ -102,85 +102,47 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         populateShortUrlReservationTable();
     }
 
-    /**
-     * Reads all the ShortUrlReservations.
-     * @return A List of all the ShortUrlReservations that exist
-     * in the repository.
-     */
     @Override
-    public List<ShortUrlReservation> readAllShortUrlReservations() {
+    public List<ShortUrlReservation> getAllShortUrlReservations() {
         List<ShortUrlReservation> result = new ArrayList<>();
-
         shortUrlReservationTable.scan(req -> req.consistentRead(true))
                 .items().forEach(result::add);
-
         return result;
     }
 
-    /**
-     * Reads the ShortUrlReservation corresponding to the specified
-     * shortUrl.
-     * @param shortUrl The shortUrl of interest.
-     * @return The ShortUrlReservation corresponding to the specified
-     * shortUrl, or `null` if that shortUrl could not be found in the
-     * database.
-     */
     @Override
-    public ShortUrlReservation readShortUrlReservation(String shortUrl) {
+    public ShortUrlReservation getSpecificShortUrlReservation(String shortUrl) {
         return shortUrlReservationTable.getItem(req -> req
                 .key(key -> key.partitionValue(shortUrl))
                 .consistentRead(true));
     }
 
     @Override
-    public ShortUrlReservation updateShortUrlReservation(
-            ShortUrlReservation shortUrlReservation) {
-
-        try {
-            // If the caller wants to mark the ShortUrlReservation as being
-            // reserved, i.e. not available, he should set the `isAvailable`
-            // field to `null`. The `.ignoreNulls(true)` mutation in the
-            // builder below will then cause DynamoDB to *remove* the
-            // `isAvailable` attribute from the item in the database, and
-            // to remove it from the `isAvailable-index` GSI as well.
-            return shortUrlReservationTable.updateItem(req -> req
-                    .item(shortUrlReservation));
-
-        } catch (ConditionalCheckFailedException e) {
-            // Version check failed. Someone updated the ShortUrlReservation
-            // item in the database after we read the item, so the item we
-            // just tried to update contains stale data.
-            System.out.println(e.getMessage());
-            return null;
-        }
+    public ShortUrlReservation reserveAnyShortUrl() throws NoShortUrlsAvailableException {
+        ShortUrlReservation updatedShortUrlReservation;
+        do {
+            ShortUrlReservation availableShortUrlReservation = findAvailableShortUrlReservation();
+            availableShortUrlReservation.setIsAvailable(null);
+            updatedShortUrlReservation = updateShortUrlReservation(availableShortUrlReservation);
+        } while (updatedShortUrlReservation == null);
+        return updatedShortUrlReservation;
     }
 
     @Override
-    public ShortUrlReservation findAvailableShortUrlReservation()
-            throws NoShortUrlsAvailableException {
-
-        while (true) {
-            // Get the first item from the `isAvailable-index` GSI,
-            SdkIterable<Page<ShortUrlReservation>> pagedResult =
-                    shortUrlReservationTable.index("isAvailable-index")
-                            .scan(req -> req.limit(1));
-            try {
-                ShortUrlReservation gsiItem = pagedResult.iterator().next().items().get(0);
-                ShortUrlReservation availableShortUrlReservation =
-                        readShortUrlReservation(gsiItem.getShortUrl());
-
-                // Since reads from any GSI, such as `isAvailable-index`, are not
-                // strongly consistent, we should perform a manual consistency check,
-                // to verify that the ShortUrlReservation we obtained from the
-                // `isAvailable-index` really is available.
-                if (!availableShortUrlReservation.isReallyAvailable()) {
-                    continue;
-                }
-                return availableShortUrlReservation;
-            } catch (NullPointerException e) {
-                throw new NoShortUrlsAvailableException();
+    public ShortUrlReservationStatus reserveSpecificShortUrl(String shortUrl) {
+        ShortUrlReservation updatedShortUrlReservation;
+        do {
+            ShortUrlReservation shortUrlReservation = getSpecificShortUrlReservation(shortUrl);
+            if (shortUrlReservation == null) {
+                return ShortUrlReservationStatus.SHORT_URL_NOT_FOUND;
             }
-        }
+            if (!shortUrlReservation.isReallyAvailable()) {
+                return ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_AVAILABLE;
+            }
+            shortUrlReservation.setIsAvailable(null);
+            updatedShortUrlReservation = updateShortUrlReservation(shortUrlReservation);
+        } while (updatedShortUrlReservation == null);
+        return ShortUrlReservationStatus.SUCCESS;
     }
 
     @Override
@@ -210,19 +172,32 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
                         .limit(SCAN_LIMIT)
                         .filterExpression(Expression.builder()
                                 .expression("attribute_not_exists(isAvailable)")
-                                .build())
-                );
-
+                                .build()));
         for (Page<ShortUrlReservation> page : pagedResult) {
             for (ShortUrlReservation shortUrlReservation : page.items()) {
-                shortUrlReservation.setIsAvailable(
-                        shortUrlReservation.getShortUrl());
-
+                shortUrlReservation.setIsAvailable(shortUrlReservation.getShortUrl());
                 // Don't have to check for update failure, since we're in
                 // system maintenance mode.
                 updateShortUrlReservation(shortUrlReservation);
             }
         }
+    }
+
+    @Override
+    public ShortUrlReservationStatus cancelSpecificShortUrlReservation(String shortUrl) {
+        ShortUrlReservation updatedShortUrlReservation;
+        do {
+            ShortUrlReservation shortUrlReservation = getSpecificShortUrlReservation(shortUrl);
+            if (shortUrlReservation == null) {
+                return ShortUrlReservationStatus.SHORT_URL_NOT_FOUND;
+            }
+            if (shortUrlReservation.isReallyAvailable()) {
+                return ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_RESERVED;
+            }
+            shortUrlReservation.setIsAvailable(shortUrl);
+            updatedShortUrlReservation = updateShortUrlReservation(shortUrlReservation);
+        } while (updatedShortUrlReservation == null);
+        return ShortUrlReservationStatus.SUCCESS;
     }
 
     // ------------------------------------------------------------------------
@@ -241,12 +216,9 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     private void deleteShortUrlReservationTable() {
         System.out.print("Deleting the Short URL Reservation table ...");
         shortUrlReservationTable.deleteTable();
-        DynamoDbWaiter waiter = DynamoDbWaiter.builder()
-                .client(dynamoDbClient)
-                .build();
+        DynamoDbWaiter waiter = DynamoDbWaiter.builder().client(dynamoDbClient).build();
         waiter.waitUntilTableNotExists(builder -> builder
-                .tableName(parameterStoreReader
-                        .getShortUrlReservationTableName())
+                .tableName(parameterStoreReader.getShortUrlReservationTableName())
                 .build());
         waiter.close();
         System.out.println(" done!");
@@ -254,40 +226,28 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
 
     private void createShortUrlReservationTable() {
         System.out.print("Creating the Short URL Reservation table ...");
-
         CreateTableEnhancedRequest createTableRequest = CreateTableEnhancedRequest.builder()
                 .globalSecondaryIndices(gsiBuilder -> gsiBuilder
                         .indexName("isAvailable-index")
                         .projection(projectionBuilder -> projectionBuilder
                                 .projectionType(ProjectionType.KEYS_ONLY))
-                )
-                .build();
-
+                ).build();
         shortUrlReservationTable.createTable(createTableRequest);
-
-        DynamoDbWaiter waiter = DynamoDbWaiter.builder()
-                .client(dynamoDbClient)
-                .build();
+        DynamoDbWaiter waiter = DynamoDbWaiter.builder().client(dynamoDbClient).build();
         waiter.waitUntilTableExists(builder -> builder
-                .tableName(parameterStoreReader.getShortUrlReservationTableName())
-                .build());
-
+                .tableName(parameterStoreReader.getShortUrlReservationTableName()).build());
         waiter.close();
-
         System.out.println(" done!");
     }
 
     private void populateShortUrlReservationTable() {
         System.out.print("Populating the Short URL Reservation table ...");
         List<ShortUrlReservation> shortUrlReservations = new ArrayList<>();
-
         long minShortUrlBase10 = parameterStoreReader.getMinShortUrlBase10();
         long maxShortUrlBase10 = parameterStoreReader.getMaxShortUrlBase10();
-
         for (long i = minShortUrlBase10; i <= maxShortUrlBase10; i++) {
             String shortUrl = longToShortUrl(i);
-            ShortUrlReservation shortUrlReservation = new ShortUrlReservation(
-                    shortUrl, shortUrl);
+            ShortUrlReservation shortUrlReservation = new ShortUrlReservation(shortUrl, shortUrl);
             shortUrlReservation.setVersion(1L);
             shortUrlReservations.add(shortUrlReservation);
         }
@@ -304,31 +264,54 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         return sb.reverse().toString();
     }
 
-    private void batchInsertShortUrlReservations(
-            List<ShortUrlReservation> shortUrlReservations) {
-
+    private void batchInsertShortUrlReservations(List<ShortUrlReservation> shortUrlReservations) {
         long numItems = shortUrlReservations.size();
-
         for (int i = 0; i < numItems; i += MAX_BATCH_SIZE) {
             List<WriteRequest> writeRequests = new ArrayList<>();
-
             for (int j = i; j < Math.min(i + MAX_BATCH_SIZE, numItems); j++) {
-                ShortUrlReservation shortUrlReservation =
-                        shortUrlReservations.get(j);
-
+                ShortUrlReservation shortUrlReservation = shortUrlReservations.get(j);
                 WriteRequest writeRequest = WriteRequest.builder()
-                        .putRequest(put -> put.item(shortUrlReservation
-                                .toAttributeValueMap()))
+                        .putRequest(put -> put.item(shortUrlReservation.toAttributeValueMap()))
                         .build();
-
                 writeRequests.add(writeRequest);
             }
+            dynamoDbClient.batchWriteItem(req -> req.requestItems(Collections.singletonMap(
+                    parameterStoreReader.getShortUrlReservationTableName(), writeRequests)));
+        }
+    }
 
-            dynamoDbClient.batchWriteItem(req -> req
-                    .requestItems(Collections.singletonMap(
-                            parameterStoreReader.getShortUrlReservationTableName(),
-                            writeRequests
-                    )));
+    private ShortUrlReservation findAvailableShortUrlReservation() throws NoShortUrlsAvailableException {
+        while (true) {
+            // Get the first item from the `isAvailable-index` GSI,
+            SdkIterable<Page<ShortUrlReservation>> pagedResult =
+                    shortUrlReservationTable.index("isAvailable-index").scan(req -> req.limit(1));
+            try {
+                ShortUrlReservation gsiItem = pagedResult.iterator().next().items().get(0);
+                ShortUrlReservation availableShortUrlReservation =
+                        getSpecificShortUrlReservation(gsiItem.getShortUrl());
+                // Since reads from any GSI, such as `isAvailable-index`, are not
+                // strongly consistent, we should perform a manual consistency check,
+                // to verify that the ShortUrlReservation we obtained from the
+                // `isAvailable-index` really is available.
+                if (!availableShortUrlReservation.isReallyAvailable()) {
+                    continue;
+                }
+                return availableShortUrlReservation;
+            } catch (NullPointerException e) {
+                throw new NoShortUrlsAvailableException();
+            }
+        }
+    }
+
+    private ShortUrlReservation updateShortUrlReservation(ShortUrlReservation shortUrlReservation) {
+        try {
+            return shortUrlReservationTable.updateItem(req -> req.item(shortUrlReservation));
+        } catch (ConditionalCheckFailedException e) {
+            // Version check failed. Someone updated the ShortUrlReservation
+            // item in the database after we read the item, so the item we
+            // just tried to update contains stale data.
+            System.out.println(e.getMessage());
+            return null;
         }
     }
 }

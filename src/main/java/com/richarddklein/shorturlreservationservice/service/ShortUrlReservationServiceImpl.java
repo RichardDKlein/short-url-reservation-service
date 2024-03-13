@@ -25,67 +25,33 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     // PUBLIC METHODS
     // ------------------------------------------------------------------------
 
-    public ShortUrlReservationServiceImpl(
-            ShortUrlReservationDao shortUrlReservationDao) {
-
+    public ShortUrlReservationServiceImpl(ShortUrlReservationDao shortUrlReservationDao) {
         this.shortUrlReservationDao = shortUrlReservationDao;
     }
 
     @Override
     public void initializeShortUrlReservationRepository() {
-        shortUrlReservationDao.initializeShortUrlReservationTable();
+        shortUrlReservationDao.initializeShortUrlReservationRepository();
     }
 
     @Override
     public List<ShortUrlReservation> getAllShortUrlReservations() {
-        return shortUrlReservationDao.readAllShortUrlReservations();
+        return shortUrlReservationDao.getAllShortUrlReservations();
     }
 
     @Override
     public ShortUrlReservation getSpecificShortUrlReservation(String shortUrl) {
-        return shortUrlReservationDao.readShortUrlReservation(shortUrl);
+        return shortUrlReservationDao.getSpecificShortUrlReservation(shortUrl);
     }
 
     @Override
     public ShortUrlReservation reserveAnyShortUrl() throws NoShortUrlsAvailableException {
-        ShortUrlReservation updatedShortUrlReservation;
-        do {
-            ShortUrlReservation availableShortUrlReservation =
-                    shortUrlReservationDao.findAvailableShortUrlReservation();
-
-            availableShortUrlReservation.setIsAvailable(null);
-
-            updatedShortUrlReservation = shortUrlReservationDao
-                    .updateShortUrlReservation(availableShortUrlReservation);
-
-        } while (updatedShortUrlReservation == null);
-
-        return updatedShortUrlReservation;
+        return shortUrlReservationDao.reserveAnyShortUrl();
     }
 
     @Override
     public ShortUrlReservationStatus reserveSpecificShortUrl(String shortUrl) {
-        ShortUrlReservation updatedShortUrlReservation;
-        do {
-            ShortUrlReservation shortUrlReservation =
-                    shortUrlReservationDao.readShortUrlReservation(shortUrl);
-
-            if (shortUrlReservation == null) {
-                return ShortUrlReservationStatus.SHORT_URL_NOT_FOUND;
-            }
-
-            if (!shortUrlReservation.isReallyAvailable()) {
-                return ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_AVAILABLE;
-            }
-
-            shortUrlReservation.setIsAvailable(null);
-
-            updatedShortUrlReservation = shortUrlReservationDao
-                    .updateShortUrlReservation(shortUrlReservation);
-
-        } while (updatedShortUrlReservation == null);
-
-        return ShortUrlReservationStatus.SUCCESS;
+        return shortUrlReservationDao.reserveSpecificShortUrl(shortUrl);
     }
 
     @Override
@@ -94,29 +60,8 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     }
 
     @Override
-    public ShortUrlReservationStatus
-    cancelSpecificShortUrlReservation(String shortUrl) {
-        ShortUrlReservation updatedShortUrlReservation;
-        do {
-            ShortUrlReservation shortUrlReservation =
-                    shortUrlReservationDao.readShortUrlReservation(shortUrl);
-
-            if (shortUrlReservation == null) {
-                return ShortUrlReservationStatus.SHORT_URL_NOT_FOUND;
-            }
-
-            if (shortUrlReservation.isReallyAvailable()) {
-                return ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_RESERVED;
-            }
-
-            shortUrlReservation.setIsAvailable(shortUrl);
-
-            updatedShortUrlReservation = shortUrlReservationDao
-                    .updateShortUrlReservation(shortUrlReservation);
-
-        } while (updatedShortUrlReservation == null);
-
-        return ShortUrlReservationStatus.SUCCESS;
+    public ShortUrlReservationStatus cancelSpecificShortUrlReservation(String shortUrl) {
+        return shortUrlReservationDao.cancelSpecificShortUrlReservation(shortUrl);
     }
 
     @Override

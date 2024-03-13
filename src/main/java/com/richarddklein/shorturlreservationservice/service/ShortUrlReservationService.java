@@ -52,6 +52,11 @@ public interface ShortUrlReservationService {
      */
     void reserveAllShortUrls();
 
+    /**
+     *
+     * @param shortUrl
+     * @return
+     */
     ShortUrlReservationStatus cancelSpecificShortUrlReservation(String shortUrl);
 
     /**

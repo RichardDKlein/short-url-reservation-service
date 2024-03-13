@@ -20,8 +20,7 @@ import com.richarddklein.shorturlreservationservice.response.GlobalErrorResponse
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    private static final Logger logger =
-            LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
      *
@@ -33,12 +32,8 @@ public class GlobalExceptionHandler {
             NoResourceFoundException e) {
         logger.warn("====> ", e);
         GlobalErrorResponse globalErrorResponse = new GlobalErrorResponse(
-                HttpStatus.NOT_FOUND.value(),
-                "Resource Not Found",
-                e.getMessage());
-
-        return new ResponseEntity<>(globalErrorResponse,
-                HttpStatus.NOT_FOUND);
+                HttpStatus.NOT_FOUND.value(), "Resource Not Found", e.getMessage());
+        return new ResponseEntity<>(globalErrorResponse, HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -51,10 +46,7 @@ public class GlobalExceptionHandler {
         logger.warn("====> ", e);
         GlobalErrorResponse globalErrorResponse = new GlobalErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Internal Server Error",
-                e.getMessage());
-
-        return new ResponseEntity<>(globalErrorResponse,
-                HttpStatus.INTERNAL_SERVER_ERROR);
+                "Internal Server Error", e.getMessage());
+        return new ResponseEntity<>(globalErrorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

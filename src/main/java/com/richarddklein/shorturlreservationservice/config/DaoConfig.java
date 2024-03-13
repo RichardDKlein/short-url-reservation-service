@@ -5,6 +5,7 @@
 
 package com.richarddklein.shorturlreservationservice.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
@@ -19,7 +20,6 @@ import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDaoIm
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.dao.ParameterStoreReader;
 import com.richarddklein.shorturlreservationservice.dao.ParameterStoreReaderImpl;
-import org.springframework.context.annotation.Bean;
 
 /**
  * The DAO (Data Access Object) @Configuration class.

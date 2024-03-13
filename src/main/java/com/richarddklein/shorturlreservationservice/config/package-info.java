@@ -6,6 +6,6 @@
 /**
  * This package contains Spring Boot @Configuration files to manage
  * dependency injection for the classes composing the Short URL
- * Reservation service.
+ * Reservation Service.
  */
 package com.richarddklein.shorturlreservationservice.config;

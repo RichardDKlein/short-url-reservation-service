@@ -5,6 +5,6 @@
 
 /**
  * This package contains files that implement the REST Controller for
- * the Short URL Reservation service.
+ * the Short URL Reservation Service.
  */
 package com.richarddklein.shorturlreservationservice.controller;

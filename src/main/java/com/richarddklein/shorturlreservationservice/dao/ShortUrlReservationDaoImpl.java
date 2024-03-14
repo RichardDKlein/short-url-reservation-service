@@ -7,7 +7,6 @@ package com.richarddklein.shorturlreservationservice.dao;
 
 import java.util.*;
 
-import com.richarddklein.shorturlreservationservice.response.ShortUrlReservationStatus;
 import org.springframework.stereotype.Repository;
 
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
@@ -21,6 +20,7 @@ import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
+import com.richarddklein.shorturlreservationservice.response.ShortUrlReservationStatus;
 
 /*
 Your approach sounds reasonable, and it addresses the requirement
@@ -63,6 +63,81 @@ a fast and scalable system.
 
 /**
  * The production implementation of the Short URL Reservation DAO interface.
+ *
+ * <p>This implementation uses a DynamoDB table, the Short URL Reservation
+ * table, to store each Short URL Reservation item. This table must be
+ * strongly consistent, since we cannot allow the possibility that two
+ * different users might accidentally reserve the same short URL. Therefore,
+ * the table cannot be replicated across multiple, geographically dispersed,
+ * instances; there can be only one instance of the table. However, DynamoDB
+ * will automatically shard (horizontally scale) the table into multiple,
+ * disjoint partitions as the access frequency increases, thereby ensuring
+ * acceptable throughput regardless of the user load.</p>
+ *
+ * <p>Each Short URL Reservation item in the table consists of just three
+ * attributes: `shortUrl`, `isAvailable`, and `version`.</p>
+ *
+ * <p>The `shortUrl` attribute of each Short URL Reservation item is the short
+ * URL itself. This is a relatively short string that is unique: No two Short
+ * URL Reservation items will contain the same `shortUrl` field. The `shortUrl`
+ * is an integer that has been encoded using true base-64 encoding.</p>
+ *
+ * <p>Each character of the `shortUrl` string is a digit that can take on one
+ * of 64 possible values. Furthermore, the digits are weighted according to
+ * their position in the `shortUrl` string: The rightmost digit is multiplied
+ * by 1, the next digit to the left of it is multiplied by 64, the next digit
+ * to the left of that digit is multiplied by (64 * 64), and so on.</p>
+ *
+ * <p>With this encoding scheme, a 5-character `shortUrl` can take on over 1 billion
+ * unique values, a 6-character `shortUrl` can take on almost 69 billion unique values,
+ * and a 7-character `shortUrl` can take on almost 4.4 trillion unique values.</p>
+ *
+ * <p>The 64 characters that compose the allowable values of each base-64 digit
+ * are '0' thru '9', 'a' thru 'z', 'A' thru 'Z', and the characters '_' and '-'.
+ * All these characters are legal URL characters that have no special meaning.</p>
+ *
+ * <p>Note that this base-64 encoding scheme is totally different from the Base64
+ * encoding that is used in HTML to encode binary data such as images.</p>
+ *
+ * <p>The `shortUrl` attribute is the Partition Key for each Short URL Reservation
+ * item. Because it has a uniform hash distribution, it can be used to quickly locate
+ * the database partition and offset of the corresponding Short URL Reservation item.
+ *
+ * <p>The `isAvailable` field of each Short URL Reservation item indicates whether
+ * the associated `shortUrl` is available. Our first inclination might be to make
+ * this a Boolean attribute: A value of `false` means that the associated `shortUrl`
+ * is available, while a value of `true` means that someone has already reserved this
+ * `shortUrl`.</p>
+ *
+ * <p>However, this would lead to very poor performance of one of our most important
+ * use cases: Finding an available short URL. If the `isAvailable` attribute is a
+ * Boolean, then in order to find an available short URL, DynamoDB would have to scan
+ * the entire table until it found an item whose `isAvailable` attribute had a value
+ * of `true`. The inefficiency of this operation is compounded by the fact that DynamoDB
+ * might have to search multiple partitions until it found an available short URL.</p>
+ *
+ * <p>To solve this problem, we use the concept of a DynamoDB "sparse index". We say
+ * that the `isAvailable` attribute is present in a Short URL Reservation item if and
+ * only if the corresponding `shortUrl` is available. If the `shortUrl` is NOT available,
+ * then the `isAvailable` attribute is completely ABSENT from the item. We then create
+ * a Global Secondary Index (GSI), with the `isAvailable` attribute as the Partition
+ * Key. Finding an available short URL is then simply a matter of looking up the first
+ * item in the `isAvailable` GSI.</p>
+ *
+ * <p>The only remaining problem is this: What should we use as the value of the
+ * `isAvailable` attribute? We cannot use a Boolean, because a Primary Key cannot be a
+ * Boolean. To get around this restriction, we could use the Strings "T" and "F" instead
+ * of the Boolean values `true` and `false`, but now we have another problem. With only
+ * two possible values for `isAvailable`, DynamoDB's hashing of `isAvailable` to locate
+ * the appropriate partition would basically be worthless. DynamoDB might have to examine
+ * many partitions before finding an available short URL.</p>
+ *
+ * <p>To solve this remaining problem, we need to let `isAvailable` take on many possible
+ * values, so that each value would hash efficiently to the appropriate partition. An easy
+ * way to accomplish this is to set `isAvailable` to the same value as `shortUrl`. That is,
+ * we say that when a short URL is available, then the corresponding `isAvailable` attribute
+ * exists, and has a value equal to `shortUrl`. If a short URL is NOT available, then the
+ * corresponding `isAvailable` does NOT exist.</p>
  */
 @Repository
 public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {

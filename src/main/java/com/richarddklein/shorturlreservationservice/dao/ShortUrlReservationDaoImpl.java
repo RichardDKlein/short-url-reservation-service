@@ -133,11 +133,13 @@ a fast and scalable system.
  * many partitions before finding an available short URL.</p>
  *
  * <p>To solve this remaining problem, we need to let `isAvailable` take on many possible
- * values, so that each value would hash efficiently to the appropriate partition. An easy
+ * values, so that each value will hash efficiently to the appropriate partition. An easy
  * way to accomplish this is to set `isAvailable` to the same value as `shortUrl`. That is,
  * we say that when a short URL is available, then the corresponding `isAvailable` attribute
- * exists, and has a value equal to `shortUrl`. If a short URL is NOT available, then the
- * corresponding `isAvailable` does NOT exist.</p>
+ * exists, and has a value equal to `shortUrl`. If a short URL is not available, then the
+ * corresponding `isAvailable` does not exist.</p>
+ *
+ * <p>The `version` field of each Short URL Reservation item is </p>
  */
 @Repository
 public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {

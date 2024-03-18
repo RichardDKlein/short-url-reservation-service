@@ -16,16 +16,20 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 import com.richarddklein.shorturlreservationservice.response.GlobalErrorResponse;
 
 /**
- *
+ * The global exception handler for the Short URL Reservation Service.
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
+     * Handle the `NoResourceFoundException` exception, which is thrown
+     * by the Spring framework.
      *
-     * @param e
-     * @return
+     * @param e The `NoResourceFoundException` exception that was thrown
+     *          by Spring.
+     * @return An HTTP Response Entity containing an error message as well
+     * as the HTTP "Not Found" error code (404).
      */
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<GlobalErrorResponse> handleNoResourceFoundException(
@@ -37,9 +41,14 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle all other exceptions.
      *
-     * @param e
-     * @return
+     * Handle all exceptions that are not handled by the above exception
+     * handlers.
+     *
+     * @param e The exception to be handled.
+     * @return An HTTP Response Entity containing an error message as well
+     * as the HTTP "Internal Server Error" error code (500).
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<GlobalErrorResponse> handleAllOtherExceptions(Exception e) {

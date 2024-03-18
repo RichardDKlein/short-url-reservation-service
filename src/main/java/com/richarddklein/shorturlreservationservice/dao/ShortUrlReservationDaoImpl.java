@@ -26,13 +26,16 @@ import com.richarddklein.shorturlreservationservice.response.ShortUrlReservation
  * The production implementation of the Short URL Reservation DAO interface.
  *
  * <p>This implementation uses a DynamoDB table, the Short URL Reservation table, to
- * storeeach Short URL Reservation item. This table must be strongly consistent, since
- * we cannot allow the possibility that two different users might accidentally reserve
- * the same short URL. Therefore, the table cannot be replicated across multiple,
- * geographically dispersed, instances; there can be only one instance of the table.
- * However, DynamoDB will automatically shard (horizontally scale) the table into
+ * store each Short URL Reservation item.</p>
+ *
+ * <p>This table must be strongly consistent, since we cannot allow the possibility
+ * that two different users might accidentally reserve the same short URL. Therefore,
+ * the table cannot be replicated across multiple, geographically dispersed, instances;
+ * there can be only one instance of the table.</p>
+ *
+ * <p>However, DynamoDB will automatically shard (horizontally scale) the table into
  * multiple, disjoint partitions as the access frequency increases, thereby ensuring
- * acceptable throughput regardless of the user demand.</p>
+ * acceptable throughput regardless of the user load.</p>
  *
  * <p>Each Short URL Reservation item in the table consists of just three attributes:
  * `shortUrl`, `isAvailable`, and `version`.</p>
@@ -105,20 +108,20 @@ import com.richarddklein.shorturlreservationservice.response.ShortUrlReservation
  * of DynamoDB; the developer should not read or write it. DynamoDB uses the `version`
  * field for what it calls "optimistic locking".</p>
  *
- * <p>In the optimistic locking scenario, the code proceeds with a read-update-write
- * transaction under the assumption that most of the time, the item will not be updated by
- * another user between the `read` and `write` operations. In the (hopefully rare) situations
- * where this is not the case, the `write` operation will fail, allowing the code to retry
- * with a new read-update-write transaction.</p>
+ * <p>In the optimistic locking scheme, the code proceeds with a read-update-write transaction
+ * under the assumption that most of the time the item will not be updated by another user
+ * between the `read` and `write` operations. In the (hopefully rare) situations where this
+ * is not the case, the `write` operation will fail, allowing the code to retry with a new
+ * read-update-write transaction.</p>
  *
  * <p>DynamoDB uses the `version` field to detect when another user has updated the same
  * item concurrently. Every time the item is written to the database, DynamoDB first checks
- * whether the `version` field in the entity is the same as the `version` field in the
- * database. If so, DynamoDB lets the `write` proceed, and updates the `version` field in
- * the database. If not, DynamoDB announces that the `write` has failed.</p>
+ * whether the `version` field in the item is the same as the `version` field in the database.
+ * If so, DynamoDB lets the `write` proceed, and updates the `version` field in the database.
+ * If not, DynamoDB announces that the `write` has failed.</p>
  *
- * <p>The Short URL Reservation table is fully populated and initialized before the service
- * goes into production.</p>
+ * <p>The Short URL Reservation table is fully populated with short URLs, and each short URL
+ * is initialized as being available, before the service goes into production.</p>
  */
 @Repository
 public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
@@ -140,6 +143,16 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     // PUBLIC METHODS
     // ------------------------------------------------------------------------
 
+    /**
+     * General constructor.
+     *
+     * @param parameterStoreReader A class instance whose role is to read parameters
+     *                             from the Parameter Store component of the AWS
+     *                             Simple System Manager (SSM).
+     * @param dynamoDbClient A class instance that plays the role of a DynamoDB Client.
+     * @param shortUrlReservationTable A class instance that models the Short URL
+     *                                 Reservation table in DynamoDB.
+     */
     public ShortUrlReservationDaoImpl(
             ParameterStoreReader parameterStoreReader,
             DynamoDbClient dynamoDbClient,
@@ -260,6 +273,12 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     // PRIVATE METHODS
     // ------------------------------------------------------------------------
 
+    /**
+     * Determine whether the Short URL Reservation table currently exists in
+     * DynamoDB.
+     *
+     * @return `true` if the table currently exists, or `false` otherwise.
+     */
     private boolean doesTableExist() {
         try {
             shortUrlReservationTable.describeTable();
@@ -269,6 +288,9 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         return true;
     }
 
+    /**
+     * Delete the Short URL Reservation table from DynamoDB.
+     */
     private void deleteShortUrlReservationTable() {
         System.out.print("Deleting the Short URL Reservation table ...");
         shortUrlReservationTable.deleteTable();
@@ -280,6 +302,9 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         System.out.println(" done!");
     }
 
+    /**
+     * Create the Short URL Reservation table in DynamoDB.
+     */
     private void createShortUrlReservationTable() {
         System.out.print("Creating the Short URL Reservation table ...");
         CreateTableEnhancedRequest createTableRequest = CreateTableEnhancedRequest.builder()
@@ -296,6 +321,13 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         System.out.println(" done!");
     }
 
+    /**
+     * Populate the Short URL Reservation table in DynamoDB.
+     *
+     * Create a Short URL Reservation item for each short URL in the range
+     * specified in the Parameter Store, and mark all the items as being
+     * available.
+     */
     private void populateShortUrlReservationTable() {
         System.out.print("Populating the Short URL Reservation table ...");
         List<ShortUrlReservation> shortUrlReservations = new ArrayList<>();
@@ -311,6 +343,12 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         System.out.println(" done!");
     }
 
+    /**
+     * Convert a long integer to its base-64 representation.
+     *
+     * @param n The long integer of interest.
+     * @return A string that is the base-64 representation of `n`.
+     */
     private String longToShortUrl(long n) {
         StringBuilder sb = new StringBuilder();
         do {
@@ -320,6 +358,17 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         return sb.reverse().toString();
     }
 
+    /**
+     * Batch insert some Short URL Reservation items.
+     *
+     * Into the Short URL Reservation table in DynamoDB, perform a
+     * batch insert of a list of Short URL Reservation items. Insert
+     * the items in batches rather than one at a time in order to
+     * improve efficiency.
+     *
+     * @param shortUrlReservations The list of Short URL Reservation
+     *                             items to be batch inserted.
+     */
     private void batchInsertShortUrlReservations(List<ShortUrlReservation> shortUrlReservations) {
         long numItems = shortUrlReservations.size();
         for (int i = 0; i < numItems; i += MAX_BATCH_SIZE) {
@@ -336,9 +385,21 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         }
     }
 
+    /**
+     * Find an available Short URL Reservation item.
+     *
+     * In the Short URL Reservation table in DynamoDB, find an available
+     * Short URL Reservation item. Use the General Secondary Index (GSI)
+     * on the `isAvailable` attribute to avoid a time-consuming scan
+     * operation.
+     *
+     * @return An available Short URl Reservation item.
+     * @throws NoShortUrlsAvailableException If no short URLs are available,
+     * i.e. if they are all reserved.
+     */
     private ShortUrlReservation findAvailableShortUrlReservation() throws NoShortUrlsAvailableException {
         while (true) {
-            // Get the first item from the `isAvailable-index` GSI,
+            // Get the first item from the `isAvailable-index` GSI.
             SdkIterable<Page<ShortUrlReservation>> pagedResult =
                     shortUrlReservationTable.index("isAvailable-index").scan(req -> req.limit(1));
             try {
@@ -359,6 +420,18 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         }
     }
 
+    /**
+     * Update a Short URL Reservation item.
+     *
+     * In the Short URL Reservation table in DynamoDB, update a specified
+     * Short URL Reservation item.
+     *
+     * @param shortUrlReservation The Short URL Reservation item that is
+     *                            to be used to update DynamoDB.
+     * @return The updated Short URL Reservation item, or `null` if the
+     * update failed. (The update can fail if someone else is updating
+     * the same item concurrently.)
+     */
     private ShortUrlReservation updateShortUrlReservation(ShortUrlReservation shortUrlReservation) {
         try {
             return shortUrlReservationTable.updateItem(req -> req.item(shortUrlReservation));

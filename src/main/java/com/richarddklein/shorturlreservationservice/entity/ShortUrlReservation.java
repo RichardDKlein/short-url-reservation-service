@@ -23,41 +23,22 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 @DynamoDbBean
 public class ShortUrlReservation {
     /**
-     * The short URL, which is a short string consisting solely of the
-     * characters 0-9, A-Z, a-z, and the characters '_' and '-'.
+     * The `shortUrl` attribute. See the `ShortUrlReservationDaoImpl`
+     * Javadoc for a detailed description of this attribute.
      */
     private String shortUrl;
 
     /**
-     * A string indicating whether the short URL is available, or has
-     * already been reserved by someone. If available, the string will
-     * have the same value as `shortUrl`. If not available, the string
-     * will be null (and in the database will be entirely absent).
+     * The `isAvailable` attribute. See the `ShortUrlReservationDaoImpl`
+     * Javadoc for a detailed description of this attribute.
      */
     private String isAvailable;
 
     /**
-     * A Long integer indicating the version # of this Short URL
-     * Reservation entity. This field is for the exclusive use of
-     * DynamoDB; the developer should not read or write it. DynamoDB
-     * uses the `version` field for what it calls "optimistic locking".
-     *
-     * In the optimistic locking scenario, the code proceeds with a
-     * read-update-write transaction under the assumption that most of the
-     * time, the item will not be updated by another user between the `read`
-     * and `write` operations. In the (hopefully rare) situations where this
-     * is not the case, the `write` operation will fail, allowing the code
-     * to retry with a new read-update-write transaction.
-     *
-     * DynamoDB uses the `version` field to detect when another user has
-     * updated the same item concurrently. Every time the item is written
-     * to the database, DynamoDB first checks whether the `version` field
-     * in the entity is the same as the `version` field in the database.
-     * If so, DynamoDB lets the `write` proceed, and updates the `version`
-     * field in the database. If not, DynamoDB announces that the `write`
-     * has failed.
+     * The `version` attribute. See the `ShortUrlReservationDaoImpl`
+     * Javadoc for a detailed description of this attribute.
      */
-    private Long version; // for optimistic locking
+    private Long version;
 
     /**
      * Default constructor.
@@ -68,10 +49,13 @@ public class ShortUrlReservation {
     }
 
     /**
-     * General constructor.
+     * General constructor #1.
      *
-     * @param shortUrl
-     * @param isAvailable
+     * Construct a Short URL Reservation entity from parameters specifying
+     * the value of the `shortUrl` and `isAvailable` attributes.
+     *
+     * @param shortUrl The value of the `shortUrl` attribute.
+     * @param isAvailable The value of the `isAvailable` attribute.
      */
     public ShortUrlReservation(String shortUrl, String isAvailable) {
         this.shortUrl = shortUrl;
@@ -79,78 +63,75 @@ public class ShortUrlReservation {
     }
 
     /**
+     * General constructor #2.
      *
-     * @param item
+     * Construct a Short URL Reservation entity from a Map containing
+     * entries that specify the values of the `shortUrl` and `isAvailable`
+     * attributes.
+     *
+     * @param item The Map containing the entries that specify the values
+     *             of the `shortUrl` and `isAvailable` attributes.
      */
     public ShortUrlReservation(Map<String, AttributeValue> item) {
         shortUrl = item.get("shortUrl").s();
         isAvailable = item.get("isAvailable").s();
     }
 
-    /**
-     *
-     * @return
-     */
     @DynamoDbPartitionKey
     public String getShortUrl() {
         return shortUrl;
     }
 
-    /**
-     *
-     * @param shortUrl
-     */
     public void setShortUrl(String shortUrl) {
         this.shortUrl = shortUrl;
     }
 
-    /**
-     *
-     * @return
-     */
     @DynamoDbAttribute("isAvailable")
     @DynamoDbSecondaryPartitionKey(indexNames = "isAvailable-index")
     public String getIsAvailable() {
         return isAvailable;
     }
 
-    /**
-     *
-     * @param isAvailable
-     */
     public void setIsAvailable(String isAvailable) {
         this.isAvailable = isAvailable;
     }
 
     /**
+     * Is this Short URL Reservation entity really available?
      *
-     * @return
+     * This is a "transient" getter, i.e. a getter-like method that does not
+     * correspond to an actual attribute in a Short URL Reservation item.
+     *
+     * Verify that this Short URL Reservation entity is really available, i.e.
+     * that the `isAvailable` attribute exists and has the same value as the
+     * `shortUrl` attribute.
+     *
+     * @return 'true' if this Short URL Reservation entity is really available,
+     * 'false' otherwise.
      */
     @Transient
     public boolean isReallyAvailable() {
         return (isAvailable != null) && (isAvailable.equals(shortUrl));
     }
 
-    /**
-     *
-     * @return
-     */
     @DynamoDbVersionAttribute
     public Long getVersion() {
         return version;
     }
 
-    /**
-     *
-     * @param version
-     */
     public void setVersion(Long version) {
         this.version = version;
     }
 
     /**
+     * Convert to an attribute-value map.
      *
-     * @return
+     * Convert this Short URL Reservation entity to an attribute-value Map
+     * containing entries that specify the values of the `shortUrl`, `isAvailable`,
+     * and `version` attributes.
+     *
+     * @return the attribute-value Map corresponding to this Short URL Reservation
+     * entity.
      */
     public Map<String, AttributeValue> toAttributeValueMap() {
         Map<String, AttributeValue> attributeValues = new HashMap<>();
@@ -161,10 +142,6 @@ public class ShortUrlReservation {
         return attributeValues;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "ShortUrlReservation{" +

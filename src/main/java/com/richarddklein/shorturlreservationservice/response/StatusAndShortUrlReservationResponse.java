@@ -8,16 +8,21 @@ package com.richarddklein.shorturlreservationservice.response;
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 
 /**
- *
+ * Class defining an HTTP Response containing a status
+ * code/message as well as a Short URL Reservation entity.
  */
 public class StatusAndShortUrlReservationResponse {
     private StatusResponse status;
     private ShortUrlReservation shortUrlReservation;
 
     /**
+     * General constructor.
      *
-     * @param status
-     * @param shortUrlReservation
+     * @param status The status code/message to be embedded
+     *               in the HTTP Response.
+     * @param shortUrlReservation The Short URL Reservation
+     *                            entity to be embedded in
+     *                            the HTTP Response.
      */
     public StatusAndShortUrlReservationResponse(
             StatusResponse status,

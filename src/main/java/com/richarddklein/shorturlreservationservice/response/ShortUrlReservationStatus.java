@@ -6,7 +6,10 @@
 package com.richarddklein.shorturlreservationservice.response;
 
 /**
+ * The Short URL Reservation Status.
  *
+ * An enumerated type describing the various possible statuses
+ * that can be returned in response to a client request.
  */
 public enum ShortUrlReservationStatus {
     SUCCESS,

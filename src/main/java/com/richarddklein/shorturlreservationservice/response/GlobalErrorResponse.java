@@ -6,7 +6,7 @@
 package com.richarddklein.shorturlreservationservice.response;
 
 /**
- *
+ * The Global Error Response class.
  */
 public class GlobalErrorResponse {
     private int httpStatusCode;
@@ -14,10 +14,11 @@ public class GlobalErrorResponse {
     private String details;
 
     /**
+     * General constructor.
      *
-     * @param httpStatusCode
-     * @param message
-     * @param details
+     * @param httpStatusCode The HTTP Status code for the error.
+     * @param message A message briefly describing the error.
+     * @param details A string giving more details about the error.
      */
     public GlobalErrorResponse(int httpStatusCode, String message, String details) {
         this.httpStatusCode = httpStatusCode;

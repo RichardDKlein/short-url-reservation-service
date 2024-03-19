@@ -1,3 +1,8 @@
+#
+# The Short URL Reservation Service
+# (Copyright 2024 by Richard Klein)
+#
+
 .idea/workspace.xml
 .aws-sam/
 build/

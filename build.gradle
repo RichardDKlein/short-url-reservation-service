@@ -1,3 +1,8 @@
+/**
+ * The Short URL Reservation Service
+ * (Copyright 2024 by Richard Klein)
+ */
+
 apply plugin: 'java'
 
 repositories {

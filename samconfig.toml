@@ -1,3 +1,7 @@
+#
+# The Short URL Reservation Service
+# (Copyright 2024 by Richard Klein)
+#
 version = 0.1
 [default.deploy.parameters]
 stack_name = "short-url-reservation-service"

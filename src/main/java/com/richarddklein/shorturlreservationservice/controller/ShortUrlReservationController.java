@@ -29,9 +29,9 @@ public interface ShortUrlReservationController {
      * completed successfully, or has failed.</p>
      *
      * <p>Because database initialization is a long-running operation
-     * that exceeds the AWS Lambda response timeout, this REST
-     * endpoint is available only when the Short URL Reservation
-     * Service is running on localhost, not on AWS.</p>
+     * that exceeds the AWS API Gateway maximum response timeout of
+     * 30 seconds, this REST endpoint is available only when the Short
+     * URL Reservation Service is running on localhost, not on AWS.</p>
      *
      * @param request The HTTP Servlet Request object.
      * @return An HTTP Response Entity containing the status (success

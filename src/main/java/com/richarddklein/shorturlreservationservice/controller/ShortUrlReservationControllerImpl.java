@@ -235,6 +235,16 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
     // PRIVATE METHODS
     // ------------------------------------------------------------------------
 
+    /**
+     * Is the service running locally?
+     *
+     * Determines whether the Short URL Reservation Service is running
+     * on your local machine, or in the AWS cloud.
+     *
+     * @param remoteAddr The IP address of the machine that sent the
+     *                   HTTP request.
+     * @return 'true' if the service is running locally, 'false' otherwise.
+     */
     private boolean isRunningLocally(String remoteAddr) {
         return remoteAddr.equals("127.0.0.1");
     }

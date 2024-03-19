@@ -5,5 +5,3 @@
 
 .idea/workspace.xml
 .aws-sam/
-build/
-target/

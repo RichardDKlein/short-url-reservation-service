@@ -146,12 +146,15 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     /**
      * General constructor.
      *
-     * @param parameterStoreReader A class instance whose role is to read parameters
-     *                             from the Parameter Store component of the AWS
-     *                             Simple System Manager (SSM).
-     * @param dynamoDbClient A class instance that plays the role of a DynamoDB Client.
-     * @param shortUrlReservationTable A class instance that models the Short URL
-     *                                 Reservation table in DynamoDB.
+     * @param parameterStoreReader Dependency injection of a class instance that
+     *                             is to play the role of reading parameters from
+     *                             the Parameter Store component of the AWS Simple
+     *                             System Manager (SSM).
+     * @param dynamoDbClient Dependency injection of a class instance that is to
+     *                       play the role of a DynamoDB Client.
+     * @param shortUrlReservationTable Dependency injection of a class instance
+     *                                 that is to model the Short URL Reservation
+     *                                 table in DynamoDB.
      */
     public ShortUrlReservationDaoImpl(
             ParameterStoreReader parameterStoreReader,

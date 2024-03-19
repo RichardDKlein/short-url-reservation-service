@@ -27,8 +27,8 @@ public class ParameterStoreReaderImpl implements ParameterStoreReader {
     /**
      * General constructor.
      *
-     * @param ssmClient An SSM (Simple Systems Manager) Client that
-     *                  can be used to access the Parameter Store.
+     * @param ssmClient Dependency injection of a class instance that is to play
+     *                  the role of an SSM (Simple Systems Manager) Client.
      */
     public ParameterStoreReaderImpl(SsmClient ssmClient) {
         this.ssmClient = ssmClient;

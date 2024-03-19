@@ -34,6 +34,13 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
     // PUBLIC METHODS
     // ------------------------------------------------------------------------
 
+    /**
+     * General constructor.
+     *
+     * @param shortUrlReservationService Dependency injection of a class instance
+     *                                   that is to play the role of the Short URL
+     *                                   Reservation service layer.
+     */
     public ShortUrlReservationControllerImpl(
             ShortUrlReservationService shortUrlReservationService) {
 

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @SpringBootApplication
 // The REST Controller will be instantiated via the `ControllerConfig`
-// @Configuration class.
+// @Configuration class, so we exclude it from the component scan.
 @ComponentScan(excludeFilters = @ComponentScan.Filter(RestController.class))
 public class Application {
     public static void main(String[] args) {

@@ -15,7 +15,7 @@ import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailab
 import com.richarddklein.shorturlreservationservice.response.ShortUrlReservationStatus;
 
 /**
- *
+ * The production implementation of the Short URL Reservation Service interface.
  */
 @Service
 public class ShortUrlReservationServiceImpl implements ShortUrlReservationService {
@@ -25,6 +25,13 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     // PUBLIC METHODS
     // ------------------------------------------------------------------------
 
+    /**
+     * General constructor.
+     *
+     * @param shortUrlReservationDao Dependency injection of a class instance
+     *                               that is to play the role of the Short URL
+     *                               Reservation Data Access Object (DAO).
+     */
     public ShortUrlReservationServiceImpl(ShortUrlReservationDao shortUrlReservationDao) {
         this.shortUrlReservationDao = shortUrlReservationDao;
     }

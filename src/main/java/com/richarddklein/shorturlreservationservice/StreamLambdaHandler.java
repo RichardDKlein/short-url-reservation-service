@@ -39,8 +39,8 @@ public class StreamLambdaHandler implements RequestStreamHandler {
      * Handles an incoming request from AWS Lambda, by proxying it to
      * Spring Boot, and returning the response to AWS Lambda.
      *
-     * @param inputStream The Lambda Function input stream
-     * @param outputStream The Lambda function output stream
+     * @param inputStream The Lambda function input stream.
+     * @param outputStream The Lambda function output stream.
      * @param context The Lambda execution environment context object.
      * @throws IOException if an error occurs during the stream processing.
      */

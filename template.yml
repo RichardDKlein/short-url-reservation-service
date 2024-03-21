@@ -26,10 +26,10 @@ Resources:
         # Read permission for SSM Parameter Store.
         - SSMParameterWithSlashPrefixReadPolicy:
             ParameterName:
-              /shortUrl/range
+              /shortUrl/reservations/range
         - SSMParameterWithSlashPrefixReadPolicy:
             ParameterName:
-              /shortUrl/tableName
+              /shortUrl/reservations/tableName
       SnapStart:
         ApplyOn: "PublishedVersions"
 

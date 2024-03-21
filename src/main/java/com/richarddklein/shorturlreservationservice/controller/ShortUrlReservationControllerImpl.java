@@ -49,7 +49,7 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
 
     @Override
     public ResponseEntity<StatusResponse>
-    initializeShortUrlReservationTable(HttpServletRequest request) {
+    initializeShortUrlReservationRepository(HttpServletRequest request) {
         if (isRunningLocally(request.getRemoteAddr())) {
             shortUrlReservationService.initializeShortUrlReservationRepository();
             StatusResponse response = new StatusResponse(
@@ -245,7 +245,7 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
     /**
      * Is the service running locally?
      *
-     * Determines whether the Short URL Reservation Service is running
+     * Determine whether the Short URL Reservation Service is running
      * on your local machine, or in the AWS cloud.
      *
      * @param remoteAddr The IP address of the machine that sent the

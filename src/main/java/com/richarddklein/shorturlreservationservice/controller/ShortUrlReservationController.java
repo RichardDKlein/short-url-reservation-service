@@ -22,7 +22,7 @@ import com.richarddklein.shorturlreservationservice.response.StatusResponse;
  */
 public interface ShortUrlReservationController {
     /**
-     * Initialize the Short URL Reservation Table in the database.
+     * Initialize the Short URL Reservation repository.
      *
      * <p>This is a synchronous operation. It will return a response
      * to the client only when the database initialization has
@@ -39,7 +39,7 @@ public interface ShortUrlReservationController {
      */
     @PostMapping("/all")
     ResponseEntity<StatusResponse>
-    initializeShortUrlReservationTable(HttpServletRequest request);
+    initializeShortUrlReservationRepository(HttpServletRequest request);
 
     /**
      * Get all Short URL Reservation items.

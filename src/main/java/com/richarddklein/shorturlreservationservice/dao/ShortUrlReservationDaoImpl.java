@@ -42,7 +42,7 @@ import com.richarddklein.shorturlreservationservice.response.ShortUrlReservation
  *
  * <p>The `shortUrl` attribute of each Short URL Reservation item is the short URL
  * itself. This is a relatively short string that is unique: No two Short URL Reservation
- * items will contain the same `shortUrl` field. The `shortUrl` is an integer that has
+ * items will contain the same `shortUrl` attribute. The `shortUrl` is an integer that has
  * been encoded using true base-64 encoding.</p>
  *
  * <p>Each character of the `shortUrl` string is a digit that can take on one of 64
@@ -66,9 +66,9 @@ import com.richarddklein.shorturlreservationservice.response.ShortUrlReservation
  * Because it has a uniform hash distribution, it can be used to quickly locate the
  * database partition containing the corresponding Short URL Reservation item.</p>
  *
- * <p>The `isAvailable` field of each Short URL Reservation item indicates whether the
- * associated `shortUrl` is available. Our first inclination might be to make this a
- * Boolean attribute: A value of `true` would mean that the associated `shortUrl` is
+ * <p>The `isAvailable` attribute of each Short URL Reservation item indicates whether
+ * the associated `shortUrl` is available. Our first inclination might be to make this
+ * a Boolean attribute: A value of `true` would mean that the associated `shortUrl` is
  * available, while a value of `false` would mean that someone has already reserved
  * this `shortUrl`.</p>
  *
@@ -103,10 +103,10 @@ import com.richarddklein.shorturlreservationservice.response.ShortUrlReservation
  * exists, and has a value equal to `shortUrl`. If a short URL is not available, then the
  * corresponding `isAvailable` attribute is completely absent.</p>
  *
- * <p>The `version` field of each Short URL Reservation item is a long integer indicating
- * the version # of the Short URL Reservation entity. This field is for the exclusive use
+ * <p>The `version` attribute of each Short URL Reservation item is a long integer indicating
+ * the version # of the Short URL Reservation entity. This attribute is for the exclusive use
  * of DynamoDB; the developer should not read or write it. DynamoDB uses the `version`
- * field for what it calls "optimistic locking".</p>
+ * attribute for what it calls "optimistic locking".</p>
  *
  * <p>In the optimistic locking scheme, the code proceeds with a read-update-write transaction
  * under the assumption that most of the time the item will not be updated by another user
@@ -114,11 +114,11 @@ import com.richarddklein.shorturlreservationservice.response.ShortUrlReservation
  * is not the case, the `write` operation will fail, allowing the code to retry with a new
  * read-update-write transaction.</p>
  *
- * <p>DynamoDB uses the `version` field to detect when another user has updated the same
+ * <p>DynamoDB uses the `version` attribute to detect when another user has updated the same
  * item concurrently. Every time the item is written to the database, DynamoDB first checks
- * whether the `version` field in the item is the same as the `version` field in the database.
- * If so, DynamoDB lets the `write` proceed, and updates the `version` field in the database.
- * If not, DynamoDB announces that the `write` has failed.</p>
+ * whether the `version` attribute in the item is the same as the `version` attribute in the
+ * database. If so, DynamoDB lets the `write` proceed, and updates the `version` attribute
+ * in the database. If not, DynamoDB announces that the `write` has failed.</p>
  *
  * <p>The Short URL Reservation table is fully populated with short URLs, and each short URL
  * is initialized as being available, before the service goes into production.</p>
@@ -160,6 +160,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             ParameterStoreReader parameterStoreReader,
             DynamoDbClient dynamoDbClient,
             DynamoDbTable<ShortUrlReservation> shortUrlReservationTable) {
+
         this.parameterStoreReader = parameterStoreReader;
         this.dynamoDbClient = dynamoDbClient;
         this.shortUrlReservationTable = shortUrlReservationTable;

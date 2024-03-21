@@ -15,8 +15,8 @@ import software.amazon.awssdk.services.ssm.model.GetParameterResponse;
  */
 @Component
 public class ParameterStoreReaderImpl implements ParameterStoreReader {
-    private static final String SHORT_URL_RANGE = "/shortUrl/range";
-    private static final String SHORT_URL_RESERVATION_TABLE_NAME = "/shortUrl/tableName";
+    private static final String SHORT_URL_RANGE = "/shortUrl/reservations/range";
+    private static final String SHORT_URL_RESERVATION_TABLE_NAME = "/shortUrl/reservations/tableName";
 
     private final SsmClient ssmClient;
 

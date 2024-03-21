@@ -15,7 +15,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>Short URL Generation Service</name>
+    <name>Short URL Reservation Service</name>
     <url>https://github.com/awslabs/aws-serverless-java-container</url>
 
     <parent>

@@ -40,7 +40,8 @@ public interface ShortUrlReservationService {
      *
      * @param shortUrl The short URL of interest.
      * @return The Short URL Reservation entity corresponding to
-     * `shortUrl`.
+     * `shortUrl`, or `null` if `shortUrl` could not be found in
+     * the repository.
      */
     ShortUrlReservation getSpecificShortUrlReservation(String shortUrl);
 
@@ -60,9 +61,7 @@ public interface ShortUrlReservationService {
      * Reserve specific short URL.
      *
      * @param shortUrl The short URL to be reserved.
-     * @return The Short URL Reservation entity for the newly reserved
-     * short URL, or `null` if the reservation failed (because `shortUrl`
-     * doesn't exist or is already reserved).
+     * @return The success/failure status of the reservation operation.
      */
     ShortUrlReservationStatus reserveSpecificShortUrl(String shortUrl);
 

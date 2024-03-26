@@ -418,7 +418,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
                     continue;
                 }
                 return availableShortUrlReservation;
-            } catch (NullPointerException e) {
+            } catch (RuntimeException e) {
                 throw new NoShortUrlsAvailableException();
             }
         }

@@ -1,9 +1,9 @@
-# Spring Boot REST API Microservice Deployment on AWS Lambda and API Gateway
+# Short URL Reservation Microservice Deployment on AWS Lambda and API Gateway
 
 ## Pre-requisites
 * AWS CLI
 * SAM CLI
-* Maven *and* Gradle (yes, you need them both)
+* Maven
 
 ## Building the project
 From the project root folder (where `template.yml` is located),

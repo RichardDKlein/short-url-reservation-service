@@ -74,7 +74,7 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
                 shortUrlReservationService.getAllShortUrlReservations();
         StatusResponse status = new StatusResponse(
                 ShortUrlReservationStatus.SUCCESS,
-                "Short URL Reservation table successfully retrieved");
+                "All Short URL Reservation items successfully retrieved");
         StatusAndShortUrlReservationArrayResponse response =
                 new StatusAndShortUrlReservationArrayResponse(status, shortUrlReservations);
         return new ResponseEntity<>(response, HttpStatus.OK);

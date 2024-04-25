@@ -82,7 +82,7 @@ public interface ShortUrlReservationController {
      * failure) of the operation, as well as the short URL string of an
      * available Short URL Reservation item (if the operation was successful).
      */
-    @PutMapping("/reserve/any")
+    @PatchMapping("/reserve/any")
     ResponseEntity<StatusAndShortUrlReservationResponse>
     reserveAnyShortUrl();
 
@@ -96,7 +96,7 @@ public interface ShortUrlReservationController {
      * @return An HTTP Response Entity containing the status (success
      * or failure) of the operation.
      */
-    @PutMapping("/reserve/specific/{shortUrl}")
+    @PatchMapping("/reserve/specific/{shortUrl}")
     ResponseEntity<StatusResponse>
     reserveSpecificShortUrl(@PathVariable String shortUrl);
 
@@ -111,7 +111,7 @@ public interface ShortUrlReservationController {
      * @return An HTTP Response Entity containing the status (success or
      * failure) of the operation.
      */
-    @PutMapping("/reserve/all")
+    @PatchMapping("/reserve/all")
     ResponseEntity<StatusResponse>
     reserveAllShortUrls();
 
@@ -127,7 +127,7 @@ public interface ShortUrlReservationController {
      * @return An HTTP Response Entity containing the status (success or
      * failure) of the operation.
      */
-    @PutMapping("/cancel/specific/{shortUrl}")
+    @PatchMapping("/cancel/specific/{shortUrl}")
     ResponseEntity<StatusResponse>
     cancelSpecificShortUrlReservation(@PathVariable String shortUrl);
 
@@ -142,7 +142,7 @@ public interface ShortUrlReservationController {
      * @return An HTTP Response Entity containing the status (success or
      * failure) of the operation.
      */
-    @PutMapping("/cancel/all")
+    @PatchMapping("/cancel/all")
     ResponseEntity<StatusResponse>
     cancelAllShortUrlReservations();
 }

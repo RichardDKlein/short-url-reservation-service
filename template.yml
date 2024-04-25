@@ -94,49 +94,49 @@ Resources:
           Type: Api
           Properties:
             Path: /shorturl/reservations/reserve/any
-            Method: PUT
+            Method: PATCH
         ReserveAnyShortUrlViaCustomDomain:
           Type: Api
           Properties:
             Path: /reserve/any
-            Method: PUT
+            Method: PATCH
         ReserveSpecificShortUrlViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
             Path: /shorturl/reservations/reserve/specific/{proxy+}
-            Method: PUT
+            Method: PATCH
         ReserveSpecificShortUrlViaCustomDomain:
           Type: Api
           Properties:
             Path: /reserve/specific/{proxy+}
-            Method: PUT
+            Method: PATCH
         ReserveAllShortUrlsViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
             Path: /shorturl/reservations/reserve/all
-            Method: PUT
+            Method: PATCH
         ReserveAllShortUrlViaCustomDomain:
           Type: Api
           Properties:
             Path: /reserve/all
-            Method: PUT
+            Method: PATCH
         CancelSpecificShortUrlReservationViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
             Path: /shorturl/reservations/cancel/specific/{proxy+}
-            Method: PUT
+            Method: PATCH
         CancelSpecificShortUrlReservationViaCustomDomain:
           Type: Api
           Properties:
             Path: /cancel/specific/{proxy+}
-            Method: PUT
+            Method: PATCH
         CancelAllShortUrlReservationsViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
             Path: /shorturl/reservations/cancel/all
-            Method: PUT
+            Method: PATCH
         CancelAllShortUrlReservationsViaCustomDomain:
           Type: Api
           Properties:
             Path: /cancel/all
-            Method: PUT
+            Method: PATCH

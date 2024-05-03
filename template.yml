@@ -46,7 +46,7 @@ Resources:
       #
       # API Gateway:   2y5f39ydt2.execute-api.us-east-2.amazonaws.com/Prod
       #                (subject to change)
-      # localhost:     localhost:3000
+      # localhost:     localhost:4000
       # Custom Domain: api.richarddklein.com
       #
       # When the service is running on your local machine, via the command

@@ -40,7 +40,7 @@ public class ShortUrlReservation {
     }
 
     /**
-     * General constructor #1.
+     * General constructor.
      *
      * Construct a Short URL Reservation entity from parameters specifying
      * the value of the `shortUrl` and `isAvailable` attributes.
@@ -51,21 +51,6 @@ public class ShortUrlReservation {
     public ShortUrlReservation(String shortUrl, String isAvailable) {
         this.shortUrl = shortUrl;
         this.isAvailable = isAvailable;
-    }
-
-    /**
-     * General constructor #2.
-     *
-     * Construct a Short URL Reservation entity from a Map containing
-     * entries that specify the values of the `shortUrl` and `isAvailable`
-     * attributes.
-     *
-     * @param item The Map containing the entries that specify the values
-     *             of the `shortUrl` and `isAvailable` attributes.
-     */
-    public ShortUrlReservation(Map<String, AttributeValue> item) {
-        shortUrl = item.get("shortUrl").s();
-        isAvailable = item.get("isAvailable").s();
     }
 
     @DynamoDbPartitionKey

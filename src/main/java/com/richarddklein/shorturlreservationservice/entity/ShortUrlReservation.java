@@ -23,21 +23,12 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 @DynamoDbBean
 public class ShortUrlReservation {
     /**
-     * The `shortUrl` attribute. See the `ShortUrlReservationDaoImpl`
-     * Javadoc for a detailed description of this attribute.
+     * The Short URL Reservation item attributes. See the
+     * `ShortUrlReservationDaoImpl` Javadoc for a detailed
+     * description of these attributes.
      */
     private String shortUrl;
-
-    /**
-     * The `isAvailable` attribute. See the `ShortUrlReservationDaoImpl`
-     * Javadoc for a detailed description of this attribute.
-     */
     private String isAvailable;
-
-    /**
-     * The `version` attribute. See the `ShortUrlReservationDaoImpl`
-     * Javadoc for a detailed description of this attribute.
-     */
     private Long version;
 
     /**

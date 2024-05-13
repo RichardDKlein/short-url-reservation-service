@@ -6,9 +6,8 @@
 package com.richarddklein.shorturlreservationservice.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 import com.richarddklein.shorturlreservationservice.response.StatusAndShortUrlReservationArrayResponse;
 import com.richarddklein.shorturlreservationservice.response.StatusAndShortUrlReservationResponse;
@@ -33,13 +32,13 @@ public interface ShortUrlReservationController {
      * 30 seconds, this REST endpoint is available only when the Short
      * URL Reservation Service is running on localhost, not on AWS.</p>
      *
-     * @param request The HTTP Servlet Request object.
+     * @param request The HTTP Request.
      * @return An HTTP Response Entity containing the status (success
      * or failure) of the database initialization operation.
      */
     @PostMapping("/all")
     ResponseEntity<StatusResponse>
-    initializeShortUrlReservationRepository(HttpServletRequest request);
+    initializeShortUrlReservationRepository(ServerHttpRequest request);
 
     /**
      * Get all Short URL Reservation items.

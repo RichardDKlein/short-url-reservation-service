@@ -9,9 +9,8 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
@@ -49,8 +48,8 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
 
     @Override
     public ResponseEntity<StatusResponse>
-    initializeShortUrlReservationRepository(HttpServletRequest request) {
-        if (isRunningLocally(request.getRemoteAddr())) {
+    initializeShortUrlReservationRepository(ServerHttpRequest request) {
+        if (isRunningLocally(request.getRemoteAddress().getHostString())) {
             shortUrlReservationService.initializeShortUrlReservationRepository();
             StatusResponse response = new StatusResponse(
                     ShortUrlReservationStatus.SUCCESS,
@@ -245,14 +244,13 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
     /**
      * Is the service running locally?
      *
-     * Determine whether the Short URL Reservation Service is running
-     * on your local machine, or in the AWS cloud.
+     * Determine whether the Short URL Reservation Service is running on your
+     * local machine, or in the AWS cloud.
      *
-     * @param remoteAddr The IP address of the machine that sent the
-     *                   HTTP request.
+     * @param hostString The host that sent the HTTP request.
      * @return 'true' if the service is running locally, 'false' otherwise.
      */
-    private boolean isRunningLocally(String remoteAddr) {
-        return remoteAddr.equals("127.0.0.1");
+    private boolean isRunningLocally(String hostString) {
+        return hostString.contains("localhost");
     }
 }

@@ -20,10 +20,6 @@ public class ParameterStoreReaderImpl implements ParameterStoreReader {
 
     private final SsmClient ssmClient;
 
-    private String shortUrlReservationTableName;
-    private long minShortUrlBase10;
-    private long maxShortUrlBase10;
-
     /**
      * General constructor.
      *
@@ -32,33 +28,25 @@ public class ParameterStoreReaderImpl implements ParameterStoreReader {
      */
     public ParameterStoreReaderImpl(SsmClient ssmClient) {
         this.ssmClient = ssmClient;
-        loadParameters();
     }
 
     @Override
     public String getShortUrlReservationTableName() {
-        return shortUrlReservationTableName;
+        return getParameter(SHORT_URL_RESERVATION_TABLE_NAME);
     }
 
     @Override
     public long getMinShortUrlBase10() {
-        return minShortUrlBase10;
+        String shortUrlRange = getParameter(SHORT_URL_RANGE);
+        String[] tokens = shortUrlRange.split(",\\s*");
+        return Long.parseLong(tokens[0]);
     }
 
     @Override
     public long getMaxShortUrlBase10() {
-        return maxShortUrlBase10;
-    }
-
-    /**
-     * Load all parameters from the Parameter Store.
-     */
-    private void loadParameters() {
         String shortUrlRange = getParameter(SHORT_URL_RANGE);
         String[] tokens = shortUrlRange.split(",\\s*");
-        minShortUrlBase10 = Long.parseLong(tokens[0]);
-        maxShortUrlBase10 = Long.parseLong(tokens[1]);
-        shortUrlReservationTableName = getParameter(SHORT_URL_RESERVATION_TABLE_NAME);
+        return Long.parseLong(tokens[1]);
     }
 
     /**

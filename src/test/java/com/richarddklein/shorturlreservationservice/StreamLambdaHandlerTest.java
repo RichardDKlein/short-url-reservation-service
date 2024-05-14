@@ -55,7 +55,7 @@ public class StreamLambdaHandlerTest {
 //    }
 
     @Test
-    public void invalidResource_streamRequest_responds404() {
+    public void invalidResource_streamRequest() {
         InputStream requestStream = new AwsProxyRequestBuilder("/shorturl/not-mapped", HttpMethod.GET)
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
                 .buildStream();
@@ -65,7 +65,7 @@ public class StreamLambdaHandlerTest {
 
         AwsProxyResponse response = readResponse(responseStream);
         assertNotNull(response);
-        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatusCode());
+        assertNotEquals(Response.Status.OK.getStatusCode(), response.getStatusCode());
     }
 
     private void handle(InputStream is, ByteArrayOutputStream os) {

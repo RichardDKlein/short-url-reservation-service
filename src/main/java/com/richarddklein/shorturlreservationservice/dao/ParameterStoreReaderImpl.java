@@ -20,6 +20,10 @@ public class ParameterStoreReaderImpl implements ParameterStoreReader {
 
     private final SsmClient ssmClient;
 
+    private String shortUrlReservationTableName;
+    private Long minShortUrlBase10;
+    private Long maxShortUrlBase10;
+
     /**
      * General constructor.
      *
@@ -32,21 +36,30 @@ public class ParameterStoreReaderImpl implements ParameterStoreReader {
 
     @Override
     public String getShortUrlReservationTableName() {
-        return getParameter(SHORT_URL_RESERVATION_TABLE_NAME);
+        if (shortUrlReservationTableName == null) {
+            shortUrlReservationTableName = getParameter(SHORT_URL_RESERVATION_TABLE_NAME);
+        }
+        return shortUrlReservationTableName;
     }
 
     @Override
     public long getMinShortUrlBase10() {
-        String shortUrlRange = getParameter(SHORT_URL_RANGE);
-        String[] tokens = shortUrlRange.split(",\\s*");
-        return Long.parseLong(tokens[0]);
+        if (minShortUrlBase10 == null) {
+            String shortUrlRange = getParameter(SHORT_URL_RANGE);
+            String[] tokens = shortUrlRange.split(",\\s*");
+            minShortUrlBase10 = Long.parseLong(tokens[0]);
+        }
+        return minShortUrlBase10;
     }
 
     @Override
     public long getMaxShortUrlBase10() {
-        String shortUrlRange = getParameter(SHORT_URL_RANGE);
-        String[] tokens = shortUrlRange.split(",\\s*");
-        return Long.parseLong(tokens[1]);
+        if (maxShortUrlBase10 == null) {
+            String shortUrlRange = getParameter(SHORT_URL_RANGE);
+            String[] tokens = shortUrlRange.split(",\\s*");
+            maxShortUrlBase10 = Long.parseLong(tokens[1]);
+        }
+        return maxShortUrlBase10;
     }
 
     /**

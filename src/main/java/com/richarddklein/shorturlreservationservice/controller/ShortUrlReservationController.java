@@ -36,7 +36,7 @@ public interface ShortUrlReservationController {
      * @return An HTTP Response Entity containing the status (success
      * or failure) of the database initialization operation.
      */
-    @PostMapping("/all")
+    @PostMapping("/dbinit")
     ResponseEntity<StatusResponse>
     initializeShortUrlReservationRepository(ServerHttpRequest request);
 

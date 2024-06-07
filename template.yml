@@ -63,12 +63,12 @@ Resources:
         InitializeShortUrlReservationTableViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/reservations/all
+            Path: /shorturl/reservations/dbinit
             Method: POST
         InitializeShortUrlReservationTableViaCustomDomain:
           Type: Api
           Properties:
-            Path: /all
+            Path: /dbinit
             Method: POST
         GetSpecificShortUrlViaApiGatewayOrLocalHost:
           Type: Api

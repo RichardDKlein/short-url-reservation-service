@@ -7,6 +7,7 @@ package com.richarddklein.shorturlreservationservice.dao;
 
 import java.util.*;
 
+import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import org.springframework.stereotype.Repository;
 
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
@@ -328,9 +329,9 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     /**
      * Populate the Short URL Reservation table in DynamoDB.
      *
-     * Create a Short URL Reservation item for each short URL in the range
+     * <p>Create a Short URL Reservation item for each short URL in the range
      * specified in the Parameter Store, and mark all the items as being
-     * available.
+     * available.</p>
      */
     private void populateShortUrlReservationTable() {
         System.out.print("Populating the Short URL Reservation table ...");
@@ -365,10 +366,10 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     /**
      * Batch insert some Short URL Reservation items.
      *
-     * Into the Short URL Reservation table in DynamoDB, perform a
+     * <p>Into the Short URL Reservation table in DynamoDB, perform a
      * batch insert of a list of Short URL Reservation items. Insert
      * the items in batches rather than one at a time in order to
-     * improve efficiency.
+     * improve efficiency.</p>
      *
      * @param shortUrlReservations The list of Short URL Reservation
      *                             items to be batch inserted.
@@ -392,10 +393,10 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     /**
      * Find an available Short URL Reservation item.
      *
-     * In the Short URL Reservation table in DynamoDB, find an available
+     * <p>In the Short URL Reservation table in DynamoDB, find an available
      * Short URL Reservation item. Use the General Secondary Index (GSI)
      * on the `isAvailable` attribute to avoid a time-consuming scan
-     * operation.
+     * operation.</p>
      *
      * @return An available Short URl Reservation item.
      * @throws NoShortUrlsAvailableException If no short URLs are available,
@@ -427,8 +428,8 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     /**
      * Update a Short URL Reservation item.
      *
-     * In the Short URL Reservation table in DynamoDB, update a specified
-     * Short URL Reservation item.
+     * <p>In the Short URL Reservation table in DynamoDB, update a specified
+     * Short URL Reservation item.</p>
      *
      * @param shortUrlReservation The Short URL Reservation item that is
      *                            to be used to update DynamoDB.

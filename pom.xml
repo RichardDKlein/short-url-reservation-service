@@ -74,6 +74,11 @@
             <artifactId>ssm</artifactId>
             <version>2.22.13</version>
         </dependency>
+        <dependency>
+            <groupId>com.richarddklein.shorturl</groupId>
+            <artifactId>short-url-common-library</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>

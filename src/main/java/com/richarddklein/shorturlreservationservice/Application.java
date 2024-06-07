@@ -17,9 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
  * service as a Spring application.</p>
  */
 @SpringBootApplication
-// The REST Controller will be instantiated via the `ControllerConfig`
-// @Configuration class, so we exclude it from the component scan.
-@ComponentScan(excludeFilters = @ComponentScan.Filter(RestController.class))
+@ComponentScan(
+        basePackages = {"com.richarddklein.shorturl.short-url-common-library"},
+        // The REST Controller will be instantiated via the `ControllerConfig`
+        // @Configuration class, so we exclude it from the component scan.
+        excludeFilters = @ComponentScan.Filter(RestController.class))
+
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);

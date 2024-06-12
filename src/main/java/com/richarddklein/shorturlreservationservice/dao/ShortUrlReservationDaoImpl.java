@@ -439,7 +439,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
      */
     private ShortUrlReservation updateShortUrlReservation(ShortUrlReservation shortUrlReservation) {
         try {
-            return shortUrlReservationTable.updateItem(req -> req.item(shortUrlReservation));
+            return shortUrlReservationTable.updateItem(shortUrlReservation);
         } catch (ConditionalCheckFailedException e) {
             // Version check failed. Someone updated the ShortUrlReservation
             // item in the database after we read the item, so the item we

@@ -33,29 +33,22 @@ Resources:
       SnapStart:
         ApplyOn: "PublishedVersions"
 
-      # Defined below are the REST endpoints. The URL for each endpoint is of
-      # the following form:
+      # Defined below are the REST endpoints. For each endpoint, a pair of
+      # paths are defined. One path is for the case where the URL specifies
+      # either the API Gateway or localhost. The other path is for the case
+      # where the URL specifies the custom domain that redirects to the API
+      # Gateway. Thus, an endpoint URL can have one of three possible values:
       #
-      # https://<hostname>/shorturl/reservations/<endpoint-path>.
-      #
-      # For each endpoint, a pair of paths are defined. One path is for the
-      # case where <hostname> is either the API Gateway or localhost. The
-      # other path is for the case where <hostname> is the custom domain that
-      # redirects to the API Gateway. Thus, <hostname> can have one of three
-      # possible values:
-      #
-      # API Gateway:   2y5f39ydt2.execute-api.us-east-2.amazonaws.com/Prod
-      #                (subject to change)
-      # localhost:     localhost:4000
-      # Custom Domain: api.richarddklein.com
+      # API Gateway:   <aws-api-ID>.execute-api.us-east-2.amazonaws.com/Prod/shorturl/reservations/<endpoint>
+      # localhost:     localhost:4000/shorturl/reservations/<endpoint>
+      # Custom Domain: api.richarddklein.com/shorturl/reservations/<endpoint>
       #
       # When the service is running on your local machine, via the command
-      # `sam local start-api`, use the above `localhost` hostname.
+      # `sam local start-api`, use the above `localhost` URL.
       #
       # When the service is running on AWS, use either the above `API Gateway`
-      # hostname or the above `Custom Domain` hostname. (It is recommended that
-      # you use the `Custom Domain` hostname, as it is simpler to remember and
-      # to type.)
+      # URL or the above `Custom Domain` URL. (It is recommended that you use
+      # the `Custom Domain` hostname, as it is simpler to remember and to type.)
       #
       # For a description of the functionality provided by the REST endpoints,
       # see the comments in the `ShortUrlReservationController` interface.

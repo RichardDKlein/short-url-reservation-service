@@ -7,6 +7,7 @@ package com.richarddklein.shorturlreservationservice.config;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import com.richarddklein.shorturlcommonlibrary.config.AwsConfig;
+import com.richarddklein.shorturlcommonlibrary.config.SecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +30,7 @@ import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
  * to implement the DAO package.</p>
  */
 @Configuration
-@Import(AwsConfig.class)
+@Import({AwsConfig.class, SecurityConfig.class})
 public class DaoConfig {
     @Autowired
     ParameterStoreReader parameterStoreReader;

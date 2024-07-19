@@ -23,7 +23,7 @@ Resources:
         - AWSLambdaBasicExecutionRole
         # Read/write permission for DynamoDB
         - AmazonDynamoDBFullAccess
-        # Read permission for SSM Parameter Store.
+        # Read permissions for SSM Parameter Store
         - SSMParameterWithSlashPrefixReadPolicy:
             ParameterName:
               /shortUrl/reservations/tableName

@@ -10,6 +10,7 @@ Globals:
     EndpointConfiguration: REGIONAL
 
 Resources:
+  # Define the Lambda function
   ShortUrlReservationService:
     Type: AWS::Serverless::Function
     Properties:
@@ -18,18 +19,7 @@ Resources:
       CodeUri: .
       MemorySize: 512
       Timeout: 90
-      Policies:
-        # Write permission for CloudWatch logs
-        - AWSLambdaBasicExecutionRole
-        # Read/write permission for DynamoDB
-        - AmazonDynamoDBFullAccess
-        # Read permissions for SSM Parameter Store
-        - SSMParameterWithSlashPrefixReadPolicy:
-            ParameterName:
-              /shortUrl/reservations/tableName
-        - SSMParameterWithSlashPrefixReadPolicy:
-            ParameterName:
-              /shortUrl/reservations/range
+      Role: !GetAtt LambdaExecutionRole.Arn
       SnapStart:
         ApplyOn: "PublishedVersions"
 
@@ -133,3 +123,44 @@ Resources:
           Properties:
             Path: /cancel/all
             Method: PATCH
+
+  # Define the IAM Role for the Lambda function
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaExecutionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # Write permission for CloudWatch logs
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+              # Read/write permission for DynamoDB
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:GetItem
+                  - dynamodb:Scan
+                  - dynamodb:Query
+                Resource: "*"
+              # Read policy for SSM parameters
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                Resource:
+                  - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shortUrl/reservations/tableName
+                  - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shortUrl/reservations/range

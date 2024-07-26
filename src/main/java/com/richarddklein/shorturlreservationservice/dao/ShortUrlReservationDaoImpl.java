@@ -301,7 +301,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         shortUrlReservationTable.deleteTable();
         DynamoDbWaiter waiter = DynamoDbWaiter.builder().client(dynamoDbClient).build();
         waiter.waitUntilTableNotExists(builder -> builder
-                .tableName(parameterStoreReader.getShortUrlReservationTableName())
+                .tableName(parameterStoreReader.getShortUrlReservationTableName().block())
                 .build());
         waiter.close();
         System.out.println(" done!");
@@ -321,7 +321,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         shortUrlReservationTable.createTable(createTableRequest);
         DynamoDbWaiter waiter = DynamoDbWaiter.builder().client(dynamoDbClient).build();
         waiter.waitUntilTableExists(builder -> builder
-                .tableName(parameterStoreReader.getShortUrlReservationTableName()).build());
+                .tableName(parameterStoreReader.getShortUrlReservationTableName().block()).build());
         waiter.close();
         System.out.println(" done!");
     }
@@ -336,8 +336,8 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     private void populateShortUrlReservationTable() {
         System.out.print("Populating the Short URL Reservation table ...");
         List<ShortUrlReservation> shortUrlReservations = new ArrayList<>();
-        long minShortUrlBase10 = parameterStoreReader.getMinShortUrlBase10();
-        long maxShortUrlBase10 = parameterStoreReader.getMaxShortUrlBase10();
+        long minShortUrlBase10 = parameterStoreReader.getMinShortUrlBase10().block();
+        long maxShortUrlBase10 = parameterStoreReader.getMaxShortUrlBase10().block();
         for (long i = minShortUrlBase10; i <= maxShortUrlBase10; i++) {
             String shortUrl = longToShortUrl(i);
             ShortUrlReservation shortUrlReservation = new ShortUrlReservation(shortUrl, shortUrl);
@@ -386,7 +386,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
                 writeRequests.add(writeRequest);
             }
             dynamoDbClient.batchWriteItem(req -> req.requestItems(Collections.singletonMap(
-                    parameterStoreReader.getShortUrlReservationTableName(), writeRequests)));
+                    parameterStoreReader.getShortUrlReservationTableName().block(), writeRequests)));
         }
     }
 

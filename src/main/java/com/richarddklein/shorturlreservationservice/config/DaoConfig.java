@@ -66,7 +66,7 @@ public class DaoConfig {
     public DynamoDbTable<ShortUrlReservation>
     shortUrlReservationTable() {
         return dynamoDbEnhancedClient().table(
-                parameterStoreReader.getShortUrlReservationTableName(),
+                parameterStoreReader.getShortUrlReservationTableName().block(),
                 TableSchema.fromBean(ShortUrlReservation.class));
     }
 }

@@ -49,21 +49,34 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
     @Override
     public ResponseEntity<StatusResponse>
     initializeShortUrlReservationRepository(ServerHttpRequest request) {
-        if (isRunningLocally(request.getRemoteAddress().getHostString())) {
-            shortUrlReservationService.initializeShortUrlReservationRepository();
-            StatusResponse response = new StatusResponse(
-                    ShortUrlReservationStatus.SUCCESS,
-                    "Initialization of Short URL Reservation table "
-                            + "completed successfully");
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } else {
-            StatusResponse response = new StatusResponse(
-                    ShortUrlReservationStatus.NOT_ON_LOCAL_MACHINE,
-                    "Initialization of the Short URL Reservation "
-                            + "table can be done only when the service is "
-                            + "running on your local machine");
-            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        ShortUrlReservationStatus shortUrlReservationStatus =
+                shortUrlReservationService
+                        .initializeShortUrlReservationRepository(request);
+
+        HttpStatus httpStatus;
+        String message;
+
+        switch (shortUrlReservationStatus) {
+            case SUCCESS:
+                httpStatus = HttpStatus.OK;
+                message = "Initialization of Short URL Reservation table "
+                        + "completed successfully";
+                break;
+
+            case NOT_ON_LOCAL_MACHINE:
+                httpStatus = HttpStatus.FORBIDDEN;
+                message = "Initialization of the Short URL Reservation "
+                        + "table can be done only when the service is "
+                        + "running on your local machine";
+                break;
+
+            default:
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                message = "An unknown error occurred";
         }
+
+        return new ResponseEntity<>(new StatusResponse(
+                shortUrlReservationStatus, message), httpStatus);
     }
 
     @Override
@@ -240,17 +253,4 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
     // ------------------------------------------------------------------------
-
-    /**
-     * Is the service running locally?
-     *
-     * Determine whether the Short URL Reservation Service is running on your
-     * local machine, or in the AWS cloud.
-     *
-     * @param hostString The host that sent the HTTP request.
-     * @return 'true' if the service is running locally, 'false' otherwise.
-     */
-    private boolean isRunningLocally(String hostString) {
-        return hostString.contains("localhost");
-    }
 }

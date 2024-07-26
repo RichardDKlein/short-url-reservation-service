@@ -5,6 +5,7 @@
 
 package com.richarddklein.shorturlreservationservice.config;
 
+import com.richarddklein.shorturlreservationservice.service.ShortUrlReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,11 +22,11 @@ import com.richarddklein.shorturlreservationservice.controller.ShortUrlReservati
 @Configuration
 public class ControllerConfig {
     @Autowired
-    ServiceConfig serviceConfig;
+    ShortUrlReservationService shortUrlReservationService;
 
     @Bean
     public ShortUrlReservationController
     shortUrlReservationController() {
-        return new ShortUrlReservationControllerImpl(serviceConfig.shortUrlReservationService());
+        return new ShortUrlReservationControllerImpl(shortUrlReservationService);
     }
 }

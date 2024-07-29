@@ -164,3 +164,6 @@ Resources:
                 Resource:
                   - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shortUrl/reservations/tableName
                   - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shortUrl/reservations/range
+                  - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shortUrl/users/adminUsername
+                  - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shortUrl/users/adminPassword
+                  - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shortUrl/users/jwtSecretKey

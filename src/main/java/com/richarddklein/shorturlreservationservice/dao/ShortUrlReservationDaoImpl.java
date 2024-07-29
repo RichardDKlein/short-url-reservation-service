@@ -8,13 +8,18 @@ package com.richarddklein.shorturlreservationservice.dao;
 import java.util.*;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
+import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
 import org.springframework.stereotype.Repository;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
@@ -138,7 +143,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
 
     private final ParameterStoreReader parameterStoreReader;
     private final DynamoDbClient dynamoDbClient;
-    private final DynamoDbTable<ShortUrlReservation> shortUrlReservationTable;
+    private final DynamoDbAsyncTable<ShortUrlReservation> shortUrlReservationTable;
 
     // ------------------------------------------------------------------------
     // PUBLIC METHODS
@@ -151,8 +156,8 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
      *                             is to play the role of reading parameters from
      *                             the Parameter Store component of the AWS Simple
      *                             System Manager (SSM).
-     * @param dynamoDbClient Dependency injection of a class instance that is to
-     *                       play the role of a DynamoDB Client.
+     * @param dynamoDbClient Dependency injection of a class instance that is
+     *                       to play the role of a DynamoDB Client.
      * @param shortUrlReservationTable Dependency injection of a class instance
      *                                 that is to model the Short URL Reservation
      *                                 table in DynamoDB.
@@ -160,13 +165,17 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     public ShortUrlReservationDaoImpl(
             ParameterStoreReader parameterStoreReader,
             DynamoDbClient dynamoDbClient,
-            DynamoDbTable<ShortUrlReservation> shortUrlReservationTable) {
+            DynamoDbAsyncTable<ShortUrlReservation> shortUrlReservationTable) {
 
         this.parameterStoreReader = parameterStoreReader;
         this.dynamoDbClient = dynamoDbClient;
         this.shortUrlReservationTable = shortUrlReservationTable;
     }
 
+    // Initialization of the Short URL Reservation repository is performed
+    // rarely, and then only by the Admin from a local machine. Therefore,
+    // we do not need to use reactive (asynchronous) programming techniques
+    // here. Simple synchronous logic will work just fine.
     @Override
     public void initializeShortUrlReservationRepository() {
         if (doesTableExist()) {
@@ -177,102 +186,110 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     }
 
     @Override
-    public List<ShortUrlReservation> getAllShortUrlReservations() {
-        List<ShortUrlReservation> result = new ArrayList<>();
-        shortUrlReservationTable.scan(req -> req.consistentRead(true))
-                .items().forEach(result::add);
-        return result;
+    public Mono<StatusAndShortUrlReservationArray> getAllShortUrlReservations() {
+        return Flux.from(shortUrlReservationTable.scan().items())
+        .collectList()
+        .map(shortUrlReservations -> {
+            return new StatusAndShortUrlReservationArray(
+                    ShortUrlReservationStatus.SUCCESS, shortUrlReservations);
+        })
+        .onErrorResume(e -> {
+            System.out.println(e.getMessage());
+            return Mono.just(new StatusAndShortUrlReservationArray(
+                    ShortUrlReservationStatus.UNKNOWN_ERROR,
+                    Collections.emptyList()));
+        });
     }
 
-    @Override
-    public ShortUrlReservation getSpecificShortUrlReservation(String shortUrl) {
-        return shortUrlReservationTable.getItem(req -> req
-                .key(key -> key.partitionValue(shortUrl))
-                .consistentRead(true));
-    }
-
-    @Override
-    public ShortUrlReservation reserveAnyShortUrl() throws NoShortUrlsAvailableException {
-        ShortUrlReservation updatedShortUrlReservation;
-        do {
-            ShortUrlReservation availableShortUrlReservation = findAvailableShortUrlReservation();
-            availableShortUrlReservation.setIsAvailable(null);
-            updatedShortUrlReservation = updateShortUrlReservation(availableShortUrlReservation);
-        } while (updatedShortUrlReservation == null);
-        return updatedShortUrlReservation;
-    }
-
-    @Override
-    public ShortUrlReservationStatus reserveSpecificShortUrl(String shortUrl) {
-        ShortUrlReservation updatedShortUrlReservation;
-        do {
-            ShortUrlReservation shortUrlReservation = getSpecificShortUrlReservation(shortUrl);
-            if (shortUrlReservation == null) {
-                return ShortUrlReservationStatus.SHORT_URL_NOT_FOUND;
-            }
-            if (!shortUrlReservation.isReallyAvailable()) {
-                return ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_AVAILABLE;
-            }
-            shortUrlReservation.setIsAvailable(null);
-            updatedShortUrlReservation = updateShortUrlReservation(shortUrlReservation);
-        } while (updatedShortUrlReservation == null);
-        return ShortUrlReservationStatus.SUCCESS;
-    }
-
-    @Override
-    public void reserveAllShortUrls() {
-        SdkIterable<Page<ShortUrlReservation>> pagedResult =
-                shortUrlReservationTable.scan(req -> req
-                        .limit(SCAN_LIMIT)
-                        .filterExpression(Expression.builder()
-                                .expression("attribute_exists(isAvailable)")
-                                .build())
-                );
-
-        for (Page<ShortUrlReservation> page : pagedResult) {
-            for (ShortUrlReservation shortUrlReservation : page.items()) {
-                shortUrlReservation.setIsAvailable(null);
-                // Don't have to check for update failure, since we're in
-                // system maintenance mode.
-                updateShortUrlReservation(shortUrlReservation);
-            }
-        }
-    }
-
-    @Override
-    public void cancelAllShortUrlReservations() {
-        SdkIterable<Page<ShortUrlReservation>> pagedResult =
-                shortUrlReservationTable.scan(req -> req
-                        .limit(SCAN_LIMIT)
-                        .filterExpression(Expression.builder()
-                                .expression("attribute_not_exists(isAvailable)")
-                                .build()));
-        for (Page<ShortUrlReservation> page : pagedResult) {
-            for (ShortUrlReservation shortUrlReservation : page.items()) {
-                shortUrlReservation.setIsAvailable(shortUrlReservation.getShortUrl());
-                // Don't have to check for update failure, since we're in
-                // system maintenance mode.
-                updateShortUrlReservation(shortUrlReservation);
-            }
-        }
-    }
-
-    @Override
-    public ShortUrlReservationStatus cancelSpecificShortUrlReservation(String shortUrl) {
-        ShortUrlReservation updatedShortUrlReservation;
-        do {
-            ShortUrlReservation shortUrlReservation = getSpecificShortUrlReservation(shortUrl);
-            if (shortUrlReservation == null) {
-                return ShortUrlReservationStatus.SHORT_URL_NOT_FOUND;
-            }
-            if (shortUrlReservation.isReallyAvailable()) {
-                return ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_RESERVED;
-            }
-            shortUrlReservation.setIsAvailable(shortUrl);
-            updatedShortUrlReservation = updateShortUrlReservation(shortUrlReservation);
-        } while (updatedShortUrlReservation == null);
-        return ShortUrlReservationStatus.SUCCESS;
-    }
+//    @Override
+//    public ShortUrlReservation getSpecificShortUrlReservation(String shortUrl) {
+//        return shortUrlReservationTable.getItem(req -> req
+//                .key(key -> key.partitionValue(shortUrl))
+//                .consistentRead(true));
+//    }
+//
+//    @Override
+//    public ShortUrlReservation reserveAnyShortUrl() throws NoShortUrlsAvailableException {
+//        ShortUrlReservation updatedShortUrlReservation;
+//        do {
+//            ShortUrlReservation availableShortUrlReservation = findAvailableShortUrlReservation();
+//            availableShortUrlReservation.setIsAvailable(null);
+//            updatedShortUrlReservation = updateShortUrlReservation(availableShortUrlReservation);
+//        } while (updatedShortUrlReservation == null);
+//        return updatedShortUrlReservation;
+//    }
+//
+//    @Override
+//    public ShortUrlReservationStatus reserveSpecificShortUrl(String shortUrl) {
+//        ShortUrlReservation updatedShortUrlReservation;
+//        do {
+//            ShortUrlReservation shortUrlReservation = getSpecificShortUrlReservation(shortUrl);
+//            if (shortUrlReservation == null) {
+//                return ShortUrlReservationStatus.SHORT_URL_NOT_FOUND;
+//            }
+//            if (!shortUrlReservation.isReallyAvailable()) {
+//                return ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_AVAILABLE;
+//            }
+//            shortUrlReservation.setIsAvailable(null);
+//            updatedShortUrlReservation = updateShortUrlReservation(shortUrlReservation);
+//        } while (updatedShortUrlReservation == null);
+//        return ShortUrlReservationStatus.SUCCESS;
+//    }
+//
+//    @Override
+//    public void reserveAllShortUrls() {
+//        SdkIterable<Page<ShortUrlReservation>> pagedResult =
+//                shortUrlReservationTable.scan(req -> req
+//                        .limit(SCAN_LIMIT)
+//                        .filterExpression(Expression.builder()
+//                                .expression("attribute_exists(isAvailable)")
+//                                .build())
+//                );
+//
+//        for (Page<ShortUrlReservation> page : pagedResult) {
+//            for (ShortUrlReservation shortUrlReservation : page.items()) {
+//                shortUrlReservation.setIsAvailable(null);
+//                // Don't have to check for update failure, since we're in
+//                // system maintenance mode.
+//                updateShortUrlReservation(shortUrlReservation);
+//            }
+//        }
+//    }
+//
+//    @Override
+//    public void cancelAllShortUrlReservations() {
+//        SdkIterable<Page<ShortUrlReservation>> pagedResult =
+//                shortUrlReservationTable.scan(req -> req
+//                        .limit(SCAN_LIMIT)
+//                        .filterExpression(Expression.builder()
+//                                .expression("attribute_not_exists(isAvailable)")
+//                                .build()));
+//        for (Page<ShortUrlReservation> page : pagedResult) {
+//            for (ShortUrlReservation shortUrlReservation : page.items()) {
+//                shortUrlReservation.setIsAvailable(shortUrlReservation.getShortUrl());
+//                // Don't have to check for update failure, since we're in
+//                // system maintenance mode.
+//                updateShortUrlReservation(shortUrlReservation);
+//            }
+//        }
+//    }
+//
+//    @Override
+//    public ShortUrlReservationStatus cancelSpecificShortUrlReservation(String shortUrl) {
+//        ShortUrlReservation updatedShortUrlReservation;
+//        do {
+//            ShortUrlReservation shortUrlReservation = getSpecificShortUrlReservation(shortUrl);
+//            if (shortUrlReservation == null) {
+//                return ShortUrlReservationStatus.SHORT_URL_NOT_FOUND;
+//            }
+//            if (shortUrlReservation.isReallyAvailable()) {
+//                return ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_RESERVED;
+//            }
+//            shortUrlReservation.setIsAvailable(shortUrl);
+//            updatedShortUrlReservation = updateShortUrlReservation(shortUrlReservation);
+//        } while (updatedShortUrlReservation == null);
+//        return ShortUrlReservationStatus.SUCCESS;
+//    }
 
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
@@ -292,6 +309,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         }
         return true;
     }
+
 
     /**
      * Delete the Short URL Reservation table from DynamoDB.
@@ -390,62 +408,62 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         }
     }
 
-    /**
-     * Find an available Short URL Reservation item.
-     *
-     * <p>In the Short URL Reservation table in DynamoDB, find an available
-     * Short URL Reservation item. Use the General Secondary Index (GSI)
-     * on the `isAvailable` attribute to avoid a time-consuming scan
-     * operation.</p>
-     *
-     * @return An available Short URl Reservation item.
-     * @throws NoShortUrlsAvailableException If no short URLs are available,
-     * i.e. if they are all reserved.
-     */
-    private ShortUrlReservation findAvailableShortUrlReservation() throws NoShortUrlsAvailableException {
-        while (true) {
-            // Get the first item from the `isAvailable-index` GSI.
-            SdkIterable<Page<ShortUrlReservation>> pagedResult =
-                    shortUrlReservationTable.index("isAvailable-index").scan(req -> req.limit(1));
-            try {
-                ShortUrlReservation gsiItem = pagedResult.iterator().next().items().get(0);
-                ShortUrlReservation availableShortUrlReservation =
-                        getSpecificShortUrlReservation(gsiItem.getShortUrl());
-                // Since reads from any GSI, such as `isAvailable-index`, are not
-                // strongly consistent, we should perform a manual consistency check,
-                // to verify that the ShortUrlReservation we obtained from the
-                // `isAvailable-index` really is available.
-                if (!availableShortUrlReservation.isReallyAvailable()) {
-                    continue;
-                }
-                return availableShortUrlReservation;
-            } catch (RuntimeException e) {
-                throw new NoShortUrlsAvailableException();
-            }
-        }
-    }
-
-    /**
-     * Update a Short URL Reservation item.
-     *
-     * <p>In the Short URL Reservation table in DynamoDB, update a specified
-     * Short URL Reservation item.</p>
-     *
-     * @param shortUrlReservation The Short URL Reservation item that is
-     *                            to be used to update DynamoDB.
-     * @return The updated Short URL Reservation item, or `null` if the
-     * update failed. (The update can fail if someone else is updating
-     * the same item concurrently.)
-     */
-    private ShortUrlReservation updateShortUrlReservation(ShortUrlReservation shortUrlReservation) {
-        try {
-            return shortUrlReservationTable.updateItem(shortUrlReservation);
-        } catch (ConditionalCheckFailedException e) {
-            // Version check failed. Someone updated the ShortUrlReservation
-            // item in the database after we read the item, so the item we
-            // just tried to update contains stale data.
-            System.out.println(e.getMessage());
-            return null;
-        }
-    }
+//    /**
+//     * Find an available Short URL Reservation item.
+//     *
+//     * <p>In the Short URL Reservation table in DynamoDB, find an available
+//     * Short URL Reservation item. Use the General Secondary Index (GSI)
+//     * on the `isAvailable` attribute to avoid a time-consuming scan
+//     * operation.</p>
+//     *
+//     * @return An available Short URl Reservation item.
+//     * @throws NoShortUrlsAvailableException If no short URLs are available,
+//     * i.e. if they are all reserved.
+//     */
+//    private ShortUrlReservation findAvailableShortUrlReservation() throws NoShortUrlsAvailableException {
+//        while (true) {
+//            // Get the first item from the `isAvailable-index` GSI.
+//            SdkIterable<Page<ShortUrlReservation>> pagedResult =
+//                    shortUrlReservationTable.index("isAvailable-index").scan(req -> req.limit(1));
+//            try {
+//                ShortUrlReservation gsiItem = pagedResult.iterator().next().items().get(0);
+//                ShortUrlReservation availableShortUrlReservation =
+//                        getSpecificShortUrlReservation(gsiItem.getShortUrl());
+//                // Since reads from any GSI, such as `isAvailable-index`, are not
+//                // strongly consistent, we should perform a manual consistency check,
+//                // to verify that the ShortUrlReservation we obtained from the
+//                // `isAvailable-index` really is available.
+//                if (!availableShortUrlReservation.isReallyAvailable()) {
+//                    continue;
+//                }
+//                return availableShortUrlReservation;
+//            } catch (RuntimeException e) {
+//                throw new NoShortUrlsAvailableException();
+//            }
+//        }
+//    }
+//
+//    /**
+//     * Update a Short URL Reservation item.
+//     *
+//     * <p>In the Short URL Reservation table in DynamoDB, update a specified
+//     * Short URL Reservation item.</p>
+//     *
+//     * @param shortUrlReservation The Short URL Reservation item that is
+//     *                            to be used to update DynamoDB.
+//     * @return The updated Short URL Reservation item, or `null` if the
+//     * update failed. (The update can fail if someone else is updating
+//     * the same item concurrently.)
+//     */
+//    private ShortUrlReservation updateShortUrlReservation(ShortUrlReservation shortUrlReservation) {
+//        try {
+//            return shortUrlReservationTable.updateItem(shortUrlReservation);
+//        } catch (ConditionalCheckFailedException e) {
+//            // Version check failed. Someone updated the ShortUrlReservation
+//            // item in the database after we read the item, so the item we
+//            // just tried to update contains stale data.
+//            System.out.println(e.getMessage());
+//            return null;
+//        }
+//    }
 }

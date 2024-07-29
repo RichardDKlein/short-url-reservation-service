@@ -56,93 +56,93 @@ public interface ShortUrlReservationController {
     Mono<ResponseEntity<StatusAndShortUrlReservationArrayResponse>>
     getAllShortUrlReservations();
 
-    /**
-     * Get a specific Short URL Reservation item.
-     *
-     * <p>Read the specified Short URL Reservation item from the Short URL
-     * Reservation Table in the database, and return it to the client.</p>
-     *
-     * @param shortUrl A string specifying the short URL of the Short URL
-     *                 Reservation item of interest.
-     * @return An HTTP Response Entity containing the status (success or
-     * failure) of the operation, as well as the desired Short URL Reservation
-     * item (if the operation was successful).
-     */
-    @GetMapping("/specific/{shortUrl}")
-    Mono<ResponseEntity<StatusAndShortUrlReservationResponse>>
-    getSpecificShortUrlReservation(@PathVariable String shortUrl);
-
-    /**
-     * Reserve any available short URL.
-     *
-     * <p>Find any available Short URL Reservation item in the database,
-     * and return its short URL string to the client.</p>
-     *
-     * @return An HTTP Response Entity containing the status (success or
-     * failure) of the operation, as well as the short URL string of an
-     * available Short URL Reservation item (if the operation was successful).
-     */
-    @PatchMapping("/reserve/any")
-    Mono<ResponseEntity<StatusAndShortUrlReservationResponse>>
-    reserveAnyShortUrl();
-
-    /**
-     * Reserve a specific short URL.
-     *
-     * <p>Find a specific Short URL Reservation item in the database,
-     * and reserve it (if it's available).</p>
-     *
-     * @param shortUrl A string specifying the short URL to reserve.
-     * @return An HTTP Response Entity containing the status (success
-     * or failure) of the operation.
-     */
-    @PatchMapping("/reserve/specific/{shortUrl}")
-    Mono<ResponseEntity<StatusResponse>>
-    reserveSpecificShortUrl(@PathVariable String shortUrl);
-
-    /**
-     * Reserve ALL Short URL Reservation items in the database.
-     *
-     * <p>This REST endpoint is not available during normal operation of
-     * the Short URL Reservation Service. It is used only during system
-     * testing, to test the use case where a client tries to reserve a
-     * short URL when none are available.</p>
-     *
-     * @return An HTTP Response Entity containing the status (success or
-     * failure) of the operation.
-     */
-    @PatchMapping("/reserve/all")
-    Mono<ResponseEntity<StatusResponse>>
-    reserveAllShortUrls();
-
-    /**
-     * Cancel a specific Short URL Reservation.
-     *
-     * <p>Find the specified Short URL Reservation item in the database
-     * (if it exists), and mark it as available (if it is currently
-     * reserved).</p>
-     *
-     * @param shortUrl A string specifying the Short URL Reservation to
-     *                 be canceled.
-     * @return An HTTP Response Entity containing the status (success or
-     * failure) of the operation.
-     */
-    @PatchMapping("/cancel/specific/{shortUrl}")
-    Mono<ResponseEntity<StatusResponse>>
-    cancelSpecificShortUrlReservation(@PathVariable String shortUrl);
-
-    /**
-     * Cancel ALL Short URL Reservation items in the database.
-     *
-     * <p>This REST endpoint is not available during normal operation of
-     * the Short URL Reservation Service. It is used only during system
-     * testing, to reset the status of all Short URL Reservation items to
-     * 'available`.</p>
-     *
-     * @return An HTTP Response Entity containing the status (success or
-     * failure) of the operation.
-     */
-    @PatchMapping("/cancel/all")
-    Mono<ResponseEntity<StatusResponse>>
-    cancelAllShortUrlReservations();
+//    /**
+//     * Get a specific Short URL Reservation item.
+//     *
+//     * <p>Read the specified Short URL Reservation item from the Short URL
+//     * Reservation Table in the database, and return it to the client.</p>
+//     *
+//     * @param shortUrl A string specifying the short URL of the Short URL
+//     *                 Reservation item of interest.
+//     * @return An HTTP Response Entity containing the status (success or
+//     * failure) of the operation, as well as the desired Short URL Reservation
+//     * item (if the operation was successful).
+//     */
+//    @GetMapping("/specific/{shortUrl}")
+//    Mono<ResponseEntity<StatusAndShortUrlReservationResponse>>
+//    getSpecificShortUrlReservation(@PathVariable String shortUrl);
+//
+//    /**
+//     * Reserve any available short URL.
+//     *
+//     * <p>Find any available Short URL Reservation item in the database,
+//     * and return its short URL string to the client.</p>
+//     *
+//     * @return An HTTP Response Entity containing the status (success or
+//     * failure) of the operation, as well as the short URL string of an
+//     * available Short URL Reservation item (if the operation was successful).
+//     */
+//    @PatchMapping("/reserve/any")
+//    Mono<ResponseEntity<StatusAndShortUrlReservationResponse>>
+//    reserveAnyShortUrl();
+//
+//    /**
+//     * Reserve a specific short URL.
+//     *
+//     * <p>Find a specific Short URL Reservation item in the database,
+//     * and reserve it (if it's available).</p>
+//     *
+//     * @param shortUrl A string specifying the short URL to reserve.
+//     * @return An HTTP Response Entity containing the status (success
+//     * or failure) of the operation.
+//     */
+//    @PatchMapping("/reserve/specific/{shortUrl}")
+//    Mono<ResponseEntity<StatusResponse>>
+//    reserveSpecificShortUrl(@PathVariable String shortUrl);
+//
+//    /**
+//     * Reserve ALL Short URL Reservation items in the database.
+//     *
+//     * <p>This REST endpoint is not available during normal operation of
+//     * the Short URL Reservation Service. It is used only during system
+//     * testing, to test the use case where a client tries to reserve a
+//     * short URL when none are available.</p>
+//     *
+//     * @return An HTTP Response Entity containing the status (success or
+//     * failure) of the operation.
+//     */
+//    @PatchMapping("/reserve/all")
+//    Mono<ResponseEntity<StatusResponse>>
+//    reserveAllShortUrls();
+//
+//    /**
+//     * Cancel a specific Short URL Reservation.
+//     *
+//     * <p>Find the specified Short URL Reservation item in the database
+//     * (if it exists), and mark it as available (if it is currently
+//     * reserved).</p>
+//     *
+//     * @param shortUrl A string specifying the Short URL Reservation to
+//     *                 be canceled.
+//     * @return An HTTP Response Entity containing the status (success or
+//     * failure) of the operation.
+//     */
+//    @PatchMapping("/cancel/specific/{shortUrl}")
+//    Mono<ResponseEntity<StatusResponse>>
+//    cancelSpecificShortUrlReservation(@PathVariable String shortUrl);
+//
+//    /**
+//     * Cancel ALL Short URL Reservation items in the database.
+//     *
+//     * <p>This REST endpoint is not available during normal operation of
+//     * the Short URL Reservation Service. It is used only during system
+//     * testing, to reset the status of all Short URL Reservation items to
+//     * 'available`.</p>
+//     *
+//     * @return An HTTP Response Entity containing the status (success or
+//     * failure) of the operation.
+//     */
+//    @PatchMapping("/cancel/all")
+//    Mono<ResponseEntity<StatusResponse>>
+//    cancelAllShortUrlReservations();
 }

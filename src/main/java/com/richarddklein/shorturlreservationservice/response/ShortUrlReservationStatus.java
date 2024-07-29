@@ -18,4 +18,5 @@ public enum ShortUrlReservationStatus {
     SHORT_URL_FOUND_BUT_NOT_RESERVED,
     NO_SHORT_URL_IS_AVAILABLE,
     NOT_ON_LOCAL_MACHINE,
+    UNKNOWN_ERROR,
 }

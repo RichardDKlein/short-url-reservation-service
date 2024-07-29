@@ -6,6 +6,7 @@
 package com.richarddklein.shorturlreservationservice.controller;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,9 @@ import com.richarddklein.shorturlreservationservice.response.StatusAndShortUrlRe
 import com.richarddklein.shorturlreservationservice.response.StatusResponse;
 import com.richarddklein.shorturlreservationservice.service.ShortUrlReservationService;
 import com.richarddklein.shorturlreservationservice.response.ShortUrlReservationStatus;
+import reactor.core.publisher.Mono;
+
+import static com.richarddklein.shorturlreservationservice.response.ShortUrlReservationStatus.SUCCESS;
 
 /**
  * The production implementation of the Short URL Reservation Controller
@@ -80,175 +84,188 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
     }
 
     @Override
-    public ResponseEntity<StatusAndShortUrlReservationArrayResponse>
+    public Mono<ResponseEntity<StatusAndShortUrlReservationArrayResponse>>
     getAllShortUrlReservations() {
-        List<ShortUrlReservation> shortUrlReservations =
-                shortUrlReservationService.getAllShortUrlReservations();
-        StatusResponse status = new StatusResponse(
-                ShortUrlReservationStatus.SUCCESS,
-                "All Short URL Reservation items successfully retrieved");
-        StatusAndShortUrlReservationArrayResponse response =
-                new StatusAndShortUrlReservationArrayResponse(status, shortUrlReservations);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return shortUrlReservationService.getAllShortUrlReservations()
+        .map(statusAndShortUrlReservationArray -> {
+            ShortUrlReservationStatus shortUrlUserStatus = statusAndShortUrlReservationArray.getStatus();
+            List<ShortUrlReservation> users = statusAndShortUrlReservationArray.getShortUrlReservations();
+
+            HttpStatus httpStatus;
+            String message;
+
+            if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
+                httpStatus = HttpStatus.OK;
+                message = "All short URL reservations successfully retrieved";
+            } else {
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                message = "An unknown error occurred";
+            }
+
+            return new ResponseEntity<>(new StatusAndShortUrlReservationArrayResponse(
+                    new StatusResponse(shortUrlUserStatus, message), users),
+                    httpStatus);
+        });
     }
 
-    @Override
-    public ResponseEntity<StatusAndShortUrlReservationResponse>
-    getSpecificShortUrlReservation(@PathVariable String shortUrl) {
-        ShortUrlReservation shortUrlReservation =
-                shortUrlReservationService.getSpecificShortUrlReservation(shortUrl);
-
-        HttpStatus httpStatus;
-        StatusResponse status;
-
-        if (shortUrlReservation == null) {
-            httpStatus = HttpStatus.NOT_FOUND;
-            status = new StatusResponse(
-                    ShortUrlReservationStatus.SHORT_URL_NOT_FOUND,
-                    String.format("Short URL '%s' not found", shortUrl)
-            );
-            shortUrlReservation = new ShortUrlReservation(
-                    shortUrl, "<not found>");
-        } else {
-            httpStatus = HttpStatus.OK;
-            status = new StatusResponse(
-                    ShortUrlReservationStatus.SUCCESS,
-                    String.format("Short URL '%s' successfully retrieved", shortUrl)
-            );
-        }
-        StatusAndShortUrlReservationResponse response =
-                new StatusAndShortUrlReservationResponse(status, shortUrlReservation);
-
-        return new ResponseEntity<>(response, httpStatus);
-    }
-
-    @Override
-    public ResponseEntity<StatusAndShortUrlReservationResponse>
-    reserveAnyShortUrl() {
-        HttpStatus httpStatus;
-        StatusResponse status;
-
-        ShortUrlReservation shortUrlReservation;
-        try {
-            shortUrlReservation = shortUrlReservationService.reserveAnyShortUrl();
-
-            httpStatus = HttpStatus.OK;
-            status = new StatusResponse(
-                    ShortUrlReservationStatus.SUCCESS,
-                    String.format(
-                            "Short URL '%s' successfully reserved",
-                            shortUrlReservation.getShortUrl())
-            );
-        } catch (NoShortUrlsAvailableException e) {
-            httpStatus = HttpStatus.NOT_FOUND;
-            status = new StatusResponse(
-                    ShortUrlReservationStatus.NO_SHORT_URL_IS_AVAILABLE,
-                    String.format("No short URLs are available")
-            );
-            shortUrlReservation = new ShortUrlReservation(
-                    "<not found>",
-                    "<not found>");
-        }
-
-        StatusAndShortUrlReservationResponse response =
-                new StatusAndShortUrlReservationResponse(
-                        status, shortUrlReservation);
-
-        return new ResponseEntity<>(response, httpStatus);
-    }
-
-    @Override
-    public ResponseEntity<StatusResponse>
-    reserveSpecificShortUrl(@PathVariable String shortUrl) {
-        ShortUrlReservationStatus shortUrlReservationStatus =
-                shortUrlReservationService.reserveSpecificShortUrl(shortUrl);
-
-        HttpStatus httpStatus;
-        StatusResponse response;
-
-        if (shortUrlReservationStatus == ShortUrlReservationStatus.SHORT_URL_NOT_FOUND) {
-            httpStatus = HttpStatus.NOT_FOUND;
-            response = new StatusResponse(
-                    ShortUrlReservationStatus.SHORT_URL_NOT_FOUND,
-                    String.format("Short URL '%s' not found", shortUrl)
-            );
-        } else if (shortUrlReservationStatus ==
-                ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_AVAILABLE) {
-
-            httpStatus = HttpStatus.CONFLICT;
-            response = new StatusResponse(
-                    ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_AVAILABLE,
-                    String.format("Short URL '%s' was found, but is not available",
-                            shortUrl)
-            );
-        } else {
-            httpStatus = HttpStatus.OK;
-            response = new StatusResponse(
-                    ShortUrlReservationStatus.SUCCESS,
-                    String.format("Short URL '%s' successfully reserved", shortUrl)
-            );
-        }
-        return new ResponseEntity<>(response, httpStatus);
-    }
-
-    @Override
-    public ResponseEntity<StatusResponse>
-    reserveAllShortUrls() {
-        shortUrlReservationService.reserveAllShortUrls();
-
-        StatusResponse response = new StatusResponse(
-                ShortUrlReservationStatus.SUCCESS,
-                "All short URL reservations successfully reserved");
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<StatusResponse>
-    cancelSpecificShortUrlReservation(@PathVariable String shortUrl) {
-        ShortUrlReservationStatus shortUrlReservationStatus =
-                shortUrlReservationService.cancelSpecificShortUrlReservation(shortUrl);
-
-        HttpStatus httpStatus;
-        StatusResponse response;
-
-        if (shortUrlReservationStatus == ShortUrlReservationStatus.SHORT_URL_NOT_FOUND) {
-
-            httpStatus = HttpStatus.NOT_FOUND;
-            response = new StatusResponse(
-                    ShortUrlReservationStatus.SHORT_URL_NOT_FOUND,
-                    String.format("Short URL '%s' not found", shortUrl)
-            );
-        } else if (shortUrlReservationStatus ==
-                ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_RESERVED) {
-
-            httpStatus = HttpStatus.CONFLICT;
-            response = new StatusResponse(
-                    ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_RESERVED,
-                    String.format("Short URL '%s' was found, but is not reserved", shortUrl)
-            );
-        } else {
-            httpStatus = HttpStatus.OK;
-            response = new StatusResponse(
-                    ShortUrlReservationStatus.SUCCESS,
-                    String.format("Short URL '%s' reservation successfully canceled", shortUrl)
-            );
-        }
-
-        return new ResponseEntity<>(response, httpStatus);
-    }
-
-    @Override
-    public ResponseEntity<StatusResponse>
-    cancelAllShortUrlReservations() {
-        shortUrlReservationService.cancelAllShortUrlReservations();
-
-        StatusResponse response = new StatusResponse(
-                ShortUrlReservationStatus.SUCCESS,
-                "All short URL reservations successfully canceled");
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+//
+//    @Override
+//    public ResponseEntity<StatusAndShortUrlReservationResponse>
+//    getSpecificShortUrlReservation(@PathVariable String shortUrl) {
+//        ShortUrlReservation shortUrlReservation =
+//                shortUrlReservationService.getSpecificShortUrlReservation(shortUrl);
+//
+//        HttpStatus httpStatus;
+//        StatusResponse status;
+//
+//        if (shortUrlReservation == null) {
+//            httpStatus = HttpStatus.NOT_FOUND;
+//            status = new StatusResponse(
+//                    ShortUrlReservationStatus.SHORT_URL_NOT_FOUND,
+//                    String.format("Short URL '%s' not found", shortUrl)
+//            );
+//            shortUrlReservation = new ShortUrlReservation(
+//                    shortUrl, "<not found>");
+//        } else {
+//            httpStatus = HttpStatus.OK;
+//            status = new StatusResponse(
+//                    ShortUrlReservationStatus.SUCCESS,
+//                    String.format("Short URL '%s' successfully retrieved", shortUrl)
+//            );
+//        }
+//        StatusAndShortUrlReservationResponse response =
+//                new StatusAndShortUrlReservationResponse(status, shortUrlReservation);
+//
+//        return new ResponseEntity<>(response, httpStatus);
+//    }
+//
+//    @Override
+//    public ResponseEntity<StatusAndShortUrlReservationResponse>
+//    reserveAnyShortUrl() {
+//        HttpStatus httpStatus;
+//        StatusResponse status;
+//
+//        ShortUrlReservation shortUrlReservation;
+//        try {
+//            shortUrlReservation = shortUrlReservationService.reserveAnyShortUrl();
+//
+//            httpStatus = HttpStatus.OK;
+//            status = new StatusResponse(
+//                    ShortUrlReservationStatus.SUCCESS,
+//                    String.format(
+//                            "Short URL '%s' successfully reserved",
+//                            shortUrlReservation.getShortUrl())
+//            );
+//        } catch (NoShortUrlsAvailableException e) {
+//            httpStatus = HttpStatus.NOT_FOUND;
+//            status = new StatusResponse(
+//                    ShortUrlReservationStatus.NO_SHORT_URL_IS_AVAILABLE,
+//                    String.format("No short URLs are available")
+//            );
+//            shortUrlReservation = new ShortUrlReservation(
+//                    "<not found>",
+//                    "<not found>");
+//        }
+//
+//        StatusAndShortUrlReservationResponse response =
+//                new StatusAndShortUrlReservationResponse(
+//                        status, shortUrlReservation);
+//
+//        return new ResponseEntity<>(response, httpStatus);
+//    }
+//
+//    @Override
+//    public ResponseEntity<StatusResponse>
+//    reserveSpecificShortUrl(@PathVariable String shortUrl) {
+//        ShortUrlReservationStatus shortUrlReservationStatus =
+//                shortUrlReservationService.reserveSpecificShortUrl(shortUrl);
+//
+//        HttpStatus httpStatus;
+//        StatusResponse response;
+//
+//        if (shortUrlReservationStatus == ShortUrlReservationStatus.SHORT_URL_NOT_FOUND) {
+//            httpStatus = HttpStatus.NOT_FOUND;
+//            response = new StatusResponse(
+//                    ShortUrlReservationStatus.SHORT_URL_NOT_FOUND,
+//                    String.format("Short URL '%s' not found", shortUrl)
+//            );
+//        } else if (shortUrlReservationStatus ==
+//                ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_AVAILABLE) {
+//
+//            httpStatus = HttpStatus.CONFLICT;
+//            response = new StatusResponse(
+//                    ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_AVAILABLE,
+//                    String.format("Short URL '%s' was found, but is not available",
+//                            shortUrl)
+//            );
+//        } else {
+//            httpStatus = HttpStatus.OK;
+//            response = new StatusResponse(
+//                    ShortUrlReservationStatus.SUCCESS,
+//                    String.format("Short URL '%s' successfully reserved", shortUrl)
+//            );
+//        }
+//        return new ResponseEntity<>(response, httpStatus);
+//    }
+//
+//    @Override
+//    public ResponseEntity<StatusResponse>
+//    reserveAllShortUrls() {
+//        shortUrlReservationService.reserveAllShortUrls();
+//
+//        StatusResponse response = new StatusResponse(
+//                ShortUrlReservationStatus.SUCCESS,
+//                "All short URL reservations successfully reserved");
+//
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
+//
+//    @Override
+//    public ResponseEntity<StatusResponse>
+//    cancelSpecificShortUrlReservation(@PathVariable String shortUrl) {
+//        ShortUrlReservationStatus shortUrlReservationStatus =
+//                shortUrlReservationService.cancelSpecificShortUrlReservation(shortUrl);
+//
+//        HttpStatus httpStatus;
+//        StatusResponse response;
+//
+//        if (shortUrlReservationStatus == ShortUrlReservationStatus.SHORT_URL_NOT_FOUND) {
+//
+//            httpStatus = HttpStatus.NOT_FOUND;
+//            response = new StatusResponse(
+//                    ShortUrlReservationStatus.SHORT_URL_NOT_FOUND,
+//                    String.format("Short URL '%s' not found", shortUrl)
+//            );
+//        } else if (shortUrlReservationStatus ==
+//                ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_RESERVED) {
+//
+//            httpStatus = HttpStatus.CONFLICT;
+//            response = new StatusResponse(
+//                    ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_RESERVED,
+//                    String.format("Short URL '%s' was found, but is not reserved", shortUrl)
+//            );
+//        } else {
+//            httpStatus = HttpStatus.OK;
+//            response = new StatusResponse(
+//                    ShortUrlReservationStatus.SUCCESS,
+//                    String.format("Short URL '%s' reservation successfully canceled", shortUrl)
+//            );
+//        }
+//
+//        return new ResponseEntity<>(response, httpStatus);
+//    }
+//
+//    @Override
+//    public ResponseEntity<StatusResponse>
+//    cancelAllShortUrlReservations() {
+//        shortUrlReservationService.cancelAllShortUrlReservations();
+//
+//        StatusResponse response = new StatusResponse(
+//                ShortUrlReservationStatus.SUCCESS,
+//                "All short URL reservations successfully canceled");
+//
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
 
     // ------------------------------------------------------------------------
     // PRIVATE METHODS

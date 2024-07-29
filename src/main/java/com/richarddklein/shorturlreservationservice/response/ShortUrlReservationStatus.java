@@ -13,10 +13,11 @@ package com.richarddklein.shorturlreservationservice.response;
  */
 public enum ShortUrlReservationStatus {
     SUCCESS,
-    SHORT_URL_NOT_FOUND,
-    SHORT_URL_FOUND_BUT_NOT_AVAILABLE,
-    SHORT_URL_FOUND_BUT_NOT_RESERVED,
+    MISSING_SHORT_URL,
     NO_SHORT_URL_IS_AVAILABLE,
+    NO_SUCH_SHORT_URL,
     NOT_ON_LOCAL_MACHINE,
+    SHORT_URL_ALREADY_RESERVED,
+    SHORT_URL_NOT_RESERVED,
     UNKNOWN_ERROR,
 }

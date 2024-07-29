@@ -201,13 +201,15 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         });
     }
 
-//    @Override
-//    public ShortUrlReservation getSpecificShortUrlReservation(String shortUrl) {
-//        return shortUrlReservationTable.getItem(req -> req
-//                .key(key -> key.partitionValue(shortUrl))
-//                .consistentRead(true));
-//    }
-//
+    @Override
+    public Mono<ShortUrlReservation>
+    getSpecificShortUrlReservation(String shortUrl) {
+        ShortUrlReservation key = new ShortUrlReservation();
+        key.setShortUrl(shortUrl);
+        return Mono.fromFuture(shortUrlReservationTable.getItem(key))
+                .switchIfEmpty(Mono.empty());
+    }
+
 //    @Override
 //    public ShortUrlReservation reserveAnyShortUrl() throws NoShortUrlsAvailableException {
 //        ShortUrlReservation updatedShortUrlReservation;

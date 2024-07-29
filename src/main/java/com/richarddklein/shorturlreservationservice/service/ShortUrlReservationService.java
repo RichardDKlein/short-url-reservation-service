@@ -29,9 +29,9 @@ public interface ShortUrlReservationService {
     Mono<StatusAndShortUrlReservationArray>
     getAllShortUrlReservations();
 
-//    Mono<StatusAndShortUrlReservation>
-//    getSpecificShortUrlReservation(String shortUrl);
-//
+    Mono<StatusAndShortUrlReservation>
+    getSpecificShortUrlReservation(String shortUrl);
+
 //    Mono<ShortUrlReservation>
 //    reserveAnyShortUrl();
 //

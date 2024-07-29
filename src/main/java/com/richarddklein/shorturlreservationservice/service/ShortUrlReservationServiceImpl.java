@@ -8,6 +8,7 @@ package com.richarddklein.shorturlreservationservice.service;
 import java.util.List;
 import java.util.Objects;
 
+import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Service;
@@ -63,11 +64,22 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
         return shortUrlReservationDao.getAllShortUrlReservations();
     }
 
-//    @Override
-//    public ShortUrlReservation getSpecificShortUrlReservation(String shortUrl) {
-//        return shortUrlReservationDao.getSpecificShortUrlReservation(shortUrl);
-//    }
-//
+    @Override
+    public Mono<StatusAndShortUrlReservation>
+    getSpecificShortUrlReservation(String shortUrl) {
+        if (shortUrl == null || shortUrl.isBlank()) {
+            return Mono.just(new StatusAndShortUrlReservation(
+                    ShortUrlReservationStatus.MISSING_SHORT_URL, null));
+        }
+        return shortUrlReservationDao.getSpecificShortUrlReservation(shortUrl)
+        .map(shortUrlReservation -> {
+            return new StatusAndShortUrlReservation(
+                    ShortUrlReservationStatus.SUCCESS, shortUrlReservation);
+        })
+        .switchIfEmpty(Mono.just(new StatusAndShortUrlReservation(
+                ShortUrlReservationStatus.NO_SUCH_SHORT_URL, null)));
+    }
+
 //    @Override
 //    public ShortUrlReservation reserveAnyShortUrl() throws NoShortUrlsAvailableException {
 //        return shortUrlReservationDao.reserveAnyShortUrl();

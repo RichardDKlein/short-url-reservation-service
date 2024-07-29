@@ -56,22 +56,22 @@ public interface ShortUrlReservationController {
     Mono<ResponseEntity<StatusAndShortUrlReservationArrayResponse>>
     getAllShortUrlReservations();
 
-//    /**
-//     * Get a specific Short URL Reservation item.
-//     *
-//     * <p>Read the specified Short URL Reservation item from the Short URL
-//     * Reservation Table in the database, and return it to the client.</p>
-//     *
-//     * @param shortUrl A string specifying the short URL of the Short URL
-//     *                 Reservation item of interest.
-//     * @return An HTTP Response Entity containing the status (success or
-//     * failure) of the operation, as well as the desired Short URL Reservation
-//     * item (if the operation was successful).
-//     */
-//    @GetMapping("/specific/{shortUrl}")
-//    Mono<ResponseEntity<StatusAndShortUrlReservationResponse>>
-//    getSpecificShortUrlReservation(@PathVariable String shortUrl);
-//
+    /**
+     * Get a specific Short URL Reservation item.
+     *
+     * <p>Read the specified Short URL Reservation item from the Short URL
+     * Reservation Table in the database, and return it to the client.</p>
+     *
+     * @param shortUrl A string specifying the short URL of the Short URL
+     *                 Reservation item of interest.
+     * @return An HTTP Response Entity containing the status (success or
+     * failure) of the operation, as well as the desired Short URL Reservation
+     * item (if the operation was successful).
+     */
+    @GetMapping("/specific/{shortUrl}")
+    Mono<ResponseEntity<StatusAndShortUrlReservationResponse>>
+    getSpecificShortUrlReservation(@PathVariable String shortUrl);
+
 //    /**
 //     * Reserve any available short URL.
 //     *

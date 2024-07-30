@@ -76,7 +76,7 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
             return new StatusAndShortUrlReservation(
                     ShortUrlReservationStatus.SUCCESS, shortUrlReservation);
         })
-        .switchIfEmpty(Mono.just(new StatusAndShortUrlReservation(
+        .onErrorResume(e -> Mono.just(new StatusAndShortUrlReservation(
                 ShortUrlReservationStatus.NO_SUCH_SHORT_URL, null)));
     }
 

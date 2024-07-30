@@ -12,6 +12,7 @@ import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
 import com.richarddklein.shorturlreservationservice.exception.InconsistentDataException;
+import com.richarddklein.shorturlreservationservice.exception.NoSuchShortUrlException;
 import org.springframework.stereotype.Repository;
 
 import reactor.core.publisher.Flux;
@@ -212,7 +213,10 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         ShortUrlReservation key = new ShortUrlReservation();
         key.setShortUrl(shortUrl);
         return Mono.fromFuture(shortUrlReservationTable.getItem(key))
-                .switchIfEmpty(Mono.empty());
+        .onErrorResume(e -> {
+            System.out.println("====> " + e.getMessage());
+            return Mono.error(new NoSuchShortUrlException());
+        });
     }
 
     @Override
@@ -484,7 +488,8 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
                     } else {
                         return Mono.error(new InconsistentDataException());
                     }
-                });
+                })
+                .onErrorResume(Mono::error);
             }
         })
         .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))

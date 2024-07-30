@@ -213,10 +213,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         ShortUrlReservation key = new ShortUrlReservation();
         key.setShortUrl(shortUrl);
         return Mono.fromFuture(shortUrlReservationTable.getItem(key))
-        .onErrorResume(e -> {
-            System.out.println("====> " + e.getMessage());
-            return Mono.error(new NoSuchShortUrlException());
-        });
+        .switchIfEmpty(Mono.error(new NoSuchShortUrlException()));
     }
 
     @Override

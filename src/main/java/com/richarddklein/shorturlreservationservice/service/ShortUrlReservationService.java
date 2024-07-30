@@ -35,9 +35,9 @@ public interface ShortUrlReservationService {
     Mono<StatusAndShortUrlReservation>
     reserveAnyShortUrl();
 
-//    Mono<ShortUrlReservationStatus>
-//    reserveSpecificShortUrl(String shortUrl);
-//
+    Mono<ShortUrlReservationStatus>
+    reserveSpecificShortUrl(String shortUrl);
+
 //    Mono<ShortUrlReservationStatus>
 //    reserveAllShortUrls();
 //

@@ -239,23 +239,27 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         });
     }
 
-//    @Override
-//    public ShortUrlReservationStatus reserveSpecificShortUrl(String shortUrl) {
-//        ShortUrlReservation updatedShortUrlReservation;
-//        do {
-//            ShortUrlReservation shortUrlReservation = getSpecificShortUrlReservation(shortUrl);
-//            if (shortUrlReservation == null) {
-//                return ShortUrlReservationStatus.SHORT_URL_NOT_FOUND;
-//            }
-//            if (!shortUrlReservation.isReallyAvailable()) {
-//                return ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_AVAILABLE;
-//            }
-//            shortUrlReservation.setIsAvailable(null);
-//            updatedShortUrlReservation = updateShortUrlReservation(shortUrlReservation);
-//        } while (updatedShortUrlReservation == null);
-//        return ShortUrlReservationStatus.SUCCESS;
-//    }
-//
+    @Override
+    public Mono<ShortUrlReservationStatus>
+    reserveSpecificShortUrl(String shortUrl) {
+        return getSpecificShortUrlReservation(shortUrl)
+        .flatMap(shortUrlReservation -> {
+            if (!shortUrlReservation.isReallyAvailable()) {
+                return Mono.just(ShortUrlReservationStatus.SHORT_URL_ALREADY_RESERVED);
+            }
+            shortUrlReservation.setIsAvailable(null);
+            return updateShortUrlReservation(shortUrlReservation)
+            .map(updatedShortUrlReservation -> ShortUrlReservationStatus.SUCCESS)
+            .onErrorResume(e -> {
+                System.out.println("====> " + e.getMessage());
+                return Mono.just(ShortUrlReservationStatus.UNKNOWN_ERROR);
+            });
+        }).onErrorResume(e -> {
+            System.out.println("====> " + e.getMessage());
+            return Mono.just(ShortUrlReservationStatus.NO_SUCH_SHORT_URL);
+        });
+    }
+
 //    @Override
 //    public void reserveAllShortUrls() {
 //        SdkIterable<Page<ShortUrlReservation>> pagedResult =

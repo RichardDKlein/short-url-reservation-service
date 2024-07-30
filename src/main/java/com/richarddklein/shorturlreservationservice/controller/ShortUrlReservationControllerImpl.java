@@ -186,40 +186,49 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
         });
     }
 
-//    @Override
-//    public ResponseEntity<StatusResponse>
-//    reserveSpecificShortUrl(@PathVariable String shortUrl) {
-//        ShortUrlReservationStatus shortUrlReservationStatus =
-//                shortUrlReservationService.reserveSpecificShortUrl(shortUrl);
-//
-//        HttpStatus httpStatus;
-//        StatusResponse response;
-//
-//        if (shortUrlReservationStatus == ShortUrlReservationStatus.SHORT_URL_NOT_FOUND) {
-//            httpStatus = HttpStatus.NOT_FOUND;
-//            response = new StatusResponse(
-//                    ShortUrlReservationStatus.SHORT_URL_NOT_FOUND,
-//                    String.format("Short URL '%s' not found", shortUrl)
-//            );
-//        } else if (shortUrlReservationStatus ==
-//                ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_AVAILABLE) {
-//
-//            httpStatus = HttpStatus.CONFLICT;
-//            response = new StatusResponse(
-//                    ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_AVAILABLE,
-//                    String.format("Short URL '%s' was found, but is not available",
-//                            shortUrl)
-//            );
-//        } else {
-//            httpStatus = HttpStatus.OK;
-//            response = new StatusResponse(
-//                    ShortUrlReservationStatus.SUCCESS,
-//                    String.format("Short URL '%s' successfully reserved", shortUrl)
-//            );
-//        }
-//        return new ResponseEntity<>(response, httpStatus);
-//    }
-//
+    @Override
+    public Mono<ResponseEntity<StatusResponse>>
+    reserveSpecificShortUrl(@PathVariable String shortUrl) {
+        return shortUrlReservationService.reserveSpecificShortUrl(shortUrl)
+        .map(shortUrlReservationStatus -> {
+
+            HttpStatus httpStatus;
+            String message;
+
+            switch (shortUrlReservationStatus) {
+                case SUCCESS:
+                    httpStatus = HttpStatus.OK;
+                    message = String.format(
+                            "Short URL '%s' successfully reserved",
+                            shortUrl);
+                    break;
+
+                case NO_SUCH_SHORT_URL:
+                    httpStatus = HttpStatus.NOT_FOUND;
+                    message = String.format(
+                            "Short URL '%s' does not exist",
+                            shortUrl);
+                    break;
+
+                case SHORT_URL_ALREADY_RESERVED:
+                    httpStatus = HttpStatus.CONFLICT;
+                    message = String.format(
+                            "Short URL '%s' has already been reserved",
+                            shortUrl);
+                    break;
+
+                default:
+                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                    message = "An unknown error occurred";
+                    break;
+            };
+
+            return new ResponseEntity<>(
+                    new StatusResponse(shortUrlReservationStatus, message),
+                    httpStatus);
+        });
+    }
+
 //    @Override
 //    public ResponseEntity<StatusResponse>
 //    reserveAllShortUrls() {

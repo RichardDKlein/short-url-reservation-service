@@ -498,8 +498,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             }
         })
         .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
-                .filter(throwable ->
-                        throwable instanceof InconsistentDataException));
+                .filter(e -> e instanceof InconsistentDataException));
     }
 
     private Mono<ShortUrlReservation>
@@ -518,8 +517,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             return Mono.error(e);
         })
         .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
-                .filter(throwable ->
-                        throwable instanceof ConditionalCheckFailedException)
+                .filter(e -> e instanceof ConditionalCheckFailedException)
         );
     }
 }

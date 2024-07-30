@@ -263,16 +263,12 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     @Override
     public Mono<ShortUrlReservationStatus>
     reserveAllShortUrls() {
-        SdkPublisher<Page<ShortUrlReservation>> pagedResult =
-                shortUrlReservationTable.scan(req -> req
+        return Flux.from(shortUrlReservationTable.scan(req -> req
                         .limit(SCAN_LIMIT)
                         .filterExpression(Expression.builder()
                                 .expression("attribute_exists(isAvailable)")
-                                .build())
-                );
-
-        return Flux.from(pagedResult)
-        .flatMap(page -> Flux.fromIterable(page.items()))
+                                .build()))
+                        .items())
         .flatMap(shortUrlReservation -> {
             shortUrlReservation.setIsAvailable(null);
             return updateShortUrlReservation(shortUrlReservation)
@@ -472,11 +468,9 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
      */
     private Mono<ShortUrlReservation>
     findAvailableShortUrlReservation() {
-        SdkPublisher<Page<ShortUrlReservation>> pagedResult =
+        return Mono.from(
                 shortUrlReservationTable.index("isAvailable-index")
-                        .scan(req -> req.limit(1));
-
-        return Mono.from(pagedResult)
+                        .scan(req -> req.limit(1)))
         .flatMap(page -> {
             if (page.items().isEmpty()) {
                 return Mono.error(new NoShortUrlsAvailableException());

@@ -260,26 +260,30 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         });
     }
 
-//    @Override
-//    public void reserveAllShortUrls() {
-//        SdkIterable<Page<ShortUrlReservation>> pagedResult =
-//                shortUrlReservationTable.scan(req -> req
-//                        .limit(SCAN_LIMIT)
-//                        .filterExpression(Expression.builder()
-//                                .expression("attribute_exists(isAvailable)")
-//                                .build())
-//                );
-//
-//        for (Page<ShortUrlReservation> page : pagedResult) {
-//            for (ShortUrlReservation shortUrlReservation : page.items()) {
-//                shortUrlReservation.setIsAvailable(null);
-//                // Don't have to check for update failure, since we're in
-//                // system maintenance mode.
-//                updateShortUrlReservation(shortUrlReservation);
-//            }
-//        }
-//    }
-//
+    @Override
+    public Mono<ShortUrlReservationStatus>
+    reserveAllShortUrls() {
+        SdkPublisher<Page<ShortUrlReservation>> pagedResult =
+                shortUrlReservationTable.scan(req -> req
+                        .limit(SCAN_LIMIT)
+                        .filterExpression(Expression.builder()
+                                .expression("attribute_exists(isAvailable)")
+                                .build())
+                );
+
+        return Flux.from(pagedResult)
+        .flatMap(page -> Flux.fromIterable(page.items()))
+        .flatMap(shortUrlReservation -> {
+            shortUrlReservation.setIsAvailable(null);
+            return updateShortUrlReservation(shortUrlReservation)
+            .onErrorResume(e -> {
+                System.err.println(e.getMessage());
+                return Mono.empty();
+            });
+        })
+        .then(Mono.just(ShortUrlReservationStatus.SUCCESS));
+    }
+
 //    @Override
 //    public void cancelAllShortUrlReservations() {
 //        SdkIterable<Page<ShortUrlReservation>> pagedResult =

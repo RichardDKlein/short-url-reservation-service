@@ -80,11 +80,12 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
                 ShortUrlReservationStatus.NO_SUCH_SHORT_URL, null)));
     }
 
-//    @Override
-//    public ShortUrlReservation reserveAnyShortUrl() throws NoShortUrlsAvailableException {
-//        return shortUrlReservationDao.reserveAnyShortUrl();
-//    }
-//
+    @Override
+    public Mono<StatusAndShortUrlReservation>
+    reserveAnyShortUrl() {
+        return shortUrlReservationDao.reserveAnyShortUrl();
+    }
+
 //    @Override
 //    public ShortUrlReservationStatus reserveSpecificShortUrl(String shortUrl) {
 //        return shortUrlReservationDao.reserveSpecificShortUrl(shortUrl);

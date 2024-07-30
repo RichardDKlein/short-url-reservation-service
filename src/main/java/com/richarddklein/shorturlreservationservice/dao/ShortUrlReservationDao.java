@@ -31,9 +31,9 @@ public interface ShortUrlReservationDao {
     Mono<ShortUrlReservation>
     getSpecificShortUrlReservation(String shortUrl);
 
-//    Mono<StatusAndShortUrlReservation>
-//    reserveAnyShortUrl() throws NoShortUrlsAvailableException;
-//
+    Mono<StatusAndShortUrlReservation>
+    reserveAnyShortUrl();
+
 //    Mono<ShortUrlReservationStatus>
 //    reserveSpecificShortUrl(String shortUrl);
 //

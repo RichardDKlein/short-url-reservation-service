@@ -92,19 +92,21 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
 
     @Override
     public Mono<ShortUrlReservationStatus>
+    cancelSpecificShortUrlReservation(String shortUrl) {
+        return shortUrlReservationDao.cancelSpecificShortUrlReservation(shortUrl);
+    }
+
+    @Override
+    public Mono<ShortUrlReservationStatus>
     reserveAllShortUrls() {
         return shortUrlReservationDao.reserveAllShortUrls();
     }
 
-//    @Override
-//    public ShortUrlReservationStatus cancelSpecificShortUrlReservation(String shortUrl) {
-//        return shortUrlReservationDao.cancelSpecificShortUrlReservation(shortUrl);
-//    }
-//
-//    @Override
-//    public void cancelAllShortUrlReservations() {
-//        shortUrlReservationDao.cancelAllShortUrlReservations();
-//    }
+    @Override
+    public Mono<ShortUrlReservationStatus>
+    cancelAllShortUrlReservations() {
+        return shortUrlReservationDao.cancelAllShortUrlReservations();
+    }
 
     // ------------------------------------------------------------------------
     // PRIVATE METHODS

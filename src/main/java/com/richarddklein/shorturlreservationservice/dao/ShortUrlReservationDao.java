@@ -38,11 +38,11 @@ public interface ShortUrlReservationDao {
     reserveSpecificShortUrl(String shortUrl);
 
     Mono<ShortUrlReservationStatus>
+    cancelSpecificShortUrlReservation(String shortUrl);
+
+    Mono<ShortUrlReservationStatus>
     reserveAllShortUrls();
 
-//    Mono<ShortUrlReservationStatus>
-//    cancelSpecificShortUrlReservation(String shortUrl);
-//
-//    Mono<ShortUrlReservationStatus>
-//    cancelAllShortUrlReservations();
+    Mono<ShortUrlReservationStatus>
+    cancelAllShortUrlReservations();
 }

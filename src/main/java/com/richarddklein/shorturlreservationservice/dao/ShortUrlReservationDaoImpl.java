@@ -262,6 +262,27 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
 
     @Override
     public Mono<ShortUrlReservationStatus>
+    cancelSpecificShortUrlReservation(String shortUrl) {
+        return getSpecificShortUrlReservation(shortUrl)
+        .flatMap(shortUrlReservation -> {
+            if (shortUrlReservation.isReallyAvailable()) {
+                return Mono.just(ShortUrlReservationStatus.SHORT_URL_NOT_RESERVED);
+            }
+            shortUrlReservation.setIsAvailable(shortUrl);
+            return updateShortUrlReservation(shortUrlReservation)
+                    .map(updatedShortUrlReservation -> ShortUrlReservationStatus.SUCCESS)
+                    .onErrorResume(e -> {
+                        System.out.println("====> " + e.getMessage());
+                        return Mono.just(ShortUrlReservationStatus.UNKNOWN_ERROR);
+                    });
+        }).onErrorResume(e -> {
+            System.out.println("====> " + e.getMessage());
+            return Mono.just(ShortUrlReservationStatus.NO_SUCH_SHORT_URL);
+        });
+    }
+
+    @Override
+    public Mono<ShortUrlReservationStatus>
     reserveAllShortUrls() {
         return Flux.from(shortUrlReservationTable.scan(req -> req
                         .limit(SCAN_LIMIT)
@@ -280,40 +301,25 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         .then(Mono.just(ShortUrlReservationStatus.SUCCESS));
     }
 
-//    @Override
-//    public void cancelAllShortUrlReservations() {
-//        SdkIterable<Page<ShortUrlReservation>> pagedResult =
-//                shortUrlReservationTable.scan(req -> req
-//                        .limit(SCAN_LIMIT)
-//                        .filterExpression(Expression.builder()
-//                                .expression("attribute_not_exists(isAvailable)")
-//                                .build()));
-//        for (Page<ShortUrlReservation> page : pagedResult) {
-//            for (ShortUrlReservation shortUrlReservation : page.items()) {
-//                shortUrlReservation.setIsAvailable(shortUrlReservation.getShortUrl());
-//                // Don't have to check for update failure, since we're in
-//                // system maintenance mode.
-//                updateShortUrlReservation(shortUrlReservation);
-//            }
-//        }
-//    }
-//
-//    @Override
-//    public ShortUrlReservationStatus cancelSpecificShortUrlReservation(String shortUrl) {
-//        ShortUrlReservation updatedShortUrlReservation;
-//        do {
-//            ShortUrlReservation shortUrlReservation = getSpecificShortUrlReservation(shortUrl);
-//            if (shortUrlReservation == null) {
-//                return ShortUrlReservationStatus.SHORT_URL_NOT_FOUND;
-//            }
-//            if (shortUrlReservation.isReallyAvailable()) {
-//                return ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_RESERVED;
-//            }
-//            shortUrlReservation.setIsAvailable(shortUrl);
-//            updatedShortUrlReservation = updateShortUrlReservation(shortUrlReservation);
-//        } while (updatedShortUrlReservation == null);
-//        return ShortUrlReservationStatus.SUCCESS;
-//    }
+    @Override
+    public Mono<ShortUrlReservationStatus>
+    cancelAllShortUrlReservations() {
+        return Flux.from(shortUrlReservationTable.scan(req -> req
+                                .limit(SCAN_LIMIT)
+                                .filterExpression(Expression.builder()
+                                        .expression("attribute_not_exists(isAvailable)")
+                                        .build()))
+                        .items())
+        .flatMap(shortUrlReservation -> {
+            shortUrlReservation.setIsAvailable(shortUrlReservation.getShortUrl());
+            return updateShortUrlReservation(shortUrlReservation)
+                    .onErrorResume(e -> {
+                        System.err.println(e.getMessage());
+                        return Mono.empty();
+                    });
+        })
+        .then(Mono.just(ShortUrlReservationStatus.SUCCESS));
+    }
 
     // ------------------------------------------------------------------------
     // PRIVATE METHODS

@@ -232,6 +232,49 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
 
     @Override
     public Mono<ResponseEntity<StatusResponse>>
+    cancelSpecificShortUrlReservation(@PathVariable String shortUrl) {
+        return shortUrlReservationService.cancelSpecificShortUrlReservation(shortUrl)
+        .map(shortUrlReservationStatus -> {
+
+            HttpStatus httpStatus;
+            String message;
+
+            switch (shortUrlReservationStatus) {
+                case SUCCESS:
+                    httpStatus = HttpStatus.OK;
+                    message = String.format(
+                            "Short URL '%s' successfully canceled",
+                            shortUrl);
+                    break;
+
+                case NO_SUCH_SHORT_URL:
+                    httpStatus = HttpStatus.NOT_FOUND;
+                    message = String.format(
+                            "Short URL '%s' does not exist",
+                            shortUrl);
+                    break;
+
+                case SHORT_URL_NOT_RESERVED:
+                    httpStatus = HttpStatus.CONFLICT;
+                    message = String.format(
+                            "Short URL '%s' cannot be canceled, because it has not been reserved",
+                            shortUrl);
+                    break;
+
+                default:
+                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                    message = "An unknown error occurred";
+                    break;
+            };
+
+            return new ResponseEntity<>(
+                    new StatusResponse(shortUrlReservationStatus, message),
+                    httpStatus);
+        });
+    }
+
+    @Override
+    public Mono<ResponseEntity<StatusResponse>>
     reserveAllShortUrls() {
         return shortUrlReservationService.reserveAllShortUrls()
         .map(shortUrlReservationStatus -> {
@@ -253,52 +296,28 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
         });
     }
 
-//    @Override
-//    public ResponseEntity<StatusResponse>
-//    cancelSpecificShortUrlReservation(@PathVariable String shortUrl) {
-//        ShortUrlReservationStatus shortUrlReservationStatus =
-//                shortUrlReservationService.cancelSpecificShortUrlReservation(shortUrl);
-//
-//        HttpStatus httpStatus;
-//        StatusResponse response;
-//
-//        if (shortUrlReservationStatus == ShortUrlReservationStatus.SHORT_URL_NOT_FOUND) {
-//
-//            httpStatus = HttpStatus.NOT_FOUND;
-//            response = new StatusResponse(
-//                    ShortUrlReservationStatus.SHORT_URL_NOT_FOUND,
-//                    String.format("Short URL '%s' not found", shortUrl)
-//            );
-//        } else if (shortUrlReservationStatus ==
-//                ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_RESERVED) {
-//
-//            httpStatus = HttpStatus.CONFLICT;
-//            response = new StatusResponse(
-//                    ShortUrlReservationStatus.SHORT_URL_FOUND_BUT_NOT_RESERVED,
-//                    String.format("Short URL '%s' was found, but is not reserved", shortUrl)
-//            );
-//        } else {
-//            httpStatus = HttpStatus.OK;
-//            response = new StatusResponse(
-//                    ShortUrlReservationStatus.SUCCESS,
-//                    String.format("Short URL '%s' reservation successfully canceled", shortUrl)
-//            );
-//        }
-//
-//        return new ResponseEntity<>(response, httpStatus);
-//    }
-//
-//    @Override
-//    public ResponseEntity<StatusResponse>
-//    cancelAllShortUrlReservations() {
-//        shortUrlReservationService.cancelAllShortUrlReservations();
-//
-//        StatusResponse response = new StatusResponse(
-//                ShortUrlReservationStatus.SUCCESS,
-//                "All short URL reservations successfully canceled");
-//
-//        return new ResponseEntity<>(response, HttpStatus.OK);
-//    }
+    @Override
+    public Mono<ResponseEntity<StatusResponse>>
+    cancelAllShortUrlReservations() {
+        return shortUrlReservationService.cancelAllShortUrlReservations()
+        .map(shortUrlReservationStatus -> {
+
+            HttpStatus httpStatus;
+            String message;
+
+            if (Objects.requireNonNull(shortUrlReservationStatus) == SUCCESS) {
+                httpStatus = HttpStatus.OK;
+                message = "All short URL reservations successfully canceled";
+            } else {
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                message = "An unknown error occurred";
+            }
+
+            return new ResponseEntity<>(
+                    new StatusResponse(shortUrlReservationStatus, message),
+                    httpStatus);
+        });
+    }
 
     // ------------------------------------------------------------------------
     // PRIVATE METHODS

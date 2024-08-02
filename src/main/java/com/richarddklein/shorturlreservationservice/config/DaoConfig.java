@@ -5,7 +5,7 @@
 
 package com.richarddklein.shorturlreservationservice.config;
 
-import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
+import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreAccessor;
 import com.richarddklein.shorturlcommonlibrary.config.AwsConfig;
 import com.richarddklein.shorturlcommonlibrary.config.SecurityConfig;
 import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import org.springframework.context.annotation.Import;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.enhanced.dynamodb.*;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
@@ -32,13 +31,13 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 @Import({AwsConfig.class, SecurityConfig.class})
 public class DaoConfig {
     @Autowired
-    ParameterStoreReader parameterStoreReader;
+    ParameterStoreAccessor parameterStoreAccessor;
 
     @Bean
     public ShortUrlReservationDao
     shortUrlReservationDao() {
         return new ShortUrlReservationDaoImpl(
-                parameterStoreReader,
+                parameterStoreAccessor,
                 dynamoDbClient(),
                 shortUrlReservationTable()
         );
@@ -70,7 +69,7 @@ public class DaoConfig {
     public DynamoDbAsyncTable<ShortUrlReservation>
     shortUrlReservationTable() {
         return dynamoDbEnhancedAsyncClient().table(
-                parameterStoreReader.getShortUrlReservationTableName().block(),
+                parameterStoreAccessor.getShortUrlReservationTableName().block(),
                 TableSchema.fromBean(ShortUrlReservation.class));
     }
 }

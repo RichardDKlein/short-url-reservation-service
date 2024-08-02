@@ -8,7 +8,7 @@ package com.richarddklein.shorturlreservationservice.dao;
 import java.time.Duration;
 import java.util.*;
 
-import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
+import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreAccessor;
 import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
 import com.richarddklein.shorturlreservationservice.exception.InconsistentDataException;
@@ -18,14 +18,9 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
-import software.amazon.awssdk.core.async.SdkPublisher;
-import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest;
-import software.amazon.awssdk.enhanced.dynamodb.model.Page;
-import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
@@ -147,7 +142,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     private static final int MAX_BATCH_SIZE = 25;
     private static final int SCAN_LIMIT = 128;
 
-    private final ParameterStoreReader parameterStoreReader;
+    private final ParameterStoreAccessor parameterStoreAccessor;
     private final DynamoDbClient dynamoDbClient;
     private final DynamoDbAsyncTable<ShortUrlReservation> shortUrlReservationTable;
 
@@ -158,10 +153,10 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     /**
      * General constructor.
      *
-     * @param parameterStoreReader Dependency injection of a class instance that
-     *                             is to play the role of reading parameters from
-     *                             the Parameter Store component of the AWS Simple
-     *                             System Manager (SSM).
+     * @param parameterStoreAccessor Dependency injection of a class instance that
+     *                               is to play the role of accessing parameters
+     *                               in the Parameter Store component of the AWS
+     *                               Simple System Manager (SSM).
      * @param dynamoDbClient Dependency injection of a class instance that is
      *                       to play the role of a DynamoDB Client.
      * @param shortUrlReservationTable Dependency injection of a class instance
@@ -169,11 +164,11 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
      *                                 table in DynamoDB.
      */
     public ShortUrlReservationDaoImpl(
-            ParameterStoreReader parameterStoreReader,
+            ParameterStoreAccessor parameterStoreAccessor,
             DynamoDbClient dynamoDbClient,
             DynamoDbAsyncTable<ShortUrlReservation> shortUrlReservationTable) {
 
-        this.parameterStoreReader = parameterStoreReader;
+        this.parameterStoreAccessor = parameterStoreAccessor;
         this.dynamoDbClient = dynamoDbClient;
         this.shortUrlReservationTable = shortUrlReservationTable;
     }
@@ -351,7 +346,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
 
         DynamoDbWaiter waiter = DynamoDbWaiter.builder().client(dynamoDbClient).build();
         waiter.waitUntilTableNotExists(builder -> builder
-                .tableName(parameterStoreReader.getShortUrlReservationTableName().block())
+                .tableName(parameterStoreAccessor.getShortUrlReservationTableName().block())
                 .build());
         waiter.close();
 
@@ -376,7 +371,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
                 .client(dynamoDbClient)
                 .build();
         waiter.waitUntilTableExists(builder -> builder
-                .tableName(parameterStoreReader.getShortUrlReservationTableName().block())
+                .tableName(parameterStoreAccessor.getShortUrlReservationTableName().block())
                 .build());
         waiter.close();
 
@@ -395,8 +390,8 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
 
         List<ShortUrlReservation> shortUrlReservations = new ArrayList<>();
 
-        long minShortUrlBase10 = parameterStoreReader.getMinShortUrlBase10().block();
-        long maxShortUrlBase10 = parameterStoreReader.getMaxShortUrlBase10().block();
+        long minShortUrlBase10 = parameterStoreAccessor.getMinShortUrlBase10().block();
+        long maxShortUrlBase10 = parameterStoreAccessor.getMaxShortUrlBase10().block();
 
         for (long i = minShortUrlBase10; i <= maxShortUrlBase10; i++) {
             String shortUrl = longToShortUrl(i);
@@ -456,7 +451,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             }
 
             dynamoDbClient.batchWriteItem(req -> req.requestItems(
-                    Collections.singletonMap(parameterStoreReader
+                    Collections.singletonMap(parameterStoreAccessor
                         .getShortUrlReservationTableName().block(),
                             writeRequests)));
         }

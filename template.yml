@@ -43,15 +43,15 @@ Resources:
       # For a description of the functionality provided by the REST endpoints,
       # see the comments in the `ShortUrlReservationController` interface.
       Events:
-        InitializeShortUrlReservationTableViaApiGatewayOrLocalHost:
+        InitializeShortUrlReservationRepositoryViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/reservations/dbinit
+            Path: /shorturl/reservations/initialize-repository
             Method: POST
-        InitializeShortUrlReservationTableViaCustomDomain:
+        InitializeShortUrlReservationRepositoryViaCustomDomain:
           Type: Api
           Properties:
-            Path: /dbinit
+            Path: /initialize-repository
             Method: POST
         GetSpecificShortUrlViaApiGatewayOrLocalHost:
           Type: Api

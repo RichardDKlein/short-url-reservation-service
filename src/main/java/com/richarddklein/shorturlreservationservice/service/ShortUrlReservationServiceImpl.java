@@ -61,10 +61,6 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     @Override
     public Mono<StatusAndShortUrlReservation>
     getSpecificShortUrlReservation(String shortUrl) {
-        if (shortUrl == null || shortUrl.isBlank()) {
-            return Mono.just(new StatusAndShortUrlReservation(
-                    ShortUrlReservationStatus.MISSING_SHORT_URL, null));
-        }
         return shortUrlReservationDao.getSpecificShortUrlReservation(shortUrl)
         .map(shortUrlReservation -> new StatusAndShortUrlReservation(
                 ShortUrlReservationStatus.SUCCESS, shortUrlReservation))

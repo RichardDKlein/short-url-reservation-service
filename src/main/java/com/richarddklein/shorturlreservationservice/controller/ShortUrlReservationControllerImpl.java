@@ -103,10 +103,6 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
                     message = String.format(
                             "Short URL '%s' successfully retrieved", shortUrl);
                     break;
-                case MISSING_SHORT_URL:
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    message = "A non-empty short URL must be specified";
-                    break;
                 case NO_SUCH_SHORT_URL:
                     httpStatus = HttpStatus.NOT_FOUND;
                     message = String.format(

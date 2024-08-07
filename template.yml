@@ -29,9 +29,9 @@ Resources:
       # where the URL specifies the custom domain that redirects to the API
       # Gateway. Thus, an endpoint URL can have one of three possible values:
       #
-      # API Gateway:   <aws-api-ID>.execute-api.us-east-2.amazonaws.com/Prod/shorturl/reservations/<endpoint>
-      # localhost:     localhost:4000/shorturl/reservations/<endpoint>
-      # Custom Domain: api.richarddklein.com/shorturl/reservations/<endpoint>
+      # API Gateway:   <aws-api-ID>.execute-api.us-east-2.amazonaws.com/Prod/short-url/reservations/<endpoint>
+      # localhost:     localhost:4000/short-url/reservations/<endpoint>
+      # Custom Domain: api.richarddklein.com/short-url/reservations/<endpoint>
       #
       # When the service is running on your local machine, via the command
       # `sam local start-api`, use the above `localhost` URL.
@@ -46,7 +46,7 @@ Resources:
         InitializeShortUrlReservationRepositoryViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/reservations/initialize-repository
+            Path: /short-url/reservations/initialize-repository
             Method: POST
         InitializeShortUrlReservationRepositoryViaCustomDomain:
           Type: Api
@@ -56,7 +56,7 @@ Resources:
         GetSpecificShortUrlViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/reservations/specific/{proxy+}
+            Path: /short-url/reservations/specific/{proxy+}
             Method: GET
         GetSpecificShortUrlViaCustomDomain:
           Type: Api
@@ -66,7 +66,7 @@ Resources:
         GetAllShortUrlsViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/reservations/all
+            Path: /short-url/reservations/all
             Method: GET
         GetAllShortUrlsViaCustomDomain:
           Type: Api
@@ -76,7 +76,7 @@ Resources:
         ReserveAnyShortUrlViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/reservations/reserve/any
+            Path: /short-url/reservations/reserve/any
             Method: PATCH
         ReserveAnyShortUrlViaCustomDomain:
           Type: Api
@@ -86,7 +86,7 @@ Resources:
         ReserveSpecificShortUrlViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/reservations/reserve/specific/{proxy+}
+            Path: /short-url/reservations/reserve/specific/{proxy+}
             Method: PATCH
         ReserveSpecificShortUrlViaCustomDomain:
           Type: Api
@@ -96,7 +96,7 @@ Resources:
         ReserveAllShortUrlsViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/reservations/reserve/all
+            Path: /short-url/reservations/reserve/all
             Method: PATCH
         ReserveAllShortUrlViaCustomDomain:
           Type: Api
@@ -106,7 +106,7 @@ Resources:
         CancelSpecificShortUrlReservationViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/reservations/cancel/specific/{proxy+}
+            Path: /short-url/reservations/cancel/specific/{proxy+}
             Method: PATCH
         CancelSpecificShortUrlReservationViaCustomDomain:
           Type: Api
@@ -116,7 +116,7 @@ Resources:
         CancelAllShortUrlReservationsViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/reservations/cancel/all
+            Path: /short-url/reservations/cancel/all
             Method: PATCH
         CancelAllShortUrlReservationsViaCustomDomain:
           Type: Api

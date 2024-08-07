@@ -29,7 +29,7 @@ import static com.richarddklein.shorturlreservationservice.response.ShortUrlRese
  * interface.
  */
 @RestController
-@RequestMapping({"/shorturl/reservations", "/"})
+@RequestMapping({"/short-url/reservations", "/"})
 public class ShortUrlReservationControllerImpl implements ShortUrlReservationController {
     private final ShortUrlReservationService shortUrlReservationService;
 

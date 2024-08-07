@@ -26,11 +26,11 @@ public interface ShortUrlReservationService {
     ShortUrlReservationStatus
     initializeShortUrlReservationRepository(ServerHttpRequest request);
 
-    Mono<StatusAndShortUrlReservationArray>
-    getAllShortUrlReservations();
-
     Mono<StatusAndShortUrlReservation>
     getSpecificShortUrlReservation(String shortUrl);
+
+    Mono<StatusAndShortUrlReservationArray>
+    getAllShortUrlReservations();
 
     Mono<StatusAndShortUrlReservation>
     reserveAnyShortUrl();
@@ -39,10 +39,10 @@ public interface ShortUrlReservationService {
     reserveSpecificShortUrl(String shortUrl);
 
     Mono<ShortUrlReservationStatus>
-    cancelSpecificShortUrlReservation(String shortUrl);
+    reserveAllShortUrls();
 
     Mono<ShortUrlReservationStatus>
-    reserveAllShortUrls();
+    cancelSpecificShortUrlReservation(String shortUrl);
 
     Mono<ShortUrlReservationStatus>
     cancelAllShortUrlReservations();

@@ -85,31 +85,6 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
     }
 
     @Override
-    public Mono<ResponseEntity<StatusAndShortUrlReservationArrayResponse>>
-    getAllShortUrlReservations() {
-        return shortUrlReservationService.getAllShortUrlReservations()
-        .map(statusAndShortUrlReservationArray -> {
-            ShortUrlReservationStatus shortUrlUserStatus = statusAndShortUrlReservationArray.getStatus();
-            List<ShortUrlReservation> users = statusAndShortUrlReservationArray.getShortUrlReservations();
-
-            HttpStatus httpStatus;
-            String message;
-
-            if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
-                httpStatus = HttpStatus.OK;
-                message = "All short URL reservations successfully retrieved";
-            } else {
-                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                message = "An unknown error occurred";
-            }
-
-            return new ResponseEntity<>(new StatusAndShortUrlReservationArrayResponse(
-                    new StatusResponse(shortUrlUserStatus, message), users),
-                    httpStatus);
-        });
-    }
-
-    @Override
     public Mono<ResponseEntity<StatusAndShortUrlReservationResponse>>
     getSpecificShortUrlReservation(@PathVariable String shortUrl) {
         return shortUrlReservationService.getSpecificShortUrlReservation(shortUrl)
@@ -146,6 +121,31 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
             return new ResponseEntity<>(new StatusAndShortUrlReservationResponse(
                     new StatusResponse(shortUrlReservationStatus, message),
                     shortUrlReservation), httpStatus);
+        });
+    }
+
+    @Override
+    public Mono<ResponseEntity<StatusAndShortUrlReservationArrayResponse>>
+    getAllShortUrlReservations() {
+        return shortUrlReservationService.getAllShortUrlReservations()
+        .map(statusAndShortUrlReservationArray -> {
+            ShortUrlReservationStatus shortUrlUserStatus = statusAndShortUrlReservationArray.getStatus();
+            List<ShortUrlReservation> users = statusAndShortUrlReservationArray.getShortUrlReservations();
+
+            HttpStatus httpStatus;
+            String message;
+
+            if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
+                httpStatus = HttpStatus.OK;
+                message = "All short URL reservations successfully retrieved";
+            } else {
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                message = "An unknown error occurred";
+            }
+
+            return new ResponseEntity<>(new StatusAndShortUrlReservationArrayResponse(
+                    new StatusResponse(shortUrlUserStatus, message), users),
+                    httpStatus);
         });
     }
 
@@ -232,6 +232,29 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
 
     @Override
     public Mono<ResponseEntity<StatusResponse>>
+    reserveAllShortUrls() {
+        return shortUrlReservationService.reserveAllShortUrls()
+        .map(shortUrlReservationStatus -> {
+
+            HttpStatus httpStatus;
+            String message;
+
+            if (Objects.requireNonNull(shortUrlReservationStatus) == SUCCESS) {
+                httpStatus = HttpStatus.OK;
+                message = "All short URL reservations successfully reserved";
+            } else {
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                message = "An unknown error occurred";
+            }
+
+            return new ResponseEntity<>(
+                    new StatusResponse(shortUrlReservationStatus, message),
+                    httpStatus);
+        });
+    }
+
+    @Override
+    public Mono<ResponseEntity<StatusResponse>>
     cancelSpecificShortUrlReservation(@PathVariable String shortUrl) {
         return shortUrlReservationService.cancelSpecificShortUrlReservation(shortUrl)
         .map(shortUrlReservationStatus -> {
@@ -266,29 +289,6 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
                     message = "An unknown error occurred";
                     break;
             };
-
-            return new ResponseEntity<>(
-                    new StatusResponse(shortUrlReservationStatus, message),
-                    httpStatus);
-        });
-    }
-
-    @Override
-    public Mono<ResponseEntity<StatusResponse>>
-    reserveAllShortUrls() {
-        return shortUrlReservationService.reserveAllShortUrls()
-        .map(shortUrlReservationStatus -> {
-
-            HttpStatus httpStatus;
-            String message;
-
-            if (Objects.requireNonNull(shortUrlReservationStatus) == SUCCESS) {
-                httpStatus = HttpStatus.OK;
-                message = "All short URL reservations successfully reserved";
-            } else {
-                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                message = "An unknown error occurred";
-            }
 
             return new ResponseEntity<>(
                     new StatusResponse(shortUrlReservationStatus, message),

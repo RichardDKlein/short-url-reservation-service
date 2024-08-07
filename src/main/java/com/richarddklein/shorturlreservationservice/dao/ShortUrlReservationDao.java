@@ -25,11 +25,11 @@ import reactor.core.publisher.Mono;
 public interface ShortUrlReservationDao {
     void initializeShortUrlReservationRepository();
 
-    Mono<StatusAndShortUrlReservationArray>
-    getAllShortUrlReservations();
-
     Mono<ShortUrlReservation>
     getSpecificShortUrlReservation(String shortUrl);
+
+    Mono<StatusAndShortUrlReservationArray>
+    getAllShortUrlReservations();
 
     Mono<StatusAndShortUrlReservation>
     reserveAnyShortUrl();
@@ -38,10 +38,10 @@ public interface ShortUrlReservationDao {
     reserveSpecificShortUrl(String shortUrl);
 
     Mono<ShortUrlReservationStatus>
-    cancelSpecificShortUrlReservation(String shortUrl);
+    reserveAllShortUrls();
 
     Mono<ShortUrlReservationStatus>
-    reserveAllShortUrls();
+    cancelSpecificShortUrlReservation(String shortUrl);
 
     Mono<ShortUrlReservationStatus>
     cancelAllShortUrlReservations();

@@ -59,12 +59,6 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     }
 
     @Override
-    public Mono<StatusAndShortUrlReservationArray>
-    getAllShortUrlReservations() {
-        return shortUrlReservationDao.getAllShortUrlReservations();
-    }
-
-    @Override
     public Mono<StatusAndShortUrlReservation>
     getSpecificShortUrlReservation(String shortUrl) {
         if (shortUrl == null || shortUrl.isBlank()) {
@@ -76,6 +70,12 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
                 ShortUrlReservationStatus.SUCCESS, shortUrlReservation))
         .onErrorResume(e -> Mono.just(new StatusAndShortUrlReservation(
                 ShortUrlReservationStatus.NO_SUCH_SHORT_URL, null)));
+    }
+
+    @Override
+    public Mono<StatusAndShortUrlReservationArray>
+    getAllShortUrlReservations() {
+        return shortUrlReservationDao.getAllShortUrlReservations();
     }
 
     @Override
@@ -92,14 +92,14 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
 
     @Override
     public Mono<ShortUrlReservationStatus>
-    cancelSpecificShortUrlReservation(String shortUrl) {
-        return shortUrlReservationDao.cancelSpecificShortUrlReservation(shortUrl);
+    reserveAllShortUrls() {
+        return shortUrlReservationDao.reserveAllShortUrls();
     }
 
     @Override
     public Mono<ShortUrlReservationStatus>
-    reserveAllShortUrls() {
-        return shortUrlReservationDao.reserveAllShortUrls();
+    cancelSpecificShortUrlReservation(String shortUrl) {
+        return shortUrlReservationDao.cancelSpecificShortUrlReservation(shortUrl);
     }
 
     @Override

@@ -22,8 +22,19 @@ $ sam local start-api -p 4000
 
 ## Deploying to AWS Lambda and API Gateway
 From the project root folder (where `template.yml` is located),
-use SAM CLI to deploy the project on AWS Lambda and API Gateway:
+use one of two shell scripts to deploy the project to AWS Lambda
+and API Gateway.
+
+Use
 
 ```
-$ sam deploy
+$ ./deploy_prod.sh
 ```
+
+to deploy the production build of the project, and use
+
+```
+$ ./deploy_test.sh
+```
+
+to deploy the test build.

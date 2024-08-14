@@ -106,7 +106,7 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
                 case NO_SUCH_SHORT_URL:
                     httpStatus = HttpStatus.NOT_FOUND;
                     message = String.format(
-                            "Short URL '%s' not found", shortUrl);
+                            "Short URL '%s' does not exist", shortUrl);
                     break;
                 default:
                     httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;

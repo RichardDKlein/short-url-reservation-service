@@ -212,25 +212,29 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     }
 
     @Override
-    public Mono<StatusAndShortUrlReservation>
-    reserveAnyShortUrl() {
+    public Mono<StatusAndShortUrlReservation> reserveAnyShortUrl() {
         return findAvailableShortUrlReservation()
         .flatMap(shortUrlReservation -> {
             shortUrlReservation.setIsAvailable(null);
             return updateShortUrlReservation(shortUrlReservation)
-            .map(updatedShortUrlReservation -> {
-                return new StatusAndShortUrlReservation(
-                        ShortUrlReservationStatus.SUCCESS, updatedShortUrlReservation);
-            }).onErrorResume(e -> {
-                System.out.println("====> " + e.getMessage());
+            .map(updatedShortUrlReservation -> new StatusAndShortUrlReservation(
+                    ShortUrlReservationStatus.SUCCESS, updatedShortUrlReservation));
+        })
+        .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
+            .filter(e -> e instanceof InconsistentDataException ||
+                    e instanceof ConditionalCheckFailedException)
+            .doAfterRetry(retrySignal -> System.out.println(
+                    "Retrying after error: " + retrySignal.failure().getMessage()))
+        )
+        .onErrorResume(e -> {
+            System.out.println("====> findAvailableShortUrlReservation() failed: " + e.getMessage());
+            if (e instanceof NoShortUrlsAvailableException) {
+                return Mono.just(new StatusAndShortUrlReservation(
+                        ShortUrlReservationStatus.NO_SHORT_URLS_ARE_AVAILABLE, null));
+            } else {
                 return Mono.just(new StatusAndShortUrlReservation(
                         ShortUrlReservationStatus.UNKNOWN_ERROR, null));
-            });
-        }).onErrorResume(e -> {
-            System.out.println("====> " + e.getMessage());
-            return Mono.just(new StatusAndShortUrlReservation(
-                    ShortUrlReservationStatus.NO_SHORT_URLS_ARE_AVAILABLE,
-                    null));
+            }
         });
     }
 
@@ -491,9 +495,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
                 })
                 .onErrorResume(Mono::error);
             }
-        })
-        .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
-                .filter(e -> e instanceof InconsistentDataException));
+        });
     }
 
     private Mono<ShortUrlReservation>
@@ -510,9 +512,6 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             // Some other exception occurred.
             System.out.println("====> Unexpected exception: " + e.getMessage());
             return Mono.error(e);
-        })
-        .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
-                .filter(e -> e instanceof ConditionalCheckFailedException)
-        );
+        });
     }
 }

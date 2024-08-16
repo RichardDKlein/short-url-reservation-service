@@ -294,6 +294,27 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         });
     }
 
+//    @Override
+//    public Mono<ShortUrlReservationStatus>
+//    cancelSpecificShortUrlReservation(String shortUrl) {
+//        return getSpecificShortUrlReservation(shortUrl)
+//        .flatMap(shortUrlReservation -> {
+//            if (shortUrlReservation.isReallyAvailable()) {
+//                return Mono.just(ShortUrlReservationStatus.SHORT_URL_NOT_RESERVED);
+//            }
+//            shortUrlReservation.setIsAvailable(shortUrl);
+//            return updateShortUrlReservation(shortUrlReservation)
+//                    .map(updatedShortUrlReservation -> ShortUrlReservationStatus.SUCCESS)
+//                    .onErrorResume(e -> {
+//                        System.out.println("====> " + e.getMessage());
+//                        return Mono.just(ShortUrlReservationStatus.UNKNOWN_ERROR);
+//                    });
+//        }).onErrorResume(e -> {
+//            System.out.println("====> " + e.getMessage());
+//            return Mono.just(ShortUrlReservationStatus.NO_SUCH_SHORT_URL);
+//        });
+//    }
+
     @Override
     public Mono<ShortUrlReservationStatus>
     cancelSpecificShortUrlReservation(String shortUrl) {
@@ -304,14 +325,21 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             }
             shortUrlReservation.setIsAvailable(shortUrl);
             return updateShortUrlReservation(shortUrlReservation)
-                    .map(updatedShortUrlReservation -> ShortUrlReservationStatus.SUCCESS)
-                    .onErrorResume(e -> {
-                        System.out.println("====> " + e.getMessage());
-                        return Mono.just(ShortUrlReservationStatus.UNKNOWN_ERROR);
-                    });
-        }).onErrorResume(e -> {
-            System.out.println("====> " + e.getMessage());
-            return Mono.just(ShortUrlReservationStatus.NO_SUCH_SHORT_URL);
+            .map(updatedShortUrlReservation -> ShortUrlReservationStatus.SUCCESS);
+        })
+        .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
+            .filter(e -> e instanceof InconsistentDataException ||
+                    e instanceof ConditionalCheckFailedException)
+            .doAfterRetry(retrySignal -> System.out.println(
+                    "====> Retrying after error: " + retrySignal.failure().getMessage()))
+        )
+        .onErrorResume(e -> {
+            System.out.println("====> cancelSpecificShortUrl() failed: " + e.getMessage());
+            if (e instanceof NoSuchShortUrlException) {
+                return Mono.just(ShortUrlReservationStatus.NO_SUCH_SHORT_URL);
+            } else {
+                return Mono.just(ShortUrlReservationStatus.UNKNOWN_ERROR);
+            }
         });
     }
 

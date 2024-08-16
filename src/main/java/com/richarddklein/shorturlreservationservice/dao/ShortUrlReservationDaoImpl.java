@@ -224,7 +224,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             .filter(e -> e instanceof InconsistentDataException ||
                     e instanceof ConditionalCheckFailedException)
             .doAfterRetry(retrySignal -> System.out.println(
-                    "Retrying after error: " + retrySignal.failure().getMessage()))
+                    "====> Retrying after error: " + retrySignal.failure().getMessage()))
         )
         .onErrorResume(e -> {
             System.out.println("====> findAvailableShortUrlReservation() failed: " + e.getMessage());

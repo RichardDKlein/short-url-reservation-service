@@ -227,7 +227,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
                     "====> Retrying after error: " + retrySignal.failure().getMessage()))
         )
         .onErrorResume(e -> {
-            System.out.println("====> findAvailableShortUrlReservation() failed: " + e.getMessage());
+            System.out.println("====> reserveAnyShortUrl() failed: " + e.getMessage());
             if (e instanceof NoShortUrlsAvailableException) {
                 return Mono.just(new StatusAndShortUrlReservation(
                         ShortUrlReservationStatus.NO_SHORT_URLS_ARE_AVAILABLE, null));
@@ -248,35 +248,50 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             }
             shortUrlReservation.setIsAvailable(null);
             return updateShortUrlReservation(shortUrlReservation)
-            .map(updatedShortUrlReservation -> ShortUrlReservationStatus.SUCCESS)
-            .onErrorResume(e -> {
-                System.out.println("====> " + e.getMessage());
+            .map(updatedShortUrlReservation -> ShortUrlReservationStatus.SUCCESS);
+        })
+        .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
+            .filter(e -> e instanceof InconsistentDataException ||
+                    e instanceof ConditionalCheckFailedException)
+            .doAfterRetry(retrySignal -> System.out.println(
+                    "====> Retrying after error: " + retrySignal.failure().getMessage()))
+        )
+        .onErrorResume(e -> {
+            System.out.println("====> reserveSpecificShortUrl() failed: " + e.getMessage());
+            if (e instanceof NoSuchShortUrlException) {
+                return Mono.just(ShortUrlReservationStatus.NO_SUCH_SHORT_URL);
+            } else {
                 return Mono.just(ShortUrlReservationStatus.UNKNOWN_ERROR);
-            });
-        }).onErrorResume(e -> {
-            System.out.println("====> " + e.getMessage());
-            return Mono.just(ShortUrlReservationStatus.NO_SUCH_SHORT_URL);
+            }
         });
     }
 
     @Override
-    public Mono<ShortUrlReservationStatus>
-    reserveAllShortUrls() {
+    public Mono<ShortUrlReservationStatus> reserveAllShortUrls() {
         return Flux.from(shortUrlReservationTable.scan(req -> req
-                                .limit(SCAN_LIMIT)
-                                .filterExpression(Expression.builder()
-                                        .expression("attribute_exists(isAvailable)")
-                                        .build()))
-                        .items())
+            .limit(SCAN_LIMIT)
+            .filterExpression(Expression.builder()
+                .expression("attribute_exists(isAvailable)")
+                .build()))
+            .items())
         .flatMap(shortUrlReservation -> {
             shortUrlReservation.setIsAvailable(null);
             return updateShortUrlReservation(shortUrlReservation)
-                    .onErrorResume(e -> {
-                        System.err.println(e.getMessage());
-                        return Mono.empty();
-                    });
+            .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
+                .filter(e -> e instanceof InconsistentDataException ||
+                        e instanceof ConditionalCheckFailedException)
+                .doAfterRetry(retrySignal -> System.out.println(
+                        "====> Retrying after error: " + retrySignal.failure().getMessage()))
+            )
+            .materialize();  // Capture the signal (onNext, onError, etc.)
         })
-        .then(Mono.just(ShortUrlReservationStatus.SUCCESS));
+        .collectList()  // Collect all signals (which may include errors)
+        .flatMap(signals -> {
+            boolean hasError = signals.stream().anyMatch(signal -> signal.isOnError());
+            return hasError ?
+                    Mono.just(ShortUrlReservationStatus.UNKNOWN_ERROR) :
+                    Mono.just(ShortUrlReservationStatus.SUCCESS);
+        });
     }
 
     @Override

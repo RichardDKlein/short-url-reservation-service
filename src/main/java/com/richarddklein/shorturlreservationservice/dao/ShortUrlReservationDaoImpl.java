@@ -323,26 +323,6 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
         });
     }
 
-//    @Override
-//    public Mono<ShortUrlReservationStatus>
-//    cancelAllShortUrlReservations() {
-//        return Flux.from(shortUrlReservationTable.scan(req -> req
-//                                .limit(SCAN_LIMIT)
-//                                .filterExpression(Expression.builder()
-//                                        .expression("attribute_not_exists(isAvailable)")
-//                                        .build()))
-//                        .items())
-//        .flatMap(shortUrlReservation -> {
-//            shortUrlReservation.setIsAvailable(shortUrlReservation.getShortUrl());
-//            return updateShortUrlReservation(shortUrlReservation)
-//                    .onErrorResume(e -> {
-//                        System.err.println(e.getMessage());
-//                        return Mono.empty();
-//                    });
-//        })
-//        .then(Mono.just(ShortUrlReservationStatus.SUCCESS));
-//    }
-
     @Override
     public Mono<ShortUrlReservationStatus>
     cancelAllShortUrlReservations() {

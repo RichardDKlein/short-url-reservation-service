@@ -5,6 +5,7 @@
 
 package com.richarddklein.shorturlreservationservice.config;
 
+import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,11 +22,11 @@ import com.richarddklein.shorturlreservationservice.service.ShortUrlReservationS
 @Configuration
 public class ServiceConfig {
     @Autowired
-    DaoConfig daoConfig;
+    ShortUrlReservationDao shortUrlReservationDao;
 
     @Bean
     public ShortUrlReservationService
     shortUrlReservationService() {
-        return new ShortUrlReservationServiceImpl(daoConfig.shortUrlReservationDao());
+        return new ShortUrlReservationServiceImpl(shortUrlReservationDao);
     }
 }

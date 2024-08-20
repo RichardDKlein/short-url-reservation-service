@@ -3,7 +3,7 @@
  * (Copyright 2024 by Richard Klein)
  */
 
-package com.richarddklein.shorturlreservationservice.response;
+package com.richarddklein.shorturlreservationservice.dto;
 
 /**
  * The Short URL Reservation Status.

@@ -5,18 +5,16 @@
 
 package com.richarddklein.shorturlreservationservice.service;
 
-import java.util.List;
 import java.util.Objects;
 
+import com.richarddklein.shorturlreservationservice.dto.Status;
 import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Service;
 
 import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
-import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
-import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
-import com.richarddklein.shorturlreservationservice.response.ShortUrlReservationStatus;
+import com.richarddklein.shorturlreservationservice.dto.ShortUrlReservationStatus;
 import reactor.core.publisher.Mono;
 
 /**
@@ -63,9 +61,9 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     getSpecificShortUrlReservation(String shortUrl) {
         return shortUrlReservationDao.getSpecificShortUrlReservation(shortUrl)
         .map(shortUrlReservation -> new StatusAndShortUrlReservation(
-                ShortUrlReservationStatus.SUCCESS, shortUrlReservation))
+                new Status(ShortUrlReservationStatus.SUCCESS), shortUrlReservation))
         .onErrorResume(e -> Mono.just(new StatusAndShortUrlReservation(
-                ShortUrlReservationStatus.NO_SUCH_SHORT_URL, null)));
+                new Status(ShortUrlReservationStatus.NO_SUCH_SHORT_URL), null)));
     }
 
     @Override

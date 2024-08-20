@@ -6,29 +6,28 @@
 package com.richarddklein.shorturlreservationservice.dto;
 
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
-import com.richarddklein.shorturlreservationservice.response.ShortUrlReservationStatus;
 
 @SuppressWarnings("unused")
 public class StatusAndShortUrlReservation {
-    private ShortUrlReservationStatus status;
+    private Status status;
     private ShortUrlReservation shortUrlReservation;
 
     public StatusAndShortUrlReservation() {
     }
 
     public StatusAndShortUrlReservation(
-            ShortUrlReservationStatus status,
+            Status status,
             ShortUrlReservation shortUrlReservation) {
 
         this.status = status;
         this.shortUrlReservation = shortUrlReservation;
     }
 
-    public ShortUrlReservationStatus getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(ShortUrlReservationStatus status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 

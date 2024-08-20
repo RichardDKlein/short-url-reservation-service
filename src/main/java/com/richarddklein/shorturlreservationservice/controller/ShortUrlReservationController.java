@@ -5,13 +5,13 @@
 
 package com.richarddklein.shorturlreservationservice.controller;
 
+import com.richarddklein.shorturlreservationservice.dto.Status;
+import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservation;
+import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 
-import com.richarddklein.shorturlreservationservice.response.StatusAndShortUrlReservationArrayResponse;
-import com.richarddklein.shorturlreservationservice.response.StatusAndShortUrlReservationResponse;
-import com.richarddklein.shorturlreservationservice.response.StatusResponse;
 import reactor.core.publisher.Mono;
 
 /**
@@ -38,7 +38,7 @@ public interface ShortUrlReservationController {
      * or failure) of the database initialization operation.
      */
     @PostMapping("/initialize-repository")
-    ResponseEntity<StatusResponse>
+    ResponseEntity<Status>
     initializeShortUrlReservationRepository(ServerHttpRequest request);
 
     /**
@@ -54,7 +54,7 @@ public interface ShortUrlReservationController {
      * item (if the operation was successful).
      */
     @GetMapping("/specific/{shortUrl}")
-    Mono<ResponseEntity<StatusAndShortUrlReservationResponse>>
+    Mono<ResponseEntity<StatusAndShortUrlReservation>>
     getSpecificShortUrlReservation(@PathVariable String shortUrl);
 
     /**
@@ -69,7 +69,7 @@ public interface ShortUrlReservationController {
      * was successful).
      */
     @GetMapping("/all")
-    Mono<ResponseEntity<StatusAndShortUrlReservationArrayResponse>>
+    Mono<ResponseEntity<StatusAndShortUrlReservationArray>>
     getAllShortUrlReservations();
 
     /**
@@ -83,7 +83,7 @@ public interface ShortUrlReservationController {
      * available Short URL Reservation item (if the operation was successful).
      */
     @PatchMapping("/reserve/any")
-    Mono<ResponseEntity<StatusAndShortUrlReservationResponse>>
+    Mono<ResponseEntity<StatusAndShortUrlReservation>>
     reserveAnyShortUrl();
 
     /**
@@ -97,7 +97,7 @@ public interface ShortUrlReservationController {
      * or failure) of the operation.
      */
     @PatchMapping("/reserve/specific/{shortUrl}")
-    Mono<ResponseEntity<StatusResponse>>
+    Mono<ResponseEntity<Status>>
     reserveSpecificShortUrl(@PathVariable String shortUrl);
 
     /**
@@ -112,7 +112,7 @@ public interface ShortUrlReservationController {
      * failure) of the operation.
      */
     @PatchMapping("/reserve/all")
-    Mono<ResponseEntity<StatusResponse>>
+    Mono<ResponseEntity<Status>>
     reserveAllShortUrls();
 
     /**
@@ -128,7 +128,7 @@ public interface ShortUrlReservationController {
      * failure) of the operation.
      */
     @PatchMapping("/cancel/specific/{shortUrl}")
-    Mono<ResponseEntity<StatusResponse>>
+    Mono<ResponseEntity<Status>>
     cancelSpecificShortUrlReservation(@PathVariable String shortUrl);
 
     /**
@@ -143,6 +143,6 @@ public interface ShortUrlReservationController {
      * failure) of the operation.
      */
     @PatchMapping("/cancel/all")
-    Mono<ResponseEntity<StatusResponse>>
+    Mono<ResponseEntity<Status>>
     cancelAllShortUrlReservations();
 }

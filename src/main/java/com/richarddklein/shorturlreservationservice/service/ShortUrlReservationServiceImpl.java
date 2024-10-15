@@ -7,6 +7,7 @@ package com.richarddklein.shorturlreservationservice.service;
 
 import java.util.Objects;
 
+import com.richarddklein.shorturlcommonlibrary.status.ShortUrlReservationStatus;
 import com.richarddklein.shorturlreservationservice.dto.Status;
 import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
@@ -14,7 +15,6 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Service;
 
 import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
-import com.richarddklein.shorturlreservationservice.dto.ShortUrlReservationStatus;
 import reactor.core.publisher.Mono;
 
 /**

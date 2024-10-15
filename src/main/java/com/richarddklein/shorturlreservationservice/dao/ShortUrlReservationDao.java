@@ -5,10 +5,10 @@
 
 package com.richarddklein.shorturlreservationservice.dao;
 
+import com.richarddklein.shorturlcommonlibrary.status.ShortUrlReservationStatus;
 import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
-import com.richarddklein.shorturlreservationservice.dto.ShortUrlReservationStatus;
 import reactor.core.publisher.Mono;
 
 /**

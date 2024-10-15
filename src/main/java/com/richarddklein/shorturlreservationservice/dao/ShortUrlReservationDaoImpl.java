@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.util.*;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreAccessor;
+import com.richarddklein.shorturlcommonlibrary.status.ShortUrlReservationStatus;
 import com.richarddklein.shorturlreservationservice.dto.Status;
 import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
@@ -29,7 +30,6 @@ import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
 import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
-import com.richarddklein.shorturlreservationservice.dto.ShortUrlReservationStatus;
 
 /**
  * The production implementation of the Short URL Reservation DAO interface.

@@ -5,6 +5,8 @@
 
 package com.richarddklein.shorturlreservationservice.dto;
 
+import com.richarddklein.shorturlcommonlibrary.status.ShortUrlReservationStatus;
+
 /**
  * Class defining an HTTP Response containing a status
  * code/message only.

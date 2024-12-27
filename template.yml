@@ -17,6 +17,9 @@ Resources:
       Handler: com.richarddklein.shorturlreservationservice.StreamLambdaHandler::handleRequest
       Runtime: java21
       CodeUri: .
+      Environment:
+        Variables:
+          PROFILE: !Ref Profile
       MemorySize: 512
       Timeout: 90
       Role: !GetAtt LambdaExecutionRole.Arn
@@ -167,3 +170,8 @@ Resources:
                   - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shortUrl/users/adminUsername
                   - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shortUrl/users/adminPassword
                   - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shortUrl/users/jwtSecretKey
+
+Parameters:
+  Profile:
+    Type: String
+    Description: "The execution profile ('prod' or 'test')"

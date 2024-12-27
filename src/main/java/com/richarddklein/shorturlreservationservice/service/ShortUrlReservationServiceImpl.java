@@ -5,8 +5,7 @@
 
 package com.richarddklein.shorturlreservationservice.service;
 
-import java.util.Objects;
-
+import com.richarddklein.shorturlcommonlibrary.security.util.HostUtils;
 import com.richarddklein.shorturlcommonlibrary.status.ShortUrlReservationStatus;
 import com.richarddklein.shorturlreservationservice.dto.Status;
 import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservation;
@@ -23,20 +22,18 @@ import reactor.core.publisher.Mono;
 @Service
 public class ShortUrlReservationServiceImpl implements ShortUrlReservationService {
     private final ShortUrlReservationDao shortUrlReservationDao;
+    private final HostUtils hostUtils;
 
     // ------------------------------------------------------------------------
     // PUBLIC METHODS
     // ------------------------------------------------------------------------
 
-    /**
-     * General constructor.
-     *
-     * @param shortUrlReservationDao Dependency injection of a class instance
-     *                               that is to play the role of the Short URL
-     *                               Reservation Data Access Object (DAO).
-     */
-    public ShortUrlReservationServiceImpl(ShortUrlReservationDao shortUrlReservationDao) {
+    public ShortUrlReservationServiceImpl(
+            ShortUrlReservationDao shortUrlReservationDao,
+            HostUtils hostUtils) {
+
         this.shortUrlReservationDao = shortUrlReservationDao;
+        this.hostUtils = hostUtils;
     }
 
     // Initialization of the Short URL Reservation repository is performed
@@ -46,12 +43,9 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     @Override
     public ShortUrlReservationStatus
     initializeShortUrlReservationRepository(ServerHttpRequest request) {
-        if (!isRunningLocally(Objects.requireNonNull(
-                request.getRemoteAddress()).getHostString())) {
-
+        if (!hostUtils.isRunningLocally(request)) {
             return ShortUrlReservationStatus.NOT_ON_LOCAL_MACHINE;
         }
-
         shortUrlReservationDao.initializeShortUrlReservationRepository();
         return ShortUrlReservationStatus.SUCCESS;
     }
@@ -105,17 +99,4 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
     // ------------------------------------------------------------------------
-
-    /**
-     * Is the service running locally?
-     *
-     * <p>Determine whether the Short URL Reservation Service is running on your
-     * local machine, or in the AWS cloud.</p>
-     *
-     * @param hostString The host that sent the HTTP request.
-     * @return 'true' if the service is running locally, 'false' otherwise.
-     */
-    private boolean isRunningLocally(String hostString) {
-        return hostString.contains("localhost");
-    }
 }

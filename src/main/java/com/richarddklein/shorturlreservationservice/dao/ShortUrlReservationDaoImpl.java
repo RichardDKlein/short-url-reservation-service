@@ -9,10 +9,11 @@ import java.time.Duration;
 import java.util.*;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreAccessor;
-import com.richarddklein.shorturlcommonlibrary.status.ShortUrlReservationStatus;
-import com.richarddklein.shorturlreservationservice.dto.Status;
-import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservation;
-import com.richarddklein.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
+import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.ShortUrlReservationStatus;
+import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.Status;
+import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservation;
+import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
+import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.entity.ShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.exception.InconsistentDataException;
 import com.richarddklein.shorturlreservationservice.exception.NoSuchShortUrlException;
 import org.springframework.stereotype.Repository;
@@ -28,7 +29,6 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
-import com.richarddklein.shorturlreservationservice.entity.ShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
 
 /**
@@ -513,7 +513,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             if (page.items().isEmpty()) {
                 return Mono.error(new NoShortUrlsAvailableException());
             } else {
-                ShortUrlReservation gsiItem = page.items().get(0);
+                ShortUrlReservation gsiItem = page.items().getFirst();
                 return getSpecificShortUrlReservation(gsiItem.getShortUrl())
                 .flatMap(firstAvailableShortUrlReservation -> {
                     // In DynamoDB, GSIs are only eventually consistent. When the

@@ -5,8 +5,8 @@
 
 package com.richarddklein.shorturlreservationservice.exception;
 
-import com.richarddklein.shorturlcommonlibrary.status.ShortUrlReservationStatus;
-import com.richarddklein.shorturlreservationservice.dto.Status;
+import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.ShortUrlReservationStatus;
+import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

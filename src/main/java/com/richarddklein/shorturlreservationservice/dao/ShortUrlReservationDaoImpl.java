@@ -8,7 +8,7 @@ package com.richarddklein.shorturlreservationservice.dao;
 import java.time.Duration;
 import java.util.*;
 
-import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreAccessor;
+import com.richarddklein.shorturlcommonlibrary.environment.ParameterStoreAccessor;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.ShortUrlReservationStatus;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.Status;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservation;

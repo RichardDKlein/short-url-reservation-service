@@ -5,7 +5,7 @@
 
 package com.richarddklein.shorturlreservationservice.service;
 
-import com.richarddklein.shorturlcommonlibrary.security.util.HostUtils;
+import com.richarddklein.shorturlcommonlibrary.environment.HostUtils;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.ShortUrlReservationStatus;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.Status;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservation;

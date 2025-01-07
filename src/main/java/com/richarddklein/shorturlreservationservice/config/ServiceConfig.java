@@ -5,7 +5,8 @@
 
 package com.richarddklein.shorturlreservationservice.config;
 
-import com.richarddklein.shorturlcommonlibrary.security.util.HostUtils;
+import com.richarddklein.shorturlcommonlibrary.config.EnvironmentConfig;
+import com.richarddklein.shorturlcommonlibrary.environment.HostUtils;
 import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.richarddklein.shorturlreservationservice.service.ShortUrlReservationService;
 import com.richarddklein.shorturlreservationservice.service.ShortUrlReservationServiceImpl;
+import org.springframework.context.annotation.Import;
 
 /**
  * The Service @Configuration class.
@@ -21,6 +23,7 @@ import com.richarddklein.shorturlreservationservice.service.ShortUrlReservationS
  * to implement the Service package.</p>
  */
 @Configuration
+@Import({EnvironmentConfig.class})
 public class ServiceConfig {
     @Autowired
     ShortUrlReservationDao shortUrlReservationDao;

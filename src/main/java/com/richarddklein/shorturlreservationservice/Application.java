@@ -5,9 +5,12 @@
 
 package com.richarddklein.shorturlreservationservice;
 
+import com.richarddklein.shorturlcommonlibrary.config.EnvironmentConfig;
+import com.richarddklein.shorturlcommonlibrary.config.SecurityConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * service as a Spring application.</p>
  */
 @SpringBootApplication
+@Import({EnvironmentConfig.class, SecurityConfig.class})
 @ComponentScan(
         // The REST Controller will be instantiated via the `ControllerConfig`
         // @Configuration class, so we exclude it from the component scan.

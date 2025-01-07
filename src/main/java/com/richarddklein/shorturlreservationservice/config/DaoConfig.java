@@ -5,7 +5,6 @@
 
 package com.richarddklein.shorturlreservationservice.config;
 
-import com.richarddklein.shorturlcommonlibrary.config.EnvironmentConfig;
 import com.richarddklein.shorturlcommonlibrary.environment.ParameterStoreAccessor;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.entity.ShortUrlReservation;
 import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import org.springframework.context.annotation.Import;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.enhanced.dynamodb.*;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
@@ -27,7 +25,6 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
  * to implement the DAO package.</p>
  */
 @Configuration
-@Import({EnvironmentConfig.class})
 public class DaoConfig {
     @Autowired
     ParameterStoreAccessor parameterStoreAccessor;

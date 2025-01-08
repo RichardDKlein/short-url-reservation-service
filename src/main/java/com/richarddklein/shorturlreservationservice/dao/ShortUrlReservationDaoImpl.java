@@ -142,7 +142,6 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     private static final int BASE = DIGITS.length();
 
     private static final int MAX_BATCH_SIZE = 25;
-    private static final int SCAN_LIMIT = 128;
 
     private final ParameterStoreAccessor parameterStoreAccessor;
     private final DynamoDbClient dynamoDbClient;
@@ -275,7 +274,6 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     @Override
     public Mono<ShortUrlReservationStatus> reserveAllShortUrls() {
         return Flux.from(shortUrlReservationTable.scan(req -> req
-            .limit(SCAN_LIMIT)
             .filterExpression(Expression.builder()
                 .expression("attribute_exists(isAvailable)")
                 .build()))
@@ -332,7 +330,6 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
     public Mono<ShortUrlReservationStatus>
     cancelAllShortUrlReservations() {
         return Flux.from(shortUrlReservationTable.scan(req -> req
-            .limit(SCAN_LIMIT)
             .filterExpression(Expression.builder()
                     .expression("attribute_not_exists(isAvailable)")
                     .build()))

@@ -54,10 +54,12 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     public Mono<StatusAndShortUrlReservation>
     getSpecificShortUrlReservation(String shortUrl) {
         return shortUrlReservationDao.getSpecificShortUrlReservation(shortUrl)
-        .map(shortUrlReservation -> new StatusAndShortUrlReservation(
-                new Status(ShortUrlReservationStatus.SUCCESS), shortUrlReservation))
-        .onErrorResume(e -> Mono.just(new StatusAndShortUrlReservation(
-                new Status(ShortUrlReservationStatus.NO_SUCH_SHORT_URL), null)));
+            .map(shortUrlReservation -> new StatusAndShortUrlReservation(
+                    new Status(ShortUrlReservationStatus.SUCCESS),
+                    shortUrlReservation))
+            .onErrorResume(e -> Mono.just(new StatusAndShortUrlReservation(
+                    new Status(ShortUrlReservationStatus.NO_SUCH_SHORT_URL),
+                    null)));
     }
 
     @Override

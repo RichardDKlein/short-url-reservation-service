@@ -85,228 +85,221 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
     public Mono<ResponseEntity<StatusAndShortUrlReservation>>
     getSpecificShortUrlReservation(@PathVariable String shortUrl) {
         return shortUrlReservationService.getSpecificShortUrlReservation(shortUrl)
-        .map(statusAndShortUrlReservation -> {
+            .map(statusAndShortUrlReservation -> {
+                ShortUrlReservationStatus shortUrlReservationStatus =
+                        statusAndShortUrlReservation.getStatus().getStatus();
 
-            ShortUrlReservationStatus shortUrlReservationStatus =
-                    statusAndShortUrlReservation.getStatus().getStatus();
+                HttpStatus httpStatus;
+                String message;
 
-            HttpStatus httpStatus;
-            String message;
+                switch (shortUrlReservationStatus) {
+                    case SUCCESS:
+                        httpStatus = HttpStatus.OK;
+                        message = String.format(
+                                "Short URL '%s' successfully retrieved", shortUrl);
+                        break;
+                    case NO_SUCH_SHORT_URL:
+                        httpStatus = HttpStatus.NOT_FOUND;
+                        message = String.format(
+                                "Short URL '%s' does not exist", shortUrl);
+                        break;
+                    default:
+                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                        message = "An unknown error occurred";
+                        break;
+                }
+                statusAndShortUrlReservation.getStatus().setMessage(message);
 
-            switch (shortUrlReservationStatus) {
-                case SUCCESS:
-                    httpStatus = HttpStatus.OK;
-                    message = String.format(
-                            "Short URL '%s' successfully retrieved", shortUrl);
-                    break;
-                case NO_SUCH_SHORT_URL:
-                    httpStatus = HttpStatus.NOT_FOUND;
-                    message = String.format(
-                            "Short URL '%s' does not exist", shortUrl);
-                    break;
-                default:
-                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                    message = "An unknown error occurred";
-                    break;
-            }
-            statusAndShortUrlReservation.getStatus().setMessage(message);
-
-            return new ResponseEntity<>(statusAndShortUrlReservation, httpStatus);
-        });
+                return new ResponseEntity<>(statusAndShortUrlReservation, httpStatus);
+            });
     }
 
     @Override
     public Mono<ResponseEntity<StatusAndShortUrlReservationArray>>
     getAllShortUrlReservations() {
         return shortUrlReservationService.getAllShortUrlReservations()
-        .map(statusAndShortUrlReservationArray -> {
+            .map(statusAndShortUrlReservationArray -> {
+                ShortUrlReservationStatus shortUrlUserStatus =
+                        statusAndShortUrlReservationArray.getStatus().getStatus();
 
-            ShortUrlReservationStatus shortUrlUserStatus =
-                    statusAndShortUrlReservationArray.getStatus().getStatus();
+                HttpStatus httpStatus;
+                String message;
 
-            HttpStatus httpStatus;
-            String message;
+                if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
+                    httpStatus = HttpStatus.OK;
+                    message = "All short URL reservations successfully retrieved";
+                } else {
+                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                    message = "An unknown error occurred";
+                }
+                statusAndShortUrlReservationArray.getStatus().setMessage(message);
 
-            if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
-                httpStatus = HttpStatus.OK;
-                message = "All short URL reservations successfully retrieved";
-            } else {
-                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                message = "An unknown error occurred";
-            }
-            statusAndShortUrlReservationArray.getStatus().setMessage(message);
-
-            return new ResponseEntity<>(statusAndShortUrlReservationArray, httpStatus);
-        });
+                return new ResponseEntity<>(statusAndShortUrlReservationArray, httpStatus);
+            });
     }
 
     @Override
     public Mono<ResponseEntity<StatusAndShortUrlReservation>>
     reserveAnyShortUrl() {
         return shortUrlReservationService.reserveAnyShortUrl()
-        .map(statusAndShortUrlReservation -> {
+            .map(statusAndShortUrlReservation -> {
+                ShortUrlReservationStatus shortUrlReservationStatus =
+                        statusAndShortUrlReservation.getStatus().getStatus();
 
-            ShortUrlReservationStatus shortUrlReservationStatus =
-                    statusAndShortUrlReservation.getStatus().getStatus();
+                HttpStatus httpStatus;
+                String message;
 
-            HttpStatus httpStatus;
-            String message;
+                switch (shortUrlReservationStatus) {
+                    case SUCCESS:
+                        httpStatus = HttpStatus.OK;
+                        message = String.format(
+                                "Short URL '%s' successfully reserved",
+                                statusAndShortUrlReservation
+                                        .getShortUrlReservation().getShortUrl());
+                        break;
 
-            switch (shortUrlReservationStatus) {
-                case SUCCESS:
-                    httpStatus = HttpStatus.OK;
-                    message = String.format(
-                            "Short URL '%s' successfully reserved",
-                            statusAndShortUrlReservation
-                                    .getShortUrlReservation().getShortUrl());
-                    break;
+                    case NO_SHORT_URLS_ARE_AVAILABLE:
+                        httpStatus = HttpStatus.NOT_FOUND;
+                        message = "No short URLs are available";
+                        break;
 
-                case NO_SHORT_URLS_ARE_AVAILABLE:
-                    httpStatus = HttpStatus.NOT_FOUND;
-                    message = "No short URLs are available";
-                    break;
+                    default:
+                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                        message = "An unknown error occurred";
+                        break;
+                };
+                statusAndShortUrlReservation.getStatus().setMessage(message);
 
-                default:
-                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                    message = "An unknown error occurred";
-                    break;
-            };
-            statusAndShortUrlReservation.getStatus().setMessage(message);
-
-            return new ResponseEntity<>(statusAndShortUrlReservation, httpStatus);
-        });
+                return new ResponseEntity<>(statusAndShortUrlReservation, httpStatus);
+            });
     }
 
     @Override
     public Mono<ResponseEntity<Status>>
     reserveSpecificShortUrl(@PathVariable String shortUrl) {
         return shortUrlReservationService.reserveSpecificShortUrl(shortUrl)
-        .map(shortUrlReservationStatus -> {
+            .map(shortUrlReservationStatus -> {
+                HttpStatus httpStatus;
+                String message;
 
-            HttpStatus httpStatus;
-            String message;
+                switch (shortUrlReservationStatus) {
+                    case SUCCESS:
+                        httpStatus = HttpStatus.OK;
+                        message = String.format(
+                                "Short URL '%s' successfully reserved",
+                                shortUrl);
+                        break;
 
-            switch (shortUrlReservationStatus) {
-                case SUCCESS:
-                    httpStatus = HttpStatus.OK;
-                    message = String.format(
-                            "Short URL '%s' successfully reserved",
-                            shortUrl);
-                    break;
+                    case NO_SUCH_SHORT_URL:
+                        httpStatus = HttpStatus.NOT_FOUND;
+                        message = String.format(
+                                "Short URL '%s' does not exist",
+                                shortUrl);
+                        break;
 
-                case NO_SUCH_SHORT_URL:
-                    httpStatus = HttpStatus.NOT_FOUND;
-                    message = String.format(
-                            "Short URL '%s' does not exist",
-                            shortUrl);
-                    break;
+                    case SHORT_URL_ALREADY_RESERVED:
+                        httpStatus = HttpStatus.CONFLICT;
+                        message = String.format(
+                                "Short URL '%s' has already been reserved",
+                                shortUrl);
+                        break;
 
-                case SHORT_URL_ALREADY_RESERVED:
-                    httpStatus = HttpStatus.CONFLICT;
-                    message = String.format(
-                            "Short URL '%s' has already been reserved",
-                            shortUrl);
-                    break;
+                    default:
+                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                        message = "An unknown error occurred";
+                        break;
+                };
 
-                default:
-                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                    message = "An unknown error occurred";
-                    break;
-            };
-
-            return new ResponseEntity<>(
-                    new Status(shortUrlReservationStatus, message),
-                    httpStatus);
-        });
+                return new ResponseEntity<>(
+                        new Status(shortUrlReservationStatus, message),
+                        httpStatus);
+            });
     }
 
     @Override
     public Mono<ResponseEntity<Status>>
     reserveAllShortUrls() {
         return shortUrlReservationService.reserveAllShortUrls()
-        .map(shortUrlReservationStatus -> {
+            .map(shortUrlReservationStatus -> {
+                HttpStatus httpStatus;
+                String message;
 
-            HttpStatus httpStatus;
-            String message;
+                if (Objects.requireNonNull(shortUrlReservationStatus) == SUCCESS) {
+                    httpStatus = HttpStatus.OK;
+                    message = "All short URL reservations successfully reserved";
+                } else {
+                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                    message = "An unknown error occurred";
+                }
 
-            if (Objects.requireNonNull(shortUrlReservationStatus) == SUCCESS) {
-                httpStatus = HttpStatus.OK;
-                message = "All short URL reservations successfully reserved";
-            } else {
-                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                message = "An unknown error occurred";
-            }
-
-            return new ResponseEntity<>(
-                    new Status(shortUrlReservationStatus, message),
-                    httpStatus);
-        });
+                return new ResponseEntity<>(
+                        new Status(shortUrlReservationStatus, message),
+                        httpStatus);
+            });
     }
 
     @Override
     public Mono<ResponseEntity<Status>>
     cancelSpecificShortUrlReservation(@PathVariable String shortUrl) {
         return shortUrlReservationService.cancelSpecificShortUrlReservation(shortUrl)
-        .map(shortUrlReservationStatus -> {
+            .map(shortUrlReservationStatus -> {
+                HttpStatus httpStatus;
+                String message;
 
-            HttpStatus httpStatus;
-            String message;
+                switch (shortUrlReservationStatus) {
+                    case SUCCESS:
+                        httpStatus = HttpStatus.OK;
+                        message = String.format(
+                                "Short URL '%s' successfully canceled",
+                                shortUrl);
+                        break;
 
-            switch (shortUrlReservationStatus) {
-                case SUCCESS:
-                    httpStatus = HttpStatus.OK;
-                    message = String.format(
-                            "Short URL '%s' successfully canceled",
-                            shortUrl);
-                    break;
+                    case NO_SUCH_SHORT_URL:
+                        httpStatus = HttpStatus.NOT_FOUND;
+                        message = String.format(
+                                "Short URL '%s' does not exist",
+                                shortUrl);
+                        break;
 
-                case NO_SUCH_SHORT_URL:
-                    httpStatus = HttpStatus.NOT_FOUND;
-                    message = String.format(
-                            "Short URL '%s' does not exist",
-                            shortUrl);
-                    break;
+                    case SHORT_URL_NOT_RESERVED:
+                        httpStatus = HttpStatus.CONFLICT;
+                        message = String.format(
+                                "Short URL '%s' cannot be canceled, because it has not been reserved",
+                                shortUrl);
+                        break;
 
-                case SHORT_URL_NOT_RESERVED:
-                    httpStatus = HttpStatus.CONFLICT;
-                    message = String.format(
-                            "Short URL '%s' cannot be canceled, because it has not been reserved",
-                            shortUrl);
-                    break;
+                    default:
+                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                        message = "An unknown error occurred";
+                        break;
+                };
 
-                default:
-                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                    message = "An unknown error occurred";
-                    break;
-            };
-
-            return new ResponseEntity<>(
-                    new Status(shortUrlReservationStatus, message),
-                    httpStatus);
-        });
+                return new ResponseEntity<>(
+                        new Status(shortUrlReservationStatus, message),
+                        httpStatus);
+            });
     }
 
     @Override
     public Mono<ResponseEntity<Status>>
     cancelAllShortUrlReservations() {
         return shortUrlReservationService.cancelAllShortUrlReservations()
-        .map(shortUrlReservationStatus -> {
+            .map(shortUrlReservationStatus -> {
+                HttpStatus httpStatus;
+                String message;
 
-            HttpStatus httpStatus;
-            String message;
+                if (Objects.requireNonNull(shortUrlReservationStatus) == SUCCESS) {
+                    httpStatus = HttpStatus.OK;
+                    message = "All short URL reservations successfully canceled";
+                } else {
+                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                    message = "An unknown error occurred";
+                }
 
-            if (Objects.requireNonNull(shortUrlReservationStatus) == SUCCESS) {
-                httpStatus = HttpStatus.OK;
-                message = "All short URL reservations successfully canceled";
-            } else {
-                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                message = "An unknown error occurred";
-            }
-
-            return new ResponseEntity<>(
-                    new Status(shortUrlReservationStatus, message),
-                    httpStatus);
-        });
+                return new ResponseEntity<>(
+                        new Status(shortUrlReservationStatus, message),
+                        httpStatus);
+            });
     }
 
     // ------------------------------------------------------------------------

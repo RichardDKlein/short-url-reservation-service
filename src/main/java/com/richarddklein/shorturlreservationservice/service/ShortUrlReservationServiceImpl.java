@@ -10,7 +10,6 @@ import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservic
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.Status;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservation;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Service;
 
 import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
@@ -42,8 +41,8 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     // here. Simple synchronous logic will work just fine.
     @Override
     public ShortUrlReservationStatus
-    initializeShortUrlReservationRepository(ServerHttpRequest request) {
-        if (!hostUtils.isRunningLocally(request)) {
+    initializeShortUrlReservationRepository() {
+        if (!hostUtils.isRunningLocally()) {
             return ShortUrlReservationStatus.NOT_ON_LOCAL_MACHINE;
         }
         shortUrlReservationDao.initializeShortUrlReservationRepository();

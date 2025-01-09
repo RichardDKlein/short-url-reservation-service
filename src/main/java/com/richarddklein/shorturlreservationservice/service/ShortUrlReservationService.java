@@ -8,7 +8,6 @@ package com.richarddklein.shorturlreservationservice.service;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.ShortUrlReservationStatus;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservation;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import reactor.core.publisher.Mono;
 
 /**
@@ -20,7 +19,7 @@ import reactor.core.publisher.Mono;
  */
 public interface ShortUrlReservationService {
     ShortUrlReservationStatus
-    initializeShortUrlReservationRepository(ServerHttpRequest request);
+    initializeShortUrlReservationRepository();
 
     Mono<StatusAndShortUrlReservation>
     getSpecificShortUrlReservation(String shortUrl);

@@ -9,7 +9,6 @@ import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservic
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservation;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 
 import reactor.core.publisher.Mono;
@@ -33,13 +32,12 @@ public interface ShortUrlReservationController {
      * 30 seconds, this REST endpoint is available only when the Short
      * URL Reservation Service is running on localhost, not on AWS.</p>
      *
-     * @param request The HTTP Request.
      * @return An HTTP Response Entity containing the status (success
      * or failure) of the database initialization operation.
      */
     @PostMapping("/initialize-repository")
     ResponseEntity<Status>
-    initializeShortUrlReservationRepository(ServerHttpRequest request);
+    initializeShortUrlReservationRepository();
 
     /**
      * Get a specific Short URL Reservation item.

@@ -13,7 +13,6 @@ import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservic
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 
 import com.richarddklein.shorturlreservationservice.service.ShortUrlReservationService;
@@ -49,10 +48,10 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
 
     @Override
     public ResponseEntity<Status>
-    initializeShortUrlReservationRepository(ServerHttpRequest request) {
+    initializeShortUrlReservationRepository() {
         ShortUrlReservationStatus shortUrlReservationStatus =
                 shortUrlReservationService
-                        .initializeShortUrlReservationRepository(request);
+                        .initializeShortUrlReservationRepository();
 
         HttpStatus httpStatus;
         String message;

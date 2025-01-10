@@ -6,14 +6,16 @@
 package com.richarddklein.shorturlreservationservice.service;
 
 import com.richarddklein.shorturlcommonlibrary.environment.HostUtils;
-import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.ShortUrlReservationStatus;
-import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.Status;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservation;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
+import com.richarddklein.shorturlcommonlibrary.service.status.ShortUrlStatus;
+import com.richarddklein.shorturlcommonlibrary.service.status.Status;
 import org.springframework.stereotype.Service;
 
 import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
 import reactor.core.publisher.Mono;
+
+import static com.richarddklein.shorturlcommonlibrary.service.status.ShortUrlStatus.*;
 
 /**
  * The production implementation of the Short URL Reservation Service interface.
@@ -40,13 +42,13 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     // we do not need to use reactive (asynchronous) programming techniques
     // here. Simple synchronous logic will work just fine.
     @Override
-    public ShortUrlReservationStatus
+    public ShortUrlStatus
     initializeShortUrlReservationRepository() {
         if (!hostUtils.isRunningLocally()) {
-            return ShortUrlReservationStatus.NOT_ON_LOCAL_MACHINE;
+            return NOT_ON_LOCAL_MACHINE;
         }
         shortUrlReservationDao.initializeShortUrlReservationRepository();
-        return ShortUrlReservationStatus.SUCCESS;
+        return SUCCESS;
     }
 
     @Override
@@ -54,10 +56,10 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     getSpecificShortUrlReservation(String shortUrl) {
         return shortUrlReservationDao.getSpecificShortUrlReservation(shortUrl)
             .map(shortUrlReservation -> new StatusAndShortUrlReservation(
-                    new Status(ShortUrlReservationStatus.SUCCESS),
+                    new Status(SUCCESS),
                     shortUrlReservation))
             .onErrorResume(e -> Mono.just(new StatusAndShortUrlReservation(
-                    new Status(ShortUrlReservationStatus.NO_SUCH_SHORT_URL),
+                    new Status(NO_SUCH_SHORT_URL),
                     null)));
     }
 
@@ -74,25 +76,25 @@ public class ShortUrlReservationServiceImpl implements ShortUrlReservationServic
     }
 
     @Override
-    public Mono<ShortUrlReservationStatus>
+    public Mono<ShortUrlStatus>
     reserveSpecificShortUrl(String shortUrl) {
         return shortUrlReservationDao.reserveSpecificShortUrl(shortUrl);
     }
 
     @Override
-    public Mono<ShortUrlReservationStatus>
+    public Mono<ShortUrlStatus>
     reserveAllShortUrls() {
         return shortUrlReservationDao.reserveAllShortUrls();
     }
 
     @Override
-    public Mono<ShortUrlReservationStatus>
+    public Mono<ShortUrlStatus>
     cancelSpecificShortUrlReservation(String shortUrl) {
         return shortUrlReservationDao.cancelSpecificShortUrlReservation(shortUrl);
     }
 
     @Override
-    public Mono<ShortUrlReservationStatus>
+    public Mono<ShortUrlStatus>
     cancelAllShortUrlReservations() {
         return shortUrlReservationDao.cancelAllShortUrlReservations();
     }

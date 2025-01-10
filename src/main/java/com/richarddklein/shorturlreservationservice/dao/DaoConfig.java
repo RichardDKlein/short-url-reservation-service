@@ -3,12 +3,10 @@
  * (Copyright 2024 by Richard Klein)
  */
 
-package com.richarddklein.shorturlreservationservice.config;
+package com.richarddklein.shorturlreservationservice.dao;
 
 import com.richarddklein.shorturlcommonlibrary.environment.ParameterStoreAccessor;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.entity.ShortUrlReservation;
-import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDao;
-import com.richarddklein.shorturlreservationservice.dao.ShortUrlReservationDaoImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

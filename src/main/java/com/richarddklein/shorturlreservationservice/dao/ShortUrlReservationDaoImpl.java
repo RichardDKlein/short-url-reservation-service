@@ -9,11 +9,11 @@ import java.time.Duration;
 import java.util.*;
 
 import com.richarddklein.shorturlcommonlibrary.environment.ParameterStoreAccessor;
-import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.ShortUrlReservationStatus;
-import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.Status;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservation;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.entity.ShortUrlReservation;
+import com.richarddklein.shorturlcommonlibrary.service.status.ShortUrlStatus;
+import com.richarddklein.shorturlcommonlibrary.service.status.Status;
 import com.richarddklein.shorturlreservationservice.exception.InconsistentDataException;
 import com.richarddklein.shorturlreservationservice.exception.NoSuchShortUrlException;
 import org.springframework.stereotype.Repository;
@@ -30,6 +30,8 @@ import software.amazon.awssdk.services.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
 import com.richarddklein.shorturlreservationservice.exception.NoShortUrlsAvailableException;
+
+import static com.richarddklein.shorturlcommonlibrary.service.status.ShortUrlStatus.*;
 
 /**
  * The production implementation of the Short URL Reservation DAO interface.
@@ -202,13 +204,13 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             .collectList()
             .map(shortUrlReservations -> {
                 return new StatusAndShortUrlReservationArray(
-                        new Status(ShortUrlReservationStatus.SUCCESS),
+                        new Status(SUCCESS),
                         shortUrlReservations);
             })
             .onErrorResume(e -> {
                 System.out.println("====> " + e.getMessage());
                 return Mono.just(new StatusAndShortUrlReservationArray(
-                        new Status(ShortUrlReservationStatus.UNKNOWN_ERROR),
+                        new Status(UNKNOWN_ERROR),
                         Collections.emptyList()));
             });
     }
@@ -220,7 +222,7 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
                 shortUrlReservation.setIsAvailable(null);
                 return updateShortUrlReservation(shortUrlReservation)
                     .map(updatedShortUrlReservation -> new StatusAndShortUrlReservation(
-                            new Status(ShortUrlReservationStatus.SUCCESS),
+                            new Status(SUCCESS),
                             updatedShortUrlReservation));
             })
             .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
@@ -233,27 +235,27 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
                 System.out.println("====> reserveAnyShortUrl() failed: " + e.getMessage());
                 if (e instanceof NoShortUrlsAvailableException) {
                     return Mono.just(new StatusAndShortUrlReservation(
-                            new Status(ShortUrlReservationStatus.NO_SHORT_URLS_ARE_AVAILABLE),
+                            new Status(NO_SHORT_URLS_ARE_AVAILABLE),
                             null));
                 } else {
                     return Mono.just(new StatusAndShortUrlReservation(
-                            new Status(ShortUrlReservationStatus.UNKNOWN_ERROR),
+                            new Status(UNKNOWN_ERROR),
                             null));
                 }
             });
     }
 
     @Override
-    public Mono<ShortUrlReservationStatus>
+    public Mono<ShortUrlStatus>
     reserveSpecificShortUrl(String shortUrl) {
         return getSpecificShortUrlReservation(shortUrl)
             .flatMap(shortUrlReservation -> {
                 if (!shortUrlReservation.isReallyAvailable()) {
-                    return Mono.just(ShortUrlReservationStatus.SHORT_URL_ALREADY_RESERVED);
+                    return Mono.just(SHORT_URL_ALREADY_TAKEN);
                 }
                 shortUrlReservation.setIsAvailable(null);
                 return updateShortUrlReservation(shortUrlReservation)
-                    .map(updatedShortUrlReservation -> ShortUrlReservationStatus.SUCCESS);
+                    .map(updatedShortUrlReservation -> SUCCESS);
             })
             .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
                 .filter(e -> e instanceof InconsistentDataException ||
@@ -264,15 +266,15 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             .onErrorResume(e -> {
                 System.out.println("====> reserveSpecificShortUrl() failed: " + e.getMessage());
                 if (e instanceof NoSuchShortUrlException) {
-                    return Mono.just(ShortUrlReservationStatus.NO_SUCH_SHORT_URL);
+                    return Mono.just(NO_SUCH_SHORT_URL);
                 } else {
-                    return Mono.just(ShortUrlReservationStatus.UNKNOWN_ERROR);
+                    return Mono.just(UNKNOWN_ERROR);
                 }
             });
     }
 
     @Override
-    public Mono<ShortUrlReservationStatus> reserveAllShortUrls() {
+    public Mono<ShortUrlStatus> reserveAllShortUrls() {
         return Flux.from(shortUrlReservationTable.scan(req -> req
             .filterExpression(Expression.builder()
                 .expression("attribute_exists(isAvailable)")
@@ -293,22 +295,22 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             .flatMap(signals -> {
                 boolean hasError = signals.stream().anyMatch(Signal::isOnError);
                 return hasError ?
-                        Mono.just(ShortUrlReservationStatus.UNKNOWN_ERROR) :
-                        Mono.just(ShortUrlReservationStatus.SUCCESS);
+                        Mono.just(UNKNOWN_ERROR) :
+                        Mono.just(SUCCESS);
             });
     }
 
     @Override
-    public Mono<ShortUrlReservationStatus>
+    public Mono<ShortUrlStatus>
     cancelSpecificShortUrlReservation(String shortUrl) {
         return getSpecificShortUrlReservation(shortUrl)
             .flatMap(shortUrlReservation -> {
                 if (shortUrlReservation.isReallyAvailable()) {
-                    return Mono.just(ShortUrlReservationStatus.SHORT_URL_NOT_RESERVED);
+                    return Mono.just(SHORT_URL_NOT_RESERVED);
                 }
                 shortUrlReservation.setIsAvailable(shortUrl);
                 return updateShortUrlReservation(shortUrlReservation)
-                    .map(updatedShortUrlReservation -> ShortUrlReservationStatus.SUCCESS);
+                    .map(updatedShortUrlReservation -> SUCCESS);
             })
             .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
                 .filter(e -> e instanceof InconsistentDataException ||
@@ -319,15 +321,15 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             .onErrorResume(e -> {
                 System.out.println("====> cancelSpecificShortUrl() failed: " + e.getMessage());
                 if (e instanceof NoSuchShortUrlException) {
-                    return Mono.just(ShortUrlReservationStatus.NO_SUCH_SHORT_URL);
+                    return Mono.just(NO_SUCH_SHORT_URL);
                 } else {
-                    return Mono.just(ShortUrlReservationStatus.UNKNOWN_ERROR);
+                    return Mono.just(UNKNOWN_ERROR);
                 }
             });
     }
 
     @Override
-    public Mono<ShortUrlReservationStatus>
+    public Mono<ShortUrlStatus>
     cancelAllShortUrlReservations() {
         return Flux.from(shortUrlReservationTable.scan(req -> req
             .filterExpression(Expression.builder()
@@ -349,8 +351,8 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
             .flatMap(signals -> {
                 boolean hasError = signals.stream().anyMatch(Signal::isOnError);
                 return hasError ?
-                        Mono.just(ShortUrlReservationStatus.UNKNOWN_ERROR) :
-                        Mono.just(ShortUrlReservationStatus.SUCCESS);
+                        Mono.just(UNKNOWN_ERROR) :
+                        Mono.just(SUCCESS);
             });
         }
 
@@ -430,8 +432,10 @@ public class ShortUrlReservationDaoImpl implements ShortUrlReservationDao {
 
         List<ShortUrlReservation> shortUrlReservations = new ArrayList<>();
 
-        long minShortUrlBase10 = parameterStoreAccessor.getMinShortUrlBase10().block();
-        long maxShortUrlBase10 = parameterStoreAccessor.getMaxShortUrlBase10().block();
+        Long minShortUrlBase10PossiblyNull = parameterStoreAccessor.getMinShortUrlBase10().block();
+        long minShortUrlBase10 = (minShortUrlBase10PossiblyNull == null) ? 0 : minShortUrlBase10PossiblyNull;
+        Long maxShortUrlBase10PossiblyNull = parameterStoreAccessor.getMaxShortUrlBase10().block();
+        long maxShortUrlBase10 = (maxShortUrlBase10PossiblyNull == null) ? 0 : maxShortUrlBase10PossiblyNull;
 
         for (long i = minShortUrlBase10; i <= maxShortUrlBase10; i++) {
             String shortUrl = longToShortUrl(i);

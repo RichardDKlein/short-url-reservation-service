@@ -7,10 +7,10 @@ package com.richarddklein.shorturlreservationservice.controller;
 
 import java.util.Objects;
 
-import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.ShortUrlReservationStatus;
-import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.Status;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservation;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
+import com.richarddklein.shorturlcommonlibrary.service.status.ShortUrlStatus;
+import com.richarddklein.shorturlcommonlibrary.service.status.Status;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import com.richarddklein.shorturlreservationservice.service.ShortUrlReservationService;
 import reactor.core.publisher.Mono;
 
-import static com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.ShortUrlReservationStatus.SUCCESS;
+import static com.richarddklein.shorturlcommonlibrary.service.status.ShortUrlStatus.SUCCESS;
 
 /**
  * The production implementation of the Short URL Reservation Controller
@@ -49,30 +49,28 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
     @Override
     public ResponseEntity<Status>
     initializeShortUrlReservationRepository() {
-        ShortUrlReservationStatus shortUrlReservationStatus =
-                shortUrlReservationService
-                        .initializeShortUrlReservationRepository();
+        ShortUrlStatus shortUrlReservationStatus = shortUrlReservationService
+                .initializeShortUrlReservationRepository();
 
         HttpStatus httpStatus;
         String message;
 
         switch (shortUrlReservationStatus) {
-            case SUCCESS:
+            case SUCCESS -> {
                 httpStatus = HttpStatus.OK;
                 message = "Initialization of Short URL Reservation table "
                         + "completed successfully";
-                break;
-
-            case NOT_ON_LOCAL_MACHINE:
+            }
+            case NOT_ON_LOCAL_MACHINE -> {
                 httpStatus = HttpStatus.FORBIDDEN;
                 message = "Initialization of the Short URL Reservation "
                         + "table can be done only when the service is "
                         + "running on your local machine";
-                break;
-
-            default:
+            }
+            default -> {
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                 message = "An unknown error occurred";
+            }
         }
 
         return new ResponseEntity<>(
@@ -85,27 +83,27 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
     getSpecificShortUrlReservation(@PathVariable String shortUrl) {
         return shortUrlReservationService.getSpecificShortUrlReservation(shortUrl)
             .map(statusAndShortUrlReservation -> {
-                ShortUrlReservationStatus shortUrlReservationStatus =
+                ShortUrlStatus shortUrlReservationStatus =
                         statusAndShortUrlReservation.getStatus().getStatus();
 
                 HttpStatus httpStatus;
                 String message;
 
                 switch (shortUrlReservationStatus) {
-                    case SUCCESS:
+                    case SUCCESS -> {
                         httpStatus = HttpStatus.OK;
                         message = String.format(
                                 "Short URL '%s' successfully retrieved", shortUrl);
-                        break;
-                    case NO_SUCH_SHORT_URL:
+                    }
+                    case NO_SUCH_SHORT_URL -> {
                         httpStatus = HttpStatus.NOT_FOUND;
                         message = String.format(
                                 "Short URL '%s' does not exist", shortUrl);
-                        break;
-                    default:
+                    }
+                    default -> {
                         httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                         message = "An unknown error occurred";
-                        break;
+                    }
                 }
                 statusAndShortUrlReservation.getStatus().setMessage(message);
 
@@ -118,7 +116,7 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
     getAllShortUrlReservations() {
         return shortUrlReservationService.getAllShortUrlReservations()
             .map(statusAndShortUrlReservationArray -> {
-                ShortUrlReservationStatus shortUrlUserStatus =
+                ShortUrlStatus shortUrlUserStatus =
                         statusAndShortUrlReservationArray.getStatus().getStatus();
 
                 HttpStatus httpStatus;
@@ -142,31 +140,29 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
     reserveAnyShortUrl() {
         return shortUrlReservationService.reserveAnyShortUrl()
             .map(statusAndShortUrlReservation -> {
-                ShortUrlReservationStatus shortUrlReservationStatus =
+                ShortUrlStatus shortUrlReservationStatus =
                         statusAndShortUrlReservation.getStatus().getStatus();
 
                 HttpStatus httpStatus;
                 String message;
 
                 switch (shortUrlReservationStatus) {
-                    case SUCCESS:
+                    case SUCCESS -> {
                         httpStatus = HttpStatus.OK;
                         message = String.format(
                                 "Short URL '%s' successfully reserved",
                                 statusAndShortUrlReservation
                                         .getShortUrlReservation().getShortUrl());
-                        break;
-
-                    case NO_SHORT_URLS_ARE_AVAILABLE:
+                    }
+                    case NO_SHORT_URLS_ARE_AVAILABLE -> {
                         httpStatus = HttpStatus.NOT_FOUND;
                         message = "No short URLs are available";
-                        break;
-
-                    default:
+                    }
+                    default -> {
                         httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                         message = "An unknown error occurred";
-                        break;
-                };
+                    }
+                }
                 statusAndShortUrlReservation.getStatus().setMessage(message);
 
                 return new ResponseEntity<>(statusAndShortUrlReservation, httpStatus);
@@ -182,32 +178,29 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
                 String message;
 
                 switch (shortUrlReservationStatus) {
-                    case SUCCESS:
+                    case SUCCESS -> {
                         httpStatus = HttpStatus.OK;
                         message = String.format(
                                 "Short URL '%s' successfully reserved",
                                 shortUrl);
-                        break;
-
-                    case NO_SUCH_SHORT_URL:
+                    }
+                    case NO_SUCH_SHORT_URL -> {
                         httpStatus = HttpStatus.NOT_FOUND;
                         message = String.format(
                                 "Short URL '%s' does not exist",
                                 shortUrl);
-                        break;
-
-                    case SHORT_URL_ALREADY_RESERVED:
+                    }
+                    case SHORT_URL_ALREADY_TAKEN -> {
                         httpStatus = HttpStatus.CONFLICT;
                         message = String.format(
                                 "Short URL '%s' has already been reserved",
                                 shortUrl);
-                        break;
-
-                    default:
+                    }
+                    default -> {
                         httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                         message = "An unknown error occurred";
-                        break;
-                };
+                    }
+                }
 
                 return new ResponseEntity<>(
                         new Status(shortUrlReservationStatus, message),
@@ -246,32 +239,29 @@ public class ShortUrlReservationControllerImpl implements ShortUrlReservationCon
                 String message;
 
                 switch (shortUrlReservationStatus) {
-                    case SUCCESS:
+                    case SUCCESS -> {
                         httpStatus = HttpStatus.OK;
                         message = String.format(
                                 "Short URL '%s' successfully canceled",
                                 shortUrl);
-                        break;
-
-                    case NO_SUCH_SHORT_URL:
+                    }
+                    case NO_SUCH_SHORT_URL -> {
                         httpStatus = HttpStatus.NOT_FOUND;
                         message = String.format(
                                 "Short URL '%s' does not exist",
                                 shortUrl);
-                        break;
-
-                    case SHORT_URL_NOT_RESERVED:
+                    }
+                    case SHORT_URL_NOT_RESERVED -> {
                         httpStatus = HttpStatus.CONFLICT;
                         message = String.format(
                                 "Short URL '%s' cannot be canceled, because it has not been reserved",
                                 shortUrl);
-                        break;
-
-                    default:
+                    }
+                    default -> {
                         httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                         message = "An unknown error occurred";
-                        break;
-                };
+                    }
+                }
 
                 return new ResponseEntity<>(
                         new Status(shortUrlReservationStatus, message),

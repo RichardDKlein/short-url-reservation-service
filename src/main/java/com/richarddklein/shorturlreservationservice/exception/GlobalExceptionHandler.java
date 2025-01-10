@@ -5,8 +5,7 @@
 
 package com.richarddklein.shorturlreservationservice.exception;
 
-import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.ShortUrlReservationStatus;
-import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.Status;
+import com.richarddklein.shorturlcommonlibrary.service.status.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -14,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import static com.richarddklein.shorturlcommonlibrary.service.status.ShortUrlStatus.UNKNOWN_ERROR;
 
 /**
  * The global exception handler for the Short URL Reservation Service.
@@ -35,7 +36,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Status> handleNoResourceFoundException(
             NoResourceFoundException e) {
         logger.warn("====> ", e);
-        Status status = new Status(ShortUrlReservationStatus.UNKNOWN_ERROR, e.getMessage());
+        Status status = new Status(UNKNOWN_ERROR, e.getMessage());
         return new ResponseEntity<>(status, HttpStatus.NOT_FOUND);
     }
 
@@ -52,7 +53,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Status> handleAllOtherExceptions(Exception e) {
         logger.warn("====> ", e);
-        Status status = new Status(ShortUrlReservationStatus.UNKNOWN_ERROR, e.getMessage());
+        Status status = new Status(UNKNOWN_ERROR, e.getMessage());
         return new ResponseEntity<>(status, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

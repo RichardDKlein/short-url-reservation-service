@@ -5,9 +5,9 @@
 
 package com.richarddklein.shorturlreservationservice.controller;
 
-import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.Status;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservation;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
+import com.richarddklein.shorturlcommonlibrary.service.status.Status;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

@@ -5,8 +5,8 @@
 
 package com.richarddklein.shorturlreservationservice;
 
-import com.richarddklein.shorturlcommonlibrary.config.EnvironmentConfig;
-import com.richarddklein.shorturlcommonlibrary.config.SecurityConfig;
+import com.richarddklein.shorturlcommonlibrary.environment.EnvironmentConfig;
+import com.richarddklein.shorturlcommonlibrary.security.SecurityConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;

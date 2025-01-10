@@ -5,9 +5,9 @@
 
 package com.richarddklein.shorturlreservationservice.service;
 
-import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.ShortUrlReservationStatus;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservation;
 import com.richarddklein.shorturlcommonlibrary.service.shorturlreservationservice.dto.StatusAndShortUrlReservationArray;
+import com.richarddklein.shorturlcommonlibrary.service.status.ShortUrlStatus;
 import reactor.core.publisher.Mono;
 
 /**
@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
  * Service.</p>
  */
 public interface ShortUrlReservationService {
-    ShortUrlReservationStatus
+    ShortUrlStatus
     initializeShortUrlReservationRepository();
 
     Mono<StatusAndShortUrlReservation>
@@ -30,15 +30,15 @@ public interface ShortUrlReservationService {
     Mono<StatusAndShortUrlReservation>
     reserveAnyShortUrl();
 
-    Mono<ShortUrlReservationStatus>
+    Mono<ShortUrlStatus>
     reserveSpecificShortUrl(String shortUrl);
 
-    Mono<ShortUrlReservationStatus>
+    Mono<ShortUrlStatus>
     reserveAllShortUrls();
 
-    Mono<ShortUrlReservationStatus>
+    Mono<ShortUrlStatus>
     cancelSpecificShortUrlReservation(String shortUrl);
 
-    Mono<ShortUrlReservationStatus>
+    Mono<ShortUrlStatus>
     cancelAllShortUrlReservations();
 }

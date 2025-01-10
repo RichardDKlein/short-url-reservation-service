@@ -3,15 +3,12 @@
  * (Copyright 2024 by Richard Klein)
  */
 
-package com.richarddklein.shorturlreservationservice.config;
+package com.richarddklein.shorturlreservationservice.controller;
 
 import com.richarddklein.shorturlreservationservice.service.ShortUrlReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.richarddklein.shorturlreservationservice.controller.ShortUrlReservationController;
-import com.richarddklein.shorturlreservationservice.controller.ShortUrlReservationControllerImpl;
 
 /**
  * The Controller @Configuration class.

@@ -5,7 +5,7 @@
 version = 0.1
 [default.deploy.parameters]
 stack_name = "short-url-reservation-service-test"
-resolve_s3 = true
+s3_bucket = "short-url-artifacts"
 s3_prefix = "short-url-reservation-service-test"
 region = "us-east-2"
 capabilities = "CAPABILITY_IAM"
